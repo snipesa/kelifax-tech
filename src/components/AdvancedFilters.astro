@@ -1,0 +1,560 @@
+---
+export interface Props {
+  categories: string[];
+  tags: string[];
+  className?: string;
+}
+
+const { categories, tags, className = "" } = Astro.props;
+---
+
+<div class={`advanced-filters bg-white rounded-lg shadow-sm p-6 ${className}`}>
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-semibold text-gray-900">Filters</h3>
+    <button id="clear-filters" class="text-sm text-blue-600 hover:text-blue-700 font-medium">
+      Clear All
+    </button>
+  </div>
+
+  <!-- Search Filter -->
+  <div class="mb-6">
+    <label class="block text-sm font-medium text-gray-700 mb-2">Search</label>
+    <div class="relative">
+      <input 
+        type="text" 
+        id="filter-search"
+        placeholder="Search resources..."
+        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+      />
+      <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Categories Filter -->
+  <div class="mb-6">
+    <label class="block text-sm font-medium text-gray-700 mb-3">Categories</label>
+    <div class="space-y-2" id="category-filters">
+      {categories.map((category) => (
+        <label class="flex items-center">
+          <input 
+            type="checkbox" 
+            value={category}
+            class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            data-filter-type="category"
+          />
+          <span class="ml-2 text-sm text-gray-900 capitalize">{category}</span>
+        </label>
+      ))}
+    </div>
+  </div>
+
+  <!-- Tags Filter -->
+  <div class="mb-6">
+    <label class="block text-sm font-medium text-gray-700 mb-3">Popular Tags</label>
+    <div class="flex flex-wrap gap-2" id="tag-filters">
+      {tags.slice(0, 10).map((tag) => (
+        <button 
+          data-tag={tag}
+          data-filter-type="tag"
+          class="tag-filter px-3 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm rounded-full transition-colors"
+        >
+          {tag}
+        </button>
+      ))}
+    </div>
+    {tags.length > 10 && (
+      <button id="show-more-tags" class="mt-2 text-sm text-blue-600 hover:text-blue-700">
+        Show {tags.length - 10} more tags
+      </button>
+    )}
+  </div>
+
+  <!-- Sort Options -->
+  <div class="mb-6">
+    <label class="block text-sm font-medium text-gray-700 mb-2">Sort By</label>
+    <select 
+      id="sort-select"
+      class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+    >
+      <option value="featured">Featured First</option>
+      <option value="name">Name (A-Z)</option>
+      <option value="name-desc">Name (Z-A)</option>
+      <option value="category">Category</option>
+      <option value="recent">Recently Added</option>
+    </select>
+  </div>
+
+  <!-- View Options -->
+  <div class="mb-6">
+    <label class="block text-sm font-medium text-gray-700 mb-3">View</label>
+    <div class="flex space-x-2">
+      <button 
+        id="grid-view" 
+        class="view-btn active flex items-center px-3 py-2 bg-blue-600 text-white rounded-lg transition-colors"
+        data-view="grid"
+      >
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+        Grid
+      </button>
+      <button 
+        id="list-view" 
+        class="view-btn flex items-center px-3 py-2 bg-gray-100 text-gray-700 rounded-lg transition-colors"
+        data-view="list"
+      >
+        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+        </svg>
+        List
+      </button>
+    </div>
+  </div>
+
+  <!-- Active Filters Display -->
+  <div id="active-filters" class="hidden">
+    <label class="block text-sm font-medium text-gray-700 mb-2">Active Filters</label>
+    <div id="filter-tags" class="flex flex-wrap gap-2"></div>
+  </div>
+</div>
+
+<script>
+  class AdvancedFilters {
+    constructor() {
+      this.activeFilters = {
+        search: '',
+        categories: [],
+        tags: [],
+        sort: 'featured'
+      };
+      this.currentView = 'grid';
+      this.init();
+    }
+
+    init() {
+      this.setupEventListeners();
+      this.setupViewToggle();
+      this.loadFromURL();
+    }
+
+    setupEventListeners() {
+      // Search input
+      const searchInput = document.getElementById('filter-search');
+      if (searchInput) {
+        let searchTimeout;
+        searchInput.addEventListener('input', (e) => {
+          clearTimeout(searchTimeout);
+          searchTimeout = setTimeout(() => {
+            this.activeFilters.search = e.target.value.trim();
+            this.applyFilters();
+            this.updateURL();
+          }, 300);
+        });
+      }
+
+      // Category checkboxes
+      const categoryInputs = document.querySelectorAll('[data-filter-type="category"]');
+      categoryInputs.forEach(input => {
+        input.addEventListener('change', (e) => {
+          if (e.target.checked) {
+            this.activeFilters.categories.push(e.target.value);
+          } else {
+            this.activeFilters.categories = this.activeFilters.categories.filter(cat => cat !== e.target.value);
+          }
+          this.applyFilters();
+          this.updateURL();
+          this.updateActiveFilters();
+        });
+      });
+
+      // Tag buttons
+      const tagButtons = document.querySelectorAll('[data-filter-type="tag"]');
+      tagButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+          const tag = e.target.dataset.tag;
+          const isActive = e.target.classList.contains('bg-blue-600');
+          
+          if (isActive) {
+            e.target.classList.remove('bg-blue-600', 'text-white');
+            e.target.classList.add('bg-gray-100', 'text-gray-700');
+            this.activeFilters.tags = this.activeFilters.tags.filter(t => t !== tag);
+          } else {
+            e.target.classList.remove('bg-gray-100', 'text-gray-700');
+            e.target.classList.add('bg-blue-600', 'text-white');
+            this.activeFilters.tags.push(tag);
+          }
+          
+          this.applyFilters();
+          this.updateURL();
+          this.updateActiveFilters();
+        });
+      });
+
+      // Sort select
+      const sortSelect = document.getElementById('sort-select');
+      if (sortSelect) {
+        sortSelect.addEventListener('change', (e) => {
+          this.activeFilters.sort = e.target.value;
+          this.applyFilters();
+          this.updateURL();
+        });
+      }
+
+      // Clear filters
+      const clearButton = document.getElementById('clear-filters');
+      if (clearButton) {
+        clearButton.addEventListener('click', () => {
+          this.clearAllFilters();
+        });
+      }
+
+      // Show more tags
+      const showMoreButton = document.getElementById('show-more-tags');
+      if (showMoreButton) {
+        showMoreButton.addEventListener('click', () => {
+          // Implementation for showing more tags
+          this.showMoreTags();
+        });
+      }
+    }
+
+    setupViewToggle() {
+      const viewButtons = document.querySelectorAll('.view-btn');
+      viewButtons.forEach(button => {
+        button.addEventListener('click', (e) => {
+          const view = e.target.closest('button').dataset.view;
+          this.setView(view);
+        });
+      });
+    }
+
+    setView(view) {
+      this.currentView = view;
+      
+      // Update button states
+      const viewButtons = document.querySelectorAll('.view-btn');
+      viewButtons.forEach(button => {
+        if (button.dataset.view === view) {
+          button.classList.remove('bg-gray-100', 'text-gray-700');
+          button.classList.add('bg-blue-600', 'text-white', 'active');
+        } else {
+          button.classList.remove('bg-blue-600', 'text-white', 'active');
+          button.classList.add('bg-gray-100', 'text-gray-700');
+        }
+      });
+
+      // Update grid layout
+      const grid = document.getElementById('resources-grid');
+      if (grid) {
+        if (view === 'list') {
+          grid.className = 'space-y-4';
+          grid.querySelectorAll('.resource-item').forEach(item => {
+            item.className = 'resource-item bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow';
+          });
+        } else {
+          grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8';
+          grid.querySelectorAll('.resource-item').forEach(item => {
+            item.className = 'resource-item';
+          });
+        }
+      }
+    }
+
+    applyFilters() {
+      const resourceItems = document.querySelectorAll('.resource-item');
+      let visibleCount = 0;
+
+      resourceItems.forEach(item => {
+        let visible = true;
+
+        // Apply search filter
+        if (this.activeFilters.search) {
+          const title = item.querySelector('h3')?.textContent.toLowerCase() || '';
+          const description = item.querySelector('p')?.textContent.toLowerCase() || '';
+          const searchTerm = this.activeFilters.search.toLowerCase();
+          
+          if (!title.includes(searchTerm) && !description.includes(searchTerm)) {
+            visible = false;
+          }
+        }
+
+        // Apply category filter
+        if (this.activeFilters.categories.length > 0) {
+          const itemCategory = item.dataset.category;
+          if (!this.activeFilters.categories.includes(itemCategory)) {
+            visible = false;
+          }
+        }
+
+        // Apply tag filter
+        if (this.activeFilters.tags.length > 0) {
+          const tagElements = item.querySelectorAll('.bg-gray-100');
+          const itemTags = Array.from(tagElements).map(el => el.textContent.trim().toLowerCase());
+          
+          const hasMatchingTag = this.activeFilters.tags.some(tag => 
+            itemTags.some(itemTag => itemTag.includes(tag.toLowerCase()))
+          );
+          
+          if (!hasMatchingTag) {
+            visible = false;
+          }
+        }
+
+        item.style.display = visible ? 'block' : 'none';
+        if (visible) visibleCount++;
+      });
+
+      this.applySorting();
+      this.updateResultsCount(visibleCount);
+    }
+
+    applySorting() {
+      const grid = document.getElementById('resources-grid');
+      const items = Array.from(document.querySelectorAll('.resource-item'));
+      
+      items.sort((a, b) => {
+        switch (this.activeFilters.sort) {
+          case 'name':
+            const titleA = a.querySelector('h3')?.textContent || '';
+            const titleB = b.querySelector('h3')?.textContent || '';
+            return titleA.localeCompare(titleB);
+          
+          case 'name-desc':
+            const titleA2 = a.querySelector('h3')?.textContent || '';
+            const titleB2 = b.querySelector('h3')?.textContent || '';
+            return titleB2.localeCompare(titleA2);
+          
+          case 'category':
+            const catA = a.dataset.category || '';
+            const catB = b.dataset.category || '';
+            return catA.localeCompare(catB);
+          
+          case 'featured':
+            const featuredA = a.querySelector('.bg-yellow-400') ? 1 : 0;
+            const featuredB = b.querySelector('.bg-yellow-400') ? 1 : 0;
+            return featuredB - featuredA;
+          
+          default:
+            return 0;
+        }
+      });
+      
+      if (grid) {
+        items.forEach(item => grid.appendChild(item));
+      }
+    }
+
+    updateActiveFilters() {
+      const container = document.getElementById('active-filters');
+      const tagsContainer = document.getElementById('filter-tags');
+      
+      if (!container || !tagsContainer) return;
+
+      const hasActiveFilters = this.activeFilters.categories.length > 0 || 
+                              this.activeFilters.tags.length > 0 ||
+                              this.activeFilters.search;
+
+      if (hasActiveFilters) {
+        container.classList.remove('hidden');
+        
+        let filterTags = [];
+        
+        // Add search filter
+        if (this.activeFilters.search) {
+          filterTags.push(`Search: "${this.activeFilters.search}"`);
+        }
+        
+        // Add category filters
+        this.activeFilters.categories.forEach(cat => {
+          filterTags.push(`Category: ${cat}`);
+        });
+        
+        // Add tag filters
+        this.activeFilters.tags.forEach(tag => {
+          filterTags.push(`Tag: ${tag}`);
+        });
+        
+        tagsContainer.innerHTML = filterTags.map(filter => `
+          <span class="inline-flex items-center px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full">
+            ${filter}
+            <button onclick="advancedFilters.removeFilter('${filter}')" class="ml-1 text-blue-600 hover:text-blue-800">
+              <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </span>
+        `).join('');
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    removeFilter(filterString) {
+      // Parse and remove the specific filter
+      if (filterString.startsWith('Search:')) {
+        this.activeFilters.search = '';
+        document.getElementById('filter-search').value = '';
+      } else if (filterString.startsWith('Category:')) {
+        const category = filterString.replace('Category: ', '');
+        this.activeFilters.categories = this.activeFilters.categories.filter(c => c !== category);
+        // Uncheck the checkbox
+        const checkbox = document.querySelector(`[data-filter-type="category"][value="${category}"]`);
+        if (checkbox) checkbox.checked = false;
+      } else if (filterString.startsWith('Tag:')) {
+        const tag = filterString.replace('Tag: ', '');
+        this.activeFilters.tags = this.activeFilters.tags.filter(t => t !== tag);
+        // Update button state
+        const button = document.querySelector(`[data-tag="${tag}"]`);
+        if (button) {
+          button.classList.remove('bg-blue-600', 'text-white');
+          button.classList.add('bg-gray-100', 'text-gray-700');
+        }
+      }
+      
+      this.applyFilters();
+      this.updateURL();
+      this.updateActiveFilters();
+    }
+
+    clearAllFilters() {
+      this.activeFilters = {
+        search: '',
+        categories: [],
+        tags: [],
+        sort: 'featured'
+      };
+      
+      // Reset UI elements
+      document.getElementById('filter-search').value = '';
+      document.querySelectorAll('[data-filter-type="category"]').forEach(cb => cb.checked = false);
+      document.querySelectorAll('[data-filter-type="tag"]').forEach(btn => {
+        btn.classList.remove('bg-blue-600', 'text-white');
+        btn.classList.add('bg-gray-100', 'text-gray-700');
+      });
+      document.getElementById('sort-select').value = 'featured';
+      
+      this.applyFilters();
+      this.updateURL();
+      this.updateActiveFilters();
+    }
+
+    updateResultsCount(count) {
+      const total = document.querySelectorAll('.resource-item').length;
+      let countDisplay = document.getElementById('results-count');
+      
+      if (!countDisplay) {
+        countDisplay = document.createElement('div');
+        countDisplay.id = 'results-count';
+        countDisplay.className = 'text-sm text-gray-600 mb-4';
+        
+        const grid = document.getElementById('resources-grid');
+        if (grid && grid.parentNode) {
+          grid.parentNode.insertBefore(countDisplay, grid);
+        }
+      }
+      
+      countDisplay.textContent = `Showing ${count} of ${total} resources`;
+    }
+
+    updateURL() {
+      const params = new URLSearchParams();
+      
+      if (this.activeFilters.search) params.set('search', this.activeFilters.search);
+      if (this.activeFilters.categories.length > 0) params.set('categories', this.activeFilters.categories.join(','));
+      if (this.activeFilters.tags.length > 0) params.set('tags', this.activeFilters.tags.join(','));
+      if (this.activeFilters.sort !== 'featured') params.set('sort', this.activeFilters.sort);
+      if (this.currentView !== 'grid') params.set('view', this.currentView);
+      
+      const newURL = params.toString() ? 
+        `${window.location.pathname}?${params.toString()}` : 
+        window.location.pathname;
+      
+      window.history.replaceState({}, '', newURL);
+    }
+
+    loadFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      
+      // Load search
+      const search = params.get('search');
+      if (search) {
+        this.activeFilters.search = search;
+        document.getElementById('filter-search').value = search;
+      }
+      
+      // Load categories
+      const categories = params.get('categories');
+      if (categories) {
+        this.activeFilters.categories = categories.split(',');
+        this.activeFilters.categories.forEach(cat => {
+          const checkbox = document.querySelector(`[data-filter-type="category"][value="${cat}"]`);
+          if (checkbox) checkbox.checked = true;
+        });
+      }
+      
+      // Load tags
+      const tags = params.get('tags');
+      if (tags) {
+        this.activeFilters.tags = tags.split(',');
+        this.activeFilters.tags.forEach(tag => {
+          const button = document.querySelector(`[data-tag="${tag}"]`);
+          if (button) {
+            button.classList.remove('bg-gray-100', 'text-gray-700');
+            button.classList.add('bg-blue-600', 'text-white');
+          }
+        });
+      }
+      
+      // Load sort
+      const sort = params.get('sort');
+      if (sort) {
+        this.activeFilters.sort = sort;
+        document.getElementById('sort-select').value = sort;
+      }
+      
+      // Load view
+      const view = params.get('view');
+      if (view) {
+        this.setView(view);
+      }
+      
+      this.applyFilters();
+      this.updateActiveFilters();
+    }
+
+    showMoreTags() {
+      // Implementation for showing more tags - could expand the existing tag list
+      const tagContainer = document.getElementById('tag-filters');
+      const showMoreBtn = document.getElementById('show-more-tags');
+      
+      if (tagContainer && showMoreBtn) {
+        // This would typically load more tags from an API or show hidden ones
+        showMoreBtn.textContent = 'Loading more tags...';
+        showMoreBtn.disabled = true;
+        
+        setTimeout(() => {
+          showMoreBtn.style.display = 'none';
+          // Add more tag buttons here
+        }, 1000);
+      }
+    }
+  }
+
+  // Initialize advanced filters
+  let advancedFilters;
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      advancedFilters = new AdvancedFilters();
+    });
+  } else {
+    advancedFilters = new AdvancedFilters();
+  }
+  
+  // Make it globally accessible
+  window.advancedFilters = advancedFilters;
+</script>

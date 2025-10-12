@@ -1,0 +1,208 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+import ResourceCard from '../components/ResourceCard.astro';
+import SearchBar from '../components/SearchBar.astro';
+import Newsletter from '../components/Newsletter.astro';
+import resourcesData from '../data/resources.json';
+
+// Get featured resources and a few random ones for display
+const featuredResources = resourcesData.filter(resource => resource.featured);
+const otherResources = resourcesData.filter(resource => !resource.featured).slice(0, 6);
+---
+
+<MainLayout title="Kelifax - Curated Tech Resources">
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-br from-blue-50 via-white to-purple-50 py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h1 class="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+          Discover the Best
+          <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600">
+            Tech Resources
+          </span>
+        </h1>
+        <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+          A curated platform of verified digital tools, platforms, and learning materials 
+          for developers, students, and technology enthusiasts.
+        </p>
+        
+        <!-- Search Bar -->
+        <div class="max-w-2xl mx-auto mb-8">
+          <SearchBar className="w-full" />
+        </div>
+        
+        <!-- CTA Buttons -->
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a 
+            href="/resources" 
+            class="inline-flex items-center px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+          >
+            Browse Resources
+            <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </a>
+          <a 
+            href="#featured" 
+            class="inline-flex items-center px-8 py-3 bg-white hover:bg-gray-50 text-gray-900 font-medium rounded-lg border border-gray-300 transition-colors"
+          >
+            See Featured
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div>
+          <div class="text-3xl font-bold text-blue-600 mb-2">500+</div>
+          <div class="text-gray-600">Curated Resources</div>
+        </div>
+        <div>
+          <div class="text-3xl font-bold text-green-600 mb-2">50+</div>
+          <div class="text-gray-600">Categories</div>
+        </div>
+        <div>
+          <div class="text-3xl font-bold text-purple-600 mb-2">10K+</div>
+          <div class="text-gray-600">Happy Users</div>
+        </div>
+        <div>
+          <div class="text-3xl font-bold text-orange-600 mb-2">100%</div>
+          <div class="text-gray-600">Free Access</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Resources Section -->
+  <section id="featured" class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          Featured Resources
+        </h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Hand-picked tools and platforms that we think you'll love
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        {featuredResources.map((resource) => (
+          <ResourceCard
+            id={resource.id}
+            title={resource.title}
+            description={resource.description}
+            category={resource.category}
+            tags={resource.tags}
+            url={resource.url}
+            image={resource.image}
+            featured={resource.featured}
+          />
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Resources Section -->
+  <section class="py-20 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          Popular Resources
+        </h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Most loved tools by our community
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        {otherResources.map((resource) => (
+          <ResourceCard
+            id={resource.id}
+            title={resource.title}
+            description={resource.description}
+            category={resource.category}
+            tags={resource.tags}
+            url={resource.url}
+            image={resource.image}
+            featured={resource.featured}
+          />
+        ))}
+      </div>
+
+      <div class="text-center">
+        <a 
+          href="/resources" 
+          class="inline-flex items-center px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+        >
+          View All Resources
+          <svg class="ml-2 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section class="py-20 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-16">
+        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          Browse by Category
+        </h2>
+        <p class="text-xl text-gray-600 max-w-2xl mx-auto">
+          Find exactly what you're looking for
+        </p>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+        <a href="/resources?category=development" class="group bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
+            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">Development</h3>
+          <p class="text-sm text-gray-600">Code editors, frameworks, libraries</p>
+        </a>
+
+        <a href="/resources?category=design" class="group bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-purple-200 transition-colors">
+            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zM21 5a2 2 0 00-2-2h-4a2 2 0 00-2 2v12a4 4 0 004 4h4a2 2 0 002-2V5z" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">Design</h3>
+          <p class="text-sm text-gray-600">UI tools, graphics, inspiration</p>
+        </a>
+
+        <a href="/resources?category=learning" class="group bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-green-200 transition-colors">
+            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">Learning</h3>
+          <p class="text-sm text-gray-600">Courses, tutorials, documentation</p>
+        </a>
+
+        <a href="/resources?category=productivity" class="group bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow">
+          <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-orange-200 transition-colors">
+            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+          </div>
+          <h3 class="font-semibold text-gray-900 mb-2">Productivity</h3>
+          <p class="text-sm text-gray-600">Task management, note-taking</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter Section -->
+  <Newsletter />
+</MainLayout>

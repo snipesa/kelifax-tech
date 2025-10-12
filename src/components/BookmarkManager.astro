@@ -1,0 +1,314 @@
+---
+// Bookmark functionality for Kelifax resources
+---
+
+<div class="bookmark-manager" style="display: none;">
+  <div class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-hidden">
+      <div class="p-6 border-b border-gray-200">
+        <div class="flex items-center justify-between">
+          <h2 class="text-xl font-semibold text-gray-900">My Bookmarks</h2>
+          <button class="close-bookmarks text-gray-400 hover:text-gray-600">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      
+      <div class="p-6 overflow-y-auto">
+        <div id="bookmarks-list" class="space-y-4">
+          <!-- Bookmarks will be dynamically populated here -->
+        </div>
+        
+        <div id="no-bookmarks" class="text-center py-8 text-gray-500" style="display: none;">
+          <svg class="w-12 h-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+          </svg>
+          <p>No bookmarks yet</p>
+          <p class="text-sm">Start bookmarking resources to build your personal collection</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  class BookmarkManager {
+    constructor() {
+      this.bookmarks = this.getBookmarks();
+      this.init();
+    }
+    
+    init() {
+      // Add bookmark buttons to resource cards
+      this.addBookmarkButtons();
+      
+      // Setup bookmark modal
+      this.setupModal();
+      
+      // Update bookmark states
+      this.updateBookmarkStates();
+    }
+    
+    addBookmarkButtons() {
+      const resourceCards = document.querySelectorAll('.resource-item, [data-resource-id]');
+      
+      resourceCards.forEach(card => {
+        const existingButton = card.querySelector('.bookmark-btn');
+        if (existingButton) return; // Skip if button already exists
+        
+        // Extract resource data
+        const titleElement = card.querySelector('h3');
+        const title = titleElement?.textContent?.trim() || '';
+        const url = card.querySelector('a[href^="http"]')?.href || '';
+        const category = card.dataset.category || card.querySelector('[class*="capitalize"]')?.textContent?.trim() || '';
+        
+        // Generate a simple ID if not available
+        const resourceId = card.dataset.resourceId || this.generateId(title);
+        card.dataset.resourceId = resourceId;
+        
+        // Create bookmark button
+        const bookmarkBtn = document.createElement('button');
+        bookmarkBtn.className = 'bookmark-btn text-gray-400 hover:text-yellow-500 transition-colors p-1';
+        bookmarkBtn.dataset.resourceId = resourceId;
+        bookmarkBtn.innerHTML = `
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+          </svg>
+        `;
+        
+        // Add click handler
+        bookmarkBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.toggleBookmark({
+            id: resourceId,
+            title,
+            url,
+            category,
+            timestamp: Date.now()
+          });
+        });
+        
+        // Add to card (find the action buttons area)
+        const actionArea = card.querySelector('.flex.items-center.justify-between, .flex.space-x-2');
+        if (actionArea) {
+          if (actionArea.children.length === 1) {
+            // If there's only one child, it's probably a single button, add bookmark to the right
+            actionArea.appendChild(bookmarkBtn);
+          } else {
+            // If there are multiple buttons, add to the existing container
+            const lastChild = actionArea.lastElementChild;
+            if (lastChild) {
+              lastChild.appendChild(bookmarkBtn);
+            } else {
+              actionArea.appendChild(bookmarkBtn);
+            }
+          }
+        }
+      });
+    }
+    
+    generateId(title) {
+      return title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').slice(0, 20);
+    }
+    
+    setupModal() {
+      const modal = document.querySelector('.bookmark-manager');
+      const closeBtn = document.querySelector('.close-bookmarks');
+      
+      // Close modal handlers
+      [closeBtn, modal].forEach(element => {
+        element?.addEventListener('click', (e) => {
+          if (e.target === element) {
+            this.closeModal();
+          }
+        });
+      });
+      
+      // Escape key to close
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && modal.style.display !== 'none') {
+          this.closeModal();
+        }
+      });
+      
+      // Add "View Bookmarks" button to header if it doesn't exist
+      this.addBookmarksButton();
+    }
+    
+    addBookmarksButton() {
+      const header = document.querySelector('header');
+      const existingBtn = document.getElementById('bookmarks-toggle');
+      
+      if (!header || existingBtn) return;
+      
+      const bookmarksBtn = document.createElement('button');
+      bookmarksBtn.id = 'bookmarks-toggle';
+      bookmarksBtn.className = 'hidden md:flex items-center space-x-2 text-gray-700 hover:text-blue-600 transition-colors font-medium';
+      bookmarksBtn.innerHTML = `
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+        </svg>
+        <span>Bookmarks</span>
+        <span class="bookmark-count bg-blue-600 text-white text-xs px-2 py-1 rounded-full">${this.bookmarks.length}</span>
+      `;
+      
+      bookmarksBtn.addEventListener('click', () => this.openModal());
+      
+      // Add to navigation
+      const nav = header.querySelector('nav');
+      if (nav) {
+        nav.appendChild(bookmarksBtn);
+      }
+    }
+    
+    updateBookmarkStates() {
+      const bookmarkButtons = document.querySelectorAll('.bookmark-btn');
+      
+      bookmarkButtons.forEach(btn => {
+        const resourceId = btn.dataset.resourceId;
+        const isBookmarked = this.bookmarks.some(b => b.id === resourceId);
+        
+        if (isBookmarked) {
+          btn.classList.remove('text-gray-400');
+          btn.classList.add('text-yellow-500');
+          btn.querySelector('svg').setAttribute('fill', 'currentColor');
+        } else {
+          btn.classList.remove('text-yellow-500');
+          btn.classList.add('text-gray-400');
+          btn.querySelector('svg').setAttribute('fill', 'none');
+        }
+      });
+      
+      // Update counter
+      const counter = document.querySelector('.bookmark-count');
+      if (counter) {
+        counter.textContent = this.bookmarks.length;
+      }
+    }
+    
+    toggleBookmark(resource) {
+      const existingIndex = this.bookmarks.findIndex(b => b.id === resource.id);
+      
+      if (existingIndex > -1) {
+        // Remove bookmark
+        this.bookmarks.splice(existingIndex, 1);
+        this.showNotification('Bookmark removed', 'info');
+      } else {
+        // Add bookmark
+        this.bookmarks.push(resource);
+        this.showNotification('Bookmarked!', 'success');
+      }
+      
+      this.saveBookmarks();
+      this.updateBookmarkStates();
+      this.renderBookmarks();
+    }
+    
+    openModal() {
+      this.renderBookmarks();
+      document.querySelector('.bookmark-manager').style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    
+    closeModal() {
+      document.querySelector('.bookmark-manager').style.display = 'none';
+      document.body.style.overflow = '';
+    }
+    
+    renderBookmarks() {
+      const container = document.getElementById('bookmarks-list');
+      const noBookmarks = document.getElementById('no-bookmarks');
+      
+      if (this.bookmarks.length === 0) {
+        container.style.display = 'none';
+        noBookmarks.style.display = 'block';
+        return;
+      }
+      
+      container.style.display = 'block';
+      noBookmarks.style.display = 'none';
+      
+      container.innerHTML = this.bookmarks.map(bookmark => `
+        <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-gray-50">
+          <div class="flex-1">
+            <h3 class="font-medium text-gray-900">${bookmark.title}</h3>
+            <p class="text-sm text-gray-500 capitalize">${bookmark.category}</p>
+            <p class="text-xs text-gray-400">${new Date(bookmark.timestamp).toLocaleDateString()}</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <a href="${bookmark.url}" target="_blank" rel="noopener noreferrer" 
+               class="text-blue-600 hover:text-blue-700 text-sm font-medium">
+              Visit
+            </a>
+            <button onclick="bookmarkManager.removeBookmark('${bookmark.id}')" 
+                    class="text-red-600 hover:text-red-700 text-sm">
+              Remove
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+    
+    removeBookmark(id) {
+      this.bookmarks = this.bookmarks.filter(b => b.id !== id);
+      this.saveBookmarks();
+      this.updateBookmarkStates();
+      this.renderBookmarks();
+      this.showNotification('Bookmark removed', 'info');
+    }
+    
+    getBookmarks() {
+      try {
+        return JSON.parse(localStorage.getItem('kelifax-bookmarks') || '[]');
+      } catch {
+        return [];
+      }
+    }
+    
+    saveBookmarks() {
+      localStorage.setItem('kelifax-bookmarks', JSON.stringify(this.bookmarks));
+    }
+    
+    showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `fixed bottom-4 right-4 z-50 p-3 rounded-lg shadow-lg text-white text-sm transform transition-transform translate-y-full`;
+      
+      if (type === 'success') {
+        notification.classList.add('bg-green-600');
+      } else if (type === 'error') {
+        notification.classList.add('bg-red-600');
+      } else {
+        notification.classList.add('bg-blue-600');
+      }
+      
+      notification.textContent = message;
+      document.body.appendChild(notification);
+      
+      // Animate in
+      setTimeout(() => notification.classList.remove('translate-y-full'), 100);
+      
+      // Auto remove
+      setTimeout(() => {
+        notification.classList.add('translate-y-full');
+        setTimeout(() => notification.remove(), 300);
+      }, 2000);
+    }
+  }
+  
+  // Initialize bookmark manager when DOM is loaded
+  let bookmarkManager;
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+      bookmarkManager = new BookmarkManager();
+    });
+  } else {
+    bookmarkManager = new BookmarkManager();
+  }
+  
+  // Make it globally accessible for remove buttons
+  window.bookmarkManager = bookmarkManager;
+</script>

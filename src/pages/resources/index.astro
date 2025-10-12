@@ -1,0 +1,289 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import ResourceCard from '../../components/ResourceCard.astro';
+import SearchBar from '../../components/SearchBar.astro';
+import resourcesData from '../../data/resources.json';
+
+// Get all unique categories for filtering
+const categories = [...new Set(resourcesData.map(resource => resource.category))];
+const allResources = resourcesData;
+---
+
+<MainLayout title="Browse Resources - Kelifax" description="Discover curated tech resources, tools, and platforms for developers and designers.">
+  <!-- Page Header -->
+  <section class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4">
+          Browse Resources
+        </h1>
+        <p class="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
+          Explore our curated collection of {allResources.length}+ verified tech resources
+        </p>
+        
+        <!-- Search Bar -->
+        <div class="max-w-2xl mx-auto">
+          <SearchBar placeholder="Search from {allResources.length}+ resources..." className="w-full" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters and Content -->
+  <section class="py-12 bg-gray-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Filter Bar -->
+      <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <!-- Category Filters -->
+          <div class="flex flex-wrap gap-2">
+            <span class="text-sm font-medium text-gray-700 mr-3 flex items-center">Filter by:</span>
+            <button class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" data-category="all">
+              All Resources
+            </button>
+            {categories.map((category) => (
+              <button 
+                class="px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors capitalize" 
+                data-category={category}
+              >
+                {category}
+              </button>
+            ))}
+          </div>
+
+          <!-- Sort Options -->
+          <div class="flex items-center gap-4">
+            <span class="text-sm font-medium text-gray-700">Sort by:</span>
+            <select class="border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <option value="featured">Featured First</option>
+              <option value="name">Name A-Z</option>
+              <option value="category">Category</option>
+              <option value="newest">Newest</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Resources Grid -->
+      <div id="resources-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {allResources.map((resource) => (
+          <div class="resource-item" data-category={resource.category}>
+            <ResourceCard
+              id={resource.id}
+              title={resource.title}
+              description={resource.description}
+              category={resource.category}
+              tags={resource.tags}
+              url={resource.url}
+              image={resource.image}
+              featured={resource.featured}
+            />
+          </div>
+        ))}
+      </div>
+
+      <!-- Load More Button -->
+      <div class="text-center mt-12">
+        <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-8 rounded-lg transition-colors">
+          Load More Resources
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Newsletter CTA -->
+  <section class="py-16 bg-blue-600">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl font-bold text-white mb-4">
+        Can't find what you're looking for?
+      </h2>
+      <p class="text-xl text-blue-100 mb-8">
+        Submit a resource suggestion and help grow our community
+      </p>
+      <button class="bg-white text-blue-600 hover:bg-gray-50 font-medium py-3 px-8 rounded-lg transition-colors">
+        Suggest a Resource
+      </button>
+    </div>
+  </section>
+</MainLayout>
+
+<script>
+  // Enhanced filter and search functionality
+  const categoryButtons = document.querySelectorAll('[data-category]');
+  const resourceItems = document.querySelectorAll('.resource-item');
+  const sortSelect = document.querySelector('select');
+  let currentCategory = 'all';
+  let currentSearchTerm = '';
+
+  // Get URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialCategory = urlParams.get('category') || 'all';
+  const initialSearch = urlParams.get('search') || '';
+
+  // Apply initial filters
+  if (initialCategory !== 'all') {
+    setActiveCategory(initialCategory);
+    filterResources();
+  }
+
+  if (initialSearch) {
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+      searchInput.value = initialSearch;
+      currentSearchTerm = initialSearch.toLowerCase();
+      filterResources();
+    }
+  }
+
+  // Category filter functionality
+  categoryButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      const selectedCategory = button.getAttribute('data-category');
+      setActiveCategory(selectedCategory);
+      filterResources();
+      updateURL();
+    });
+  });
+
+  function setActiveCategory(category) {
+    currentCategory = category;
+    
+    // Update button states
+    categoryButtons.forEach(btn => {
+      btn.classList.remove('bg-blue-600', 'text-white');
+      btn.classList.add('bg-gray-100', 'text-gray-700');
+    });
+    
+    const activeButton = document.querySelector(`[data-category="${category}"]`);
+    if (activeButton) {
+      activeButton.classList.remove('bg-gray-100', 'text-gray-700');
+      activeButton.classList.add('bg-blue-600', 'text-white');
+    }
+  }
+
+  // Search functionality
+  const searchInput = document.getElementById('search-input');
+  if (searchInput) {
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchTimeout);
+      
+      searchTimeout = setTimeout(() => {
+        currentSearchTerm = e.target.value.toLowerCase().trim();
+        filterResources();
+        updateURL();
+      }, 300);
+    });
+  }
+
+  // Sort functionality
+  if (sortSelect) {
+    sortSelect.addEventListener('change', (e) => {
+      sortResources(e.target.value);
+    });
+  }
+
+  function filterResources() {
+    let visibleCount = 0;
+    
+    resourceItems.forEach(item => {
+      const itemCategory = item.getAttribute('data-category');
+      const title = item.querySelector('h3')?.textContent.toLowerCase() || '';
+      const description = item.querySelector('p')?.textContent.toLowerCase() || '';
+      const tags = Array.from(item.querySelectorAll('.bg-gray-100')).map(tag => 
+        tag.textContent.toLowerCase()
+      ).join(' ');
+      
+      const categoryMatch = currentCategory === 'all' || itemCategory === currentCategory;
+      const searchMatch = currentSearchTerm === '' || 
+        title.includes(currentSearchTerm) || 
+        description.includes(currentSearchTerm) || 
+        tags.includes(currentSearchTerm);
+      
+      if (categoryMatch && searchMatch) {
+        item.style.display = 'block';
+        visibleCount++;
+      } else {
+        item.style.display = 'none';
+      }
+    });
+
+    // Update results count
+    updateResultsCount(visibleCount);
+  }
+
+  function sortResources(sortBy) {
+    const grid = document.getElementById('resources-grid');
+    const items = Array.from(resourceItems);
+    
+    items.sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          const titleA = a.querySelector('h3')?.textContent || '';
+          const titleB = b.querySelector('h3')?.textContent || '';
+          return titleA.localeCompare(titleB);
+        
+        case 'category':
+          const catA = a.getAttribute('data-category') || '';
+          const catB = b.getAttribute('data-category') || '';
+          return catA.localeCompare(catB);
+        
+        case 'featured':
+          const featuredA = a.querySelector('.bg-yellow-400') ? 1 : 0;
+          const featuredB = b.querySelector('.bg-yellow-400') ? 1 : 0;
+          return featuredB - featuredA;
+        
+        default:
+          return 0;
+      }
+    });
+    
+    // Re-append sorted items
+    items.forEach(item => grid.appendChild(item));
+  }
+
+  function updateResultsCount(count) {
+    // Create or update results count display
+    let countDisplay = document.getElementById('results-count');
+    if (!countDisplay) {
+      countDisplay = document.createElement('div');
+      countDisplay.id = 'results-count';
+      countDisplay.className = 'text-sm text-gray-600 mb-4';
+      
+      const grid = document.getElementById('resources-grid');
+      if (grid) {
+        grid.parentNode.insertBefore(countDisplay, grid);
+      }
+    }
+    
+    const total = resourceItems.length;
+    if (currentSearchTerm || currentCategory !== 'all') {
+      countDisplay.textContent = `Showing ${count} of ${total} resources`;
+    } else {
+      countDisplay.textContent = `Showing all ${total} resources`;
+    }
+  }
+
+  function updateURL() {
+    const params = new URLSearchParams();
+    
+    if (currentCategory !== 'all') {
+      params.set('category', currentCategory);
+    }
+    
+    if (currentSearchTerm) {
+      params.set('search', currentSearchTerm);
+    }
+    
+    const newURL = params.toString() ? 
+      `${window.location.pathname}?${params.toString()}` : 
+      window.location.pathname;
+    
+    // Update URL without refreshing the page
+    window.history.replaceState({}, '', newURL);
+  }
+
+  // Initial setup
+  filterResources();
+</script>

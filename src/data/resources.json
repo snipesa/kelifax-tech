@@ -1,0 +1,122 @@
+[
+  {
+    "id": 1,
+    "title": "Visual Studio Code",
+    "description": "Free source-code editor with rich ecosystem of extensions for web development, debugging, and Git integration.",
+    "category": "development",
+    "tags": ["code editor", "microsoft", "extensions", "debugging", "git"],
+    "url": "https://code.visualstudio.com",
+    "featured": true,
+    "image": null
+  },
+  {
+    "id": 2,
+    "title": "Figma",
+    "description": "Collaborative interface design tool with real-time collaboration, prototyping, and design system capabilities.",
+    "category": "design",
+    "tags": ["ui design", "prototyping", "collaboration", "vector graphics"],
+    "url": "https://figma.com",
+    "featured": true,
+    "image": null
+  },
+  {
+    "id": 3,
+    "title": "freeCodeCamp",
+    "description": "Free coding bootcamp offering interactive lessons, projects, and certifications in web development and data science.",
+    "category": "learning",
+    "tags": ["coding bootcamp", "free", "certifications", "web development", "data science"],
+    "url": "https://freecodecamp.org",
+    "featured": false,
+    "image": null
+  },
+  {
+    "id": 4,
+    "title": "GitHub",
+    "description": "Web-based platform for version control, code collaboration, project management, and open-source development.",
+    "category": "development",
+    "tags": ["git", "version control", "collaboration", "open source", "ci/cd"],
+    "url": "https://github.com",
+    "featured": false,
+    "image": null
+  },
+  {
+    "id": 5,
+    "title": "Notion",
+    "description": "All-in-one workspace combining notes, tasks, wikis, and databases for personal and team productivity.",
+    "category": "productivity",
+    "tags": ["notes", "project management", "collaboration", "database", "wiki"],
+    "url": "https://notion.so",
+    "featured": false,
+    "image": null
+  },
+  {
+    "id": 6,
+    "title": "Tailwind CSS",
+    "description": "Utility-first CSS framework with low-level utility classes for building custom designs without writing CSS.",
+    "category": "development",
+    "tags": ["css framework", "utility-first", "responsive design", "customizable"],
+    "url": "https://tailwindcss.com",
+    "featured": false,
+    "image": null
+  },
+  {
+    "id": 7,
+    "title": "Unsplash",
+    "description": "Large collection of high-quality, freely usable photos from professional photographers worldwide.",
+    "category": "design",
+    "tags": ["stock photos", "free", "high-quality", "commercial use"],
+    "url": "https://unsplash.com",
+    "featured": false,
+    "image": null
+  },
+  {
+    "id": 8,
+    "title": "Coursera",
+    "description": "Online learning platform offering courses, specializations, and degrees from top universities and companies.",
+    "category": "learning",
+    "tags": ["online courses", "universities", "certificates", "degrees", "skills"],
+    "url": "https://coursera.org",
+    "featured": false,
+    "image": null
+  },
+  {
+    "id": 9,
+    "title": "Postman",
+    "description": "API development platform for building, testing, and documenting APIs with collaborative features.",
+    "category": "development",
+    "tags": ["api testing", "api development", "documentation", "collaboration"],
+    "url": "https://postman.com",
+    "featured": false,
+    "image": null
+  },
+  {
+    "id": 10,
+    "title": "Canva",
+    "description": "User-friendly graphic design platform with templates, stock photos, and design tools for non-designers.",
+    "category": "design",
+    "tags": ["graphic design", "templates", "social media", "presentations", "easy-to-use"],
+    "url": "https://canva.com",
+    "featured": false,
+    "image": null
+  },
+  {
+    "id": 11,
+    "title": "Stack Overflow",
+    "description": "Question and answer community for programmers to share knowledge and solve coding problems.",
+    "category": "learning",
+    "tags": ["programming", "qa community", "problem solving", "knowledge sharing"],
+    "url": "https://stackoverflow.com",
+    "featured": true,
+    "image": null
+  },
+  {
+    "id": 12,
+    "title": "Slack",
+    "description": "Business communication platform with channels, direct messaging, file sharing, and app integrations.",
+    "category": "productivity",
+    "tags": ["team communication", "messaging", "collaboration", "integrations"],
+    "url": "https://slack.com",
+    "featured": false,
+    "image": null
+  }
+]
