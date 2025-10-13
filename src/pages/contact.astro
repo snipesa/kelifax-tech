@@ -1,5 +1,8 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+
+// Get contact email from environment variable
+const contactEmail = import.meta.env.PUBLIC_CONTACT_EMAIL || 'contact@kelifax.com';
 ---
 
 <MainLayout title="Contact Us - Kelifax" description="Get in touch with the Kelifax team. We'd love to hear from you!">
@@ -136,8 +139,8 @@ import MainLayout from '../layouts/MainLayout.astro';
               <div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-2">Email Us</h3>
                 <p class="text-gray-600 mb-1">For general inquiries</p>
-                <a href="mailto:hello@kelifax.com" class="text-blue-600 hover:text-blue-700 font-medium">
-                  hello@kelifax.com
+                <a href={`mailto:${contactEmail}`} class="text-blue-600 hover:text-blue-700 font-medium">
+                  {contactEmail}
                 </a>
               </div>
             </div>
@@ -153,8 +156,8 @@ import MainLayout from '../layouts/MainLayout.astro';
               <div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-2">Resource Submissions</h3>
                 <p class="text-gray-600 mb-1">For submitting new resources</p>
-                <a href="mailto:resources@kelifax.com" class="text-blue-600 hover:text-blue-700 font-medium">
-                  resources@kelifax.com
+                <a href={`mailto:${contactEmail}`} class="text-blue-600 hover:text-blue-700 font-medium">
+                  {contactEmail}
                 </a>
               </div>
             </div>
@@ -170,8 +173,8 @@ import MainLayout from '../layouts/MainLayout.astro';
               <div>
                 <h3 class="text-lg font-semibold text-gray-900 mb-2">Partnerships</h3>
                 <p class="text-gray-600 mb-1">For business partnerships</p>
-                <a href="mailto:partnerships@kelifax.com" class="text-blue-600 hover:text-blue-700 font-medium">
-                  partnerships@kelifax.com
+                <a href={`mailto:${contactEmail}`} class="text-blue-600 hover:text-blue-700 font-medium">
+                  {contactEmail}
                 </a>
               </div>
             </div>

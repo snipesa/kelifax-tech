@@ -7,7 +7,7 @@
     "tags": ["code editor", "microsoft", "extensions", "debugging", "git"],
     "url": "https://code.visualstudio.com",
     "featured": true,
-    "image": null
+    "image": "vscode.png"
   },
   {
     "id": 2,
@@ -17,7 +17,7 @@
     "tags": ["ui design", "prototyping", "collaboration", "vector graphics"],
     "url": "https://figma.com",
     "featured": true,
-    "image": null
+    "image": "figma.png"
   },
   {
     "id": 3,
@@ -27,17 +27,93 @@
     "tags": ["coding bootcamp", "free", "certifications", "web development", "data science"],
     "url": "https://freecodecamp.org",
     "featured": false,
-    "image": null
+    "image": "freecodecamp.png"
   },
   {
     "id": 4,
     "title": "GitHub",
-    "description": "Web-based platform for version control, code collaboration, project management, and open-source development.",
+    "description": "Comprehensive platform for Git-based version control, collaborative development, automated CI/CD with GitHub Actions, and AI-powered coding assistance with GitHub Copilot.",
     "category": "development",
-    "tags": ["git", "version control", "collaboration", "open source", "ci/cd"],
+    "tags": [
+      "git",
+      "version control",
+      "collaboration",
+      "open source",
+      "ci/cd",
+      "github actions",
+      "github copilot",
+      "code review",
+      "automation",
+      "ai assistant",
+      "repository management",
+      "pull requests",
+      "branching",
+      "merging",
+      "continuous integration",
+      "continuous deployment"
+    ],
     "url": "https://github.com",
-    "featured": false,
-    "image": null
+    "featured": true,
+    "image": "github.png",
+    "keyFeatures": [
+      {
+        "title": "Git Version Control",
+        "description": "Complete Git-based version control system for tracking changes, managing branches, and collaborative development."
+      },
+      {
+        "title": "GitHub Actions CI/CD",
+        "description": "Powerful automation platform for building, testing, and deploying code with custom workflows and pre-built actions."
+      },
+      {
+        "title": "GitHub Copilot",
+        "description": "AI-powered coding assistant that provides intelligent code suggestions, auto-completion, and code generation."
+      },
+      {
+        "title": "Code Review & Collaboration",
+        "description": "Built-in tools for code reviews, pull requests, issue tracking, and team collaboration."
+      },
+      {
+        "title": "Repository Management",
+        "description": "Organize code with repositories, manage access permissions, and integrate with third-party tools."
+      },
+      
+      {
+        "title": "Open Source Community",
+        "description": "World's largest platform for open source projects with millions of repositories and developers."
+      }
+    ],
+    "useCases": [
+      "Version control and source code management",
+      "Collaborative software development",
+      "Automated testing and deployment pipelines",
+      "Code review and quality assurance",
+      "Open source project hosting",
+      "Documentation and project wikis",
+      "Issue and bug tracking",
+      "Team project management"
+    ],
+    "learningResources": [
+      {
+        "title": "Git Handbook",
+        "url": "https://guides.github.com/introduction/git-handbook/",
+        "type": "Guide"
+      },
+      {
+        "title": "GitHub Actions Documentation",
+        "url": "https://docs.github.com/en/actions",
+        "type": "Documentation"
+      },
+      {
+        "title": "GitHub Copilot Guide",
+        "url": "https://docs.github.com/en/copilot",
+        "type": "Documentation"
+      },
+      {
+        "title": "Git Branching Tutorial",
+        "url": "https://learngitbranching.js.org/",
+        "type": "Interactive Tutorial"
+      }
+    ]
   },
   {
     "id": 5,
@@ -47,7 +123,7 @@
     "tags": ["notes", "project management", "collaboration", "database", "wiki"],
     "url": "https://notion.so",
     "featured": false,
-    "image": null
+    "image": "notion.png"
   },
   {
     "id": 6,
@@ -57,7 +133,7 @@
     "tags": ["css framework", "utility-first", "responsive design", "customizable"],
     "url": "https://tailwindcss.com",
     "featured": false,
-    "image": null
+    "image": "tailwindcss.png"
   },
   {
     "id": 7,
@@ -67,7 +143,7 @@
     "tags": ["stock photos", "free", "high-quality", "commercial use"],
     "url": "https://unsplash.com",
     "featured": false,
-    "image": null
+    "image": "unsplash.png"
   },
   {
     "id": 8,
@@ -77,7 +153,7 @@
     "tags": ["online courses", "universities", "certificates", "degrees", "skills"],
     "url": "https://coursera.org",
     "featured": false,
-    "image": null
+    "image": "coursera.png"
   },
   {
     "id": 9,
@@ -87,7 +163,7 @@
     "tags": ["api testing", "api development", "documentation", "collaboration"],
     "url": "https://postman.com",
     "featured": false,
-    "image": null
+    "image": "postman.png"
   },
   {
     "id": 10,
@@ -97,7 +173,7 @@
     "tags": ["graphic design", "templates", "social media", "presentations", "easy-to-use"],
     "url": "https://canva.com",
     "featured": false,
-    "image": null
+    "image": "canva.png"
   },
   {
     "id": 11,
@@ -107,7 +183,7 @@
     "tags": ["programming", "qa community", "problem solving", "knowledge sharing"],
     "url": "https://stackoverflow.com",
     "featured": true,
-    "image": null
+    "image": "stackoverflow.png"
   },
   {
     "id": 12,
@@ -117,6 +193,6 @@
     "tags": ["team communication", "messaging", "collaboration", "integrations"],
     "url": "https://slack.com",
     "featured": false,
-    "image": null
+    "image": "slack.png"
   }
 ]

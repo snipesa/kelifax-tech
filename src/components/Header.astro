@@ -7,11 +7,11 @@
     <div class="flex justify-between items-center h-16">
       <!-- Logo and Brand -->
       <div class="flex items-center">
-        <a href="/" class="flex items-center space-x-2">
+        <a href="/" class="flex items-center" style="margin-right:2.5rem;">
           <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
             <span class="text-white font-bold text-lg">K</span>
           </div>
-          <span class="text-xl font-bold text-gray-900">Kelifax</span>
+          <span class="text-xl font-bold text-gray-900 ml-4">Kelifax</span>
         </a>
       </div>
 
@@ -23,6 +23,25 @@
         <a href="/resources" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">
           Resources
         </a>
+        <div class="relative group">
+          <button class="text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center">
+            Featured
+            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+            <a href="/github" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors border-b border-gray-100">
+              <div class="flex items-center">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                GitHub - Enhanced
+              </div>
+            </a>
+            <a href="/resources?featured=true" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+              All Featured Resources
+            </a>
+          </div>
+        </div>
         <a href="/about" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">
           About
         </a>

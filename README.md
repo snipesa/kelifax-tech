@@ -73,13 +73,65 @@ aws s3 sync ./dist s3://kelifax-dev-project --delete  #Upload to s3 dev bucket
 Visit the s3 website URL
 ```
 
-## 🌟 What's Next (Phase 2)
+## 🌟 Phase 2a Complete - Enhanced GitHub Resource
+
+- ✅ **Dynamic JSON Integration** - GitHub resource now uses dynamic data from resources.json
+- ✅ **Enhanced Resource Data** - Added keyFeatures, useCases, and learningResources
+- ✅ **Dedicated GitHub Page** - Comprehensive page showcasing Git, GitHub Actions, and GitHub Copilot
+- ✅ **Improved ResourceCard** - Enhanced to display key features and additional metadata
+- ✅ **Scalable Architecture** - Code structure ready for easy addition of more enhanced resources
+
+## 🚀 Future-Compatible API Architecture
+
+### ✅ **API-Ready Implementation Complete**
+
+The codebase has been restructured to seamlessly support both **static JSON** (current) and **API Gateway + Lambda** (future) without any code changes:
+
+- **Environment-Based Switching**: Uses `PUBLIC_USE_API` environment variable
+- **Graceful Fallback**: API failures automatically fall back to local JSON
+- **Zero Breaking Changes**: All existing functionality preserved
+- **Promise-Based Architecture**: All data functions now async-ready
+
+### 🔧 **How It Works**
+
+**Current Development Mode:**
+```env
+PUBLIC_USE_API=false
+PUBLIC_API_BASE_URL=
+```
+- Uses static `src/data/resources.json`
+- Fast, reliable, no network calls
+
+**Future Production Mode:**
+```env
+PUBLIC_USE_API=true
+PUBLIC_API_BASE_URL=https://your-api-gateway-url
+```
+- Fetches from API Gateway: `/resources/{id}`
+- Falls back to local JSON if API fails
+
+### 📋 **Migration Path**
+
+1. **Current**: All resources from local JSON ✅
+2. **Hybrid**: Migrate resources to API one by one
+3. **Full API**: All resources served dynamically
+
+**API Contract**: Lambda functions should return the same JSON structure as `resources.json`
+
+## 🌟 What's Next (Phase 2b)
 
 - Backend integration with AWS Lambda
 - User accounts and authentication
 - Resource bookmarking and favorites
 - Admin dashboard for resource management
 - Analytics and performance tracking
+- Enhanced resource pages for other tools (VS Code, Figma, etc.)
+
+### Resource Logo Images
+- Store all resource logo images in `public/logos/`.
+- Recommended size: **128x128 pixels**.
+- Use **PNG** (with transparency) or **SVG** formats.
+- Keep file size under **50 KB** for optimal performance.
 
 ## 📞 Support
 

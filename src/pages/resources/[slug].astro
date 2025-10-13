@@ -1,9 +1,10 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import resourcesData from '../../data/resources.json';
+import { getAllResources, getResourceById, getRelatedResources } from '../../utils/resources.js';
 
-export function getStaticPaths() {
-  return resourcesData.map((resource) => ({
+export async function getStaticPaths() {
+  const resources = await getAllResources();
+  return resources.map((resource) => ({
     params: { slug: resource.id.toString() },
     props: { resource }
   }));
@@ -11,10 +12,8 @@ export function getStaticPaths() {
 
 const { resource } = Astro.props;
 
-// Get related resources (same category, different resource)
-const relatedResources = resourcesData
-  .filter(r => r.category === resource.category && r.id !== resource.id)
-  .slice(0, 3);
+// Get related resources using utility function
+const relatedResources = await getRelatedResources(resource, 3);
 ---
 
 <MainLayout 
@@ -106,36 +105,74 @@ const relatedResources = resourcesData
               </div>
             </div>
 
-            <!-- Features/Benefits (placeholder content) -->
-            <div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-3">Key Features</h3>
-              <ul class="space-y-2 text-gray-600">
-                <li class="flex items-start space-x-2">
-                  <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>User-friendly interface and intuitive design</span>
-                </li>
-                <li class="flex items-start space-x-2">
-                  <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Regular updates and active community support</span>
-                </li>
-                <li class="flex items-start space-x-2">
-                  <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Comprehensive documentation and tutorials</span>
-                </li>
-                <li class="flex items-start space-x-2">
-                  <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>Cross-platform compatibility</span>
-                </li>
-              </ul>
-            </div>
+            <!-- Key Features or Use Cases -->
+            {resource.keyFeatures && (
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Key Features</h3>
+                <ul class="space-y-3 text-gray-600">
+                  {resource.keyFeatures.map((feature) => (
+                    <li class="flex items-start space-x-3">
+                      <svg class="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <div>
+                        <strong class="text-gray-900">{feature.title}</strong>
+                        <p class="text-sm text-gray-600 mt-1">{feature.description}</p>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <!-- Use Cases -->
+            {resource.useCases && (
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Use Cases</h3>
+                <ul class="space-y-2 text-gray-600">
+                  {resource.useCases.map((useCase) => (
+                    <li class="flex items-start space-x-2">
+                      <svg class="w-5 h-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                      <span>{useCase}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            <!-- Learning Resources -->
+            {resource.learningResources && (
+              <div>
+                <h3 class="text-lg font-semibold text-gray-900 mb-3">Learning Resources</h3>
+                <div class="space-y-3">
+                  {resource.learningResources.map((learning) => (
+                    <div class="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                      <div class="flex items-center justify-between">
+                        <div>
+                          <h4 class="font-semibold text-gray-900">{learning.title}</h4>
+                          <span class="text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded mt-1 inline-block">
+                            {learning.type}
+                          </span>
+                        </div>
+                        <a 
+                          href={learning.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          class="flex items-center space-x-1 text-blue-600 hover:text-blue-800 transition-colors"
+                        >
+                          <span class="text-sm">Visit</span>
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <!-- Share Buttons -->
             <div>
