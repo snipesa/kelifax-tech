@@ -20,16 +20,6 @@
     "image": "figma.png"
   },
   {
-    "id": 3,
-    "title": "freeCodeCamp",
-    "description": "Free coding bootcamp offering interactive lessons, projects, and certifications in web development and data science.",
-    "category": "learning",
-    "tags": ["coding bootcamp", "free", "certifications", "web development", "data science"],
-    "url": "https://freecodecamp.org",
-    "featured": false,
-    "image": "freecodecamp.png"
-  },
-  {
     "id": 4,
     "title": "GitHub",
     "description": "Comprehensive platform for Git-based version control, collaborative development, automated CI/CD with GitHub Actions, and AI-powered coding assistance with GitHub Copilot.",
@@ -134,16 +124,6 @@
     "url": "https://tailwindcss.com",
     "featured": false,
     "image": "tailwindcss.png"
-  },
-  {
-    "id": 7,
-    "title": "Unsplash",
-    "description": "Large collection of high-quality, freely usable photos from professional photographers worldwide.",
-    "category": "design",
-    "tags": ["stock photos", "free", "high-quality", "commercial use"],
-    "url": "https://unsplash.com",
-    "featured": false,
-    "image": "unsplash.png"
   },
   {
     "id": 8,

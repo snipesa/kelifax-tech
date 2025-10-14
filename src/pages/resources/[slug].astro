@@ -48,12 +48,12 @@ const relatedResources = await getRelatedResources(resource, 3);
         <!-- Main Content -->
         <div class="lg:col-span-2">
           <!-- Resource Image/Logo -->
-          <div class="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg mb-8 relative overflow-hidden">
+          <div class="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg mb-8 relative overflow-hidden flex items-center justify-center">
             {resource.image ? (
               <img 
-                src={resource.image} 
+                src={`/logos/${resource.image}`} 
                 alt={resource.title}
-                class="w-full h-full object-cover"
+                class="max-w-48 max-h-32 object-contain"
               />
             ) : (
               <div class="w-full h-full flex items-center justify-center">
@@ -295,12 +295,12 @@ const relatedResources = await getRelatedResources(resource, 3);
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           {relatedResources.map((related) => (
             <div class="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden">
-              <div class="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 relative">
+              <div class="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 relative flex items-center justify-center">
                 {related.image ? (
                   <img 
-                    src={related.image} 
+                    src={`/logos/${related.image}`} 
                     alt={related.title}
-                    class="w-full h-full object-cover"
+                    class="max-w-24 max-h-16 object-contain"
                   />
                 ) : (
                   <div class="w-full h-full flex items-center justify-center">
