@@ -71,9 +71,9 @@ npm run preview  # Preview production build
 aws s3 sync ./dist s3://kelifax-dev-project --delete  #Upload to s3 dev bucket
 
 # Example dev
-aws s3 sync ./dist s3://kelifax-dev-project
+aws s3 sync ./dist s3://kelifax-dev-project --delete 
 # Prod
-aws s3 sync ./dist s3://kelifax.com-website
+aws s3 sync ./dist s3://kelifax.com-website --delete 
 
 Visit the s3 website URL
 ```
