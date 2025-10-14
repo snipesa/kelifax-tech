@@ -2,12 +2,90 @@
   {
     "id": 1,
     "title": "Visual Studio Code",
-    "description": "Free source-code editor with rich ecosystem of extensions for web development, debugging, and Git integration.",
+    "description": "Free, open-source code editor with intelligent code completion, built-in Git integration, extensive extension marketplace, and powerful debugging capabilities for modern development workflows.",
     "category": "development",
-    "tags": ["code editor", "microsoft", "extensions", "debugging", "git"],
+    "tags": [
+      "code editor",
+      "microsoft",
+      "extensions",
+      "debugging",
+      "git",
+      "intellisense",
+      "syntax highlighting",
+      "integrated terminal",
+      "live share",
+      "remote development",
+      "multi-language support",
+      "code completion",
+      "refactoring",
+      "linting",
+      "version control"
+    ],
     "url": "https://code.visualstudio.com",
     "featured": true,
-    "image": null
+    "image": "vscode.png",
+    "keyFeatures": [
+      {
+        "title": "IntelliSense Code Completion",
+        "description": "Smart code completion with syntax highlighting, auto-completion, and intelligent suggestions based on variable types and function definitions."
+      },
+      {
+        "title": "Extensive Extension Marketplace",
+        "description": "Thousands of extensions for languages, themes, debuggers, and tools to customize and enhance your coding experience."
+      },
+      {
+        "title": "Built-in Git Integration",
+        "description": "Native Git support with visual diff editor, staging, branching, and seamless version control workflow."
+      },
+      {
+        "title": "Powerful Debugging Tools",
+        "description": "Advanced debugging capabilities with breakpoints, call stacks, variable inspection, and multi-language debugging support."
+      },
+      {
+        "title": "Integrated Terminal",
+        "description": "Built-in terminal that supports multiple shells and allows you to run commands without leaving the editor."
+      },
+      {
+        "title": "Live Share Collaboration",
+        "description": "Real-time collaborative editing and debugging sessions with other developers, including shared terminals and servers."
+      },
+      {
+        "title": "Remote Development",
+        "description": "Develop on remote machines, containers, or WSL with the same local VS Code experience through remote extensions."
+      }
+    ],
+    "useCases": [
+      "Full-stack web development",
+      "Mobile app development",
+      "Data science and machine learning projects",
+      "DevOps and infrastructure as code",
+      "API development and testing",
+      "Database management and queries",
+      "Documentation writing with Markdown",
+      "Multi-language programming projects"
+    ],
+    "learningResources": [
+      {
+        "title": "VS Code Official Documentation",
+        "url": "https://code.visualstudio.com/docs",
+        "type": "Documentation"
+      },
+      {
+        "title": "VS Code Tips and Tricks",
+        "url": "https://code.visualstudio.com/docs/getstarted/tips-and-tricks",
+        "type": "Guide"
+      },
+      {
+        "title": "Extension Development Guide",
+        "url": "https://code.visualstudio.com/api",
+        "type": "API Documentation"
+      },
+      {
+        "title": "VS Code YouTube Channel",
+        "url": "https://www.youtube.com/channel/UCs5Y5_7XK8HLDX0SLNwkd3w",
+        "type": "Video Tutorials"
+      }
+    ]
   },
   {
     "id": 2,
@@ -17,27 +95,93 @@
     "tags": ["ui design", "prototyping", "collaboration", "vector graphics"],
     "url": "https://figma.com",
     "featured": true,
-    "image": null
-  },
-  {
-    "id": 3,
-    "title": "freeCodeCamp",
-    "description": "Free coding bootcamp offering interactive lessons, projects, and certifications in web development and data science.",
-    "category": "learning",
-    "tags": ["coding bootcamp", "free", "certifications", "web development", "data science"],
-    "url": "https://freecodecamp.org",
-    "featured": false,
-    "image": null
+    "image": "figma.png"
   },
   {
     "id": 4,
     "title": "GitHub",
-    "description": "Web-based platform for version control, code collaboration, project management, and open-source development.",
+    "description": "Comprehensive platform for Git-based version control, collaborative development, automated CI/CD with GitHub Actions, and AI-powered coding assistance with GitHub Copilot.",
     "category": "development",
-    "tags": ["git", "version control", "collaboration", "open source", "ci/cd"],
+    "tags": [
+      "git",
+      "version control",
+      "collaboration",
+      "open source",
+      "ci/cd",
+      "github actions",
+      "github copilot",
+      "code review",
+      "automation",
+      "ai assistant",
+      "repository management",
+      "pull requests",
+      "branching",
+      "merging",
+      "continuous integration",
+      "continuous deployment"
+    ],
     "url": "https://github.com",
-    "featured": false,
-    "image": null
+    "featured": true,
+    "image": "github.png",
+    "keyFeatures": [
+      {
+        "title": "Git Version Control",
+        "description": "Complete Git-based version control system for tracking changes, managing branches, and collaborative development."
+      },
+      {
+        "title": "GitHub Actions CI/CD",
+        "description": "Powerful automation platform for building, testing, and deploying code with custom workflows and pre-built actions."
+      },
+      {
+        "title": "GitHub Copilot",
+        "description": "AI-powered coding assistant that provides intelligent code suggestions, auto-completion, and code generation."
+      },
+      {
+        "title": "Code Review & Collaboration",
+        "description": "Built-in tools for code reviews, pull requests, issue tracking, and team collaboration."
+      },
+      {
+        "title": "Repository Management",
+        "description": "Organize code with repositories, manage access permissions, and integrate with third-party tools."
+      },
+      
+      {
+        "title": "Open Source Community",
+        "description": "World's largest platform for open source projects with millions of repositories and developers."
+      }
+    ],
+    "useCases": [
+      "Version control and source code management",
+      "Collaborative software development",
+      "Automated testing and deployment pipelines",
+      "Code review and quality assurance",
+      "Open source project hosting",
+      "Documentation and project wikis",
+      "Issue and bug tracking",
+      "Team project management"
+    ],
+    "learningResources": [
+      {
+        "title": "Git Handbook",
+        "url": "https://guides.github.com/introduction/git-handbook/",
+        "type": "Guide"
+      },
+      {
+        "title": "GitHub Actions Documentation",
+        "url": "https://docs.github.com/en/actions",
+        "type": "Documentation"
+      },
+      {
+        "title": "GitHub Copilot Guide",
+        "url": "https://docs.github.com/en/copilot",
+        "type": "Documentation"
+      },
+      {
+        "title": "Git Branching Tutorial",
+        "url": "https://learngitbranching.js.org/",
+        "type": "Interactive Tutorial"
+      }
+    ]
   },
   {
     "id": 5,
@@ -47,7 +191,7 @@
     "tags": ["notes", "project management", "collaboration", "database", "wiki"],
     "url": "https://notion.so",
     "featured": false,
-    "image": null
+    "image": "notion.png"
   },
   {
     "id": 6,
@@ -57,17 +201,7 @@
     "tags": ["css framework", "utility-first", "responsive design", "customizable"],
     "url": "https://tailwindcss.com",
     "featured": false,
-    "image": null
-  },
-  {
-    "id": 7,
-    "title": "Unsplash",
-    "description": "Large collection of high-quality, freely usable photos from professional photographers worldwide.",
-    "category": "design",
-    "tags": ["stock photos", "free", "high-quality", "commercial use"],
-    "url": "https://unsplash.com",
-    "featured": false,
-    "image": null
+    "image": "tailwindcss.png"
   },
   {
     "id": 8,
@@ -77,7 +211,7 @@
     "tags": ["online courses", "universities", "certificates", "degrees", "skills"],
     "url": "https://coursera.org",
     "featured": false,
-    "image": null
+    "image": "coursera.png"
   },
   {
     "id": 9,
@@ -87,7 +221,7 @@
     "tags": ["api testing", "api development", "documentation", "collaboration"],
     "url": "https://postman.com",
     "featured": false,
-    "image": null
+    "image": "postman.png"
   },
   {
     "id": 10,
@@ -97,7 +231,7 @@
     "tags": ["graphic design", "templates", "social media", "presentations", "easy-to-use"],
     "url": "https://canva.com",
     "featured": false,
-    "image": null
+    "image": "canva.png"
   },
   {
     "id": 11,
@@ -107,7 +241,7 @@
     "tags": ["programming", "qa community", "problem solving", "knowledge sharing"],
     "url": "https://stackoverflow.com",
     "featured": true,
-    "image": null
+    "image": "stackoverflow.png"
   },
   {
     "id": 12,
@@ -117,6 +251,6 @@
     "tags": ["team communication", "messaging", "collaboration", "integrations"],
     "url": "https://slack.com",
     "featured": false,
-    "image": null
+    "image": "slack.png"
   }
 ]

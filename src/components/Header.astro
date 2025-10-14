@@ -1,5 +1,42 @@
 ---
 // Header component for Kelifax
+export interface Props {
+  currentPage?: string;
+}
+
+const { currentPage = '' } = Astro.props;
+
+// Function to check if current page matches
+const isActive = (page: string) => {
+  if (page === 'home' && (currentPage === '' || currentPage === 'home')) return true;
+  if (page === 'resources' && (currentPage === 'resources' || currentPage.startsWith('resources'))) return true;
+  if (page === 'about' && currentPage === 'about') return true;
+  if (page === 'contact' && currentPage === 'contact') return true;
+  if (page === 'github' && currentPage === 'github') return true;
+  return false;
+};
+
+// Function to get link classes
+const getLinkClasses = (page: string) => {
+  const baseClasses = "transition-colors font-medium";
+  const activeClasses = "text-blue-600 border-b-2 border-blue-600";
+  const inactiveClasses = "text-gray-700 hover:text-blue-600";
+  
+  return isActive(page) 
+    ? `${baseClasses} ${activeClasses}`
+    : `${baseClasses} ${inactiveClasses}`;
+};
+
+// Function to get mobile link classes
+const getMobileLinkClasses = (page: string) => {
+  const baseClasses = "block px-3 py-2 font-medium rounded-md transition-colors";
+  const activeClasses = "text-blue-600 bg-blue-50 border-l-4 border-blue-600";
+  const inactiveClasses = "text-gray-700 hover:text-blue-600 hover:bg-gray-50";
+  
+  return isActive(page) 
+    ? `${baseClasses} ${activeClasses}`
+    : `${baseClasses} ${inactiveClasses}`;
+};
 ---
 
 <header class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
@@ -7,26 +44,58 @@
     <div class="flex justify-between items-center h-16">
       <!-- Logo and Brand -->
       <div class="flex items-center">
-        <a href="/" class="flex items-center space-x-2">
+        <a href="/" class="flex items-center" style="margin-right:2.5rem;">
           <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
             <span class="text-white font-bold text-lg">K</span>
           </div>
-          <span class="text-xl font-bold text-gray-900">Kelifax</span>
+          <span class="text-xl font-bold text-gray-900 ml-4">Kelifax</span>
         </a>
       </div>
 
       <!-- Navigation - Desktop -->
       <nav class="hidden md:flex items-center space-x-8">
-        <a href="/" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">
+        <a href="/" class={getLinkClasses('home')}>
           Home
         </a>
-        <a href="/resources" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">
+        <a href="/resources" class={getLinkClasses('resources')}>
           Resources
         </a>
-        <a href="/about" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">
+        <div class="relative group" x-data="{ open: false }">
+          <button 
+            @click="open = !open" 
+            @click.away="open = false"
+            class="text-gray-700 hover:text-blue-600 transition-colors font-medium flex items-center cursor-pointer bg-transparent border-none focus:outline-none"
+          >
+            Featured
+            <svg class="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          <div 
+            x-show="open"
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="transform opacity-0 scale-95"
+            x-transition:enter-end="transform opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="transform opacity-100 scale-100"
+            x-transition:leave-end="transform opacity-0 scale-95"
+            class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
+          >
+            <a href="/github" class={`block px-4 py-3 text-sm transition-colors border-b border-gray-100 ${isActive('github') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'}`}>
+              <div class="flex items-center">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                GitHub - Enhanced
+              </div>
+            </a>
+            <a href="/resources?featured=true" class="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors">
+              All Featured Resources
+            </a>
+          </div>
+        </div>
+        <a href="/about" class={getLinkClasses('about')}>
           About
         </a>
-        <a href="/contact" class="text-gray-700 hover:text-blue-600 transition-colors font-medium">
+        <a href="/contact" class={getLinkClasses('contact')}>
           Contact
         </a>
       </nav>
@@ -55,29 +124,48 @@
       </div>
 
       <!-- Mobile menu button -->
-      <div class="md:hidden">
-        <button type="button" class="text-gray-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 p-2">
+      <div class="md:hidden" x-data="{ mobileMenuOpen: false }">
+        <button 
+          @click="mobileMenuOpen = !mobileMenuOpen" 
+          type="button" 
+          class="text-gray-700 hover:text-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 p-2"
+        >
           <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Mobile menu (hidden by default) -->
-  <div class="md:hidden border-t border-gray-200 bg-white">
+        
+        <!-- Mobile menu (toggle with Alpine.js) -->
+        <div 
+          x-show="mobileMenuOpen"
+          x-transition:enter="transition ease-out duration-200"
+          x-transition:enter-start="opacity-0 -translate-y-1"
+          x-transition:enter-end="opacity-100 translate-y-0"
+          x-transition:leave="transition ease-in duration-150"
+          x-transition:leave-start="opacity-100 translate-y-0"
+          x-transition:leave-end="opacity-0 -translate-y-1"
+          class="absolute top-16 left-0 right-0 border-t border-gray-200 bg-white z-50 shadow-lg"
+        >
     <div class="px-2 pt-2 pb-3 space-y-1">
-      <a href="/" class="block px-3 py-2 text-gray-700 font-medium hover:text-blue-600 hover:bg-gray-50 rounded-md">
+      <a href="/" class={getMobileLinkClasses('home')}>
         Home
       </a>
-      <a href="/resources" class="block px-3 py-2 text-gray-700 font-medium hover:text-blue-600 hover:bg-gray-50 rounded-md">
+      <a href="/resources" class={getMobileLinkClasses('resources')}>
         Resources
       </a>
-      <a href="/about" class="block px-3 py-2 text-gray-700 font-medium hover:text-blue-600 hover:bg-gray-50 rounded-md">
+      <a href="/resources?featured=true" class="block px-3 py-2 text-gray-700 font-medium hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors">
+        Featured
+      </a>
+      <a href="/github" class={`block px-3 py-2 ml-4 text-sm text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors ${isActive('github') ? 'text-blue-600 bg-blue-50 border-l-2 border-blue-600' : ''}`}>
+        <div class="flex items-center">
+          <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+          GitHub - Enhanced
+        </div>
+      </a>
+      <a href="/about" class={getMobileLinkClasses('about')}>
         About
       </a>
-      <a href="/contact" class="block px-3 py-2 text-gray-700 font-medium hover:text-blue-600 hover:bg-gray-50 rounded-md">
+      <a href="/contact" class={getMobileLinkClasses('contact')}>
         Contact
       </a>
       <div class="px-3 py-2">

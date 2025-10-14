@@ -1,15 +1,18 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
 import ResourceCard from '../../components/ResourceCard.astro';
+import EnhancedResourceCard from '../../components/EnhancedResourceCard.astro';
 import SearchBar from '../../components/SearchBar.astro';
-import resourcesData from '../../data/resources.json';
+import { getAllResources, getCategories, getEnhancedResources, getFeaturedResources } from '../../utils/resources.js';
 
-// Get all unique categories for filtering
-const categories = [...new Set(resourcesData.map(resource => resource.category))];
-const allResources = resourcesData;
+// Get resources using utility functions
+const allResources = await getAllResources();
+const categories = await getCategories();
+const enhancedResources = await getEnhancedResources();
+const featuredResources = await getFeaturedResources();
 ---
 
-<MainLayout title="Browse Resources - Kelifax" description="Discover curated tech resources, tools, and platforms for developers and designers.">
+<MainLayout title="Browse Resources - Kelifax" description="Discover curated tech resources, tools, and platforms for developers and designers." currentPage="resources">
   <!-- Page Header -->
   <section class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -62,6 +65,43 @@ const allResources = resourcesData;
             </select>
           </div>
         </div>
+      </div>
+
+      <!-- Enhanced Resources Section -->
+      {enhancedResources.length > 0 && (
+        <div class="mb-12">
+          <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">Enhanced Resources</h2>
+            <span class="text-sm text-gray-600">
+              Resources with detailed guides and learning materials
+            </span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {enhancedResources.map((resource) => (
+              <EnhancedResourceCard
+                id={resource.id}
+                title={resource.title}
+                description={resource.description}
+                category={resource.category}
+                tags={resource.tags}
+                url={resource.url}
+                image={resource.image}
+                featured={resource.featured}
+                keyFeatures={resource.keyFeatures}
+                useCases={resource.useCases}
+                learningResources={resource.learningResources}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      <!-- All Resources Section -->
+      <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-bold text-gray-900">All Resources</h2>
+        <span class="text-sm text-gray-600">
+          {allResources.length} total resources
+        </span>
       </div>
 
       <!-- Resources Grid -->
