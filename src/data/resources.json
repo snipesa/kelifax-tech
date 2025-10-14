@@ -2,12 +2,90 @@
   {
     "id": 1,
     "title": "Visual Studio Code",
-    "description": "Free source-code editor with rich ecosystem of extensions for web development, debugging, and Git integration.",
+    "description": "Free, open-source code editor with intelligent code completion, built-in Git integration, extensive extension marketplace, and powerful debugging capabilities for modern development workflows.",
     "category": "development",
-    "tags": ["code editor", "microsoft", "extensions", "debugging", "git"],
+    "tags": [
+      "code editor",
+      "microsoft",
+      "extensions",
+      "debugging",
+      "git",
+      "intellisense",
+      "syntax highlighting",
+      "integrated terminal",
+      "live share",
+      "remote development",
+      "multi-language support",
+      "code completion",
+      "refactoring",
+      "linting",
+      "version control"
+    ],
     "url": "https://code.visualstudio.com",
     "featured": true,
-    "image": "vscode.png"
+    "image": "vscode.png",
+    "keyFeatures": [
+      {
+        "title": "IntelliSense Code Completion",
+        "description": "Smart code completion with syntax highlighting, auto-completion, and intelligent suggestions based on variable types and function definitions."
+      },
+      {
+        "title": "Extensive Extension Marketplace",
+        "description": "Thousands of extensions for languages, themes, debuggers, and tools to customize and enhance your coding experience."
+      },
+      {
+        "title": "Built-in Git Integration",
+        "description": "Native Git support with visual diff editor, staging, branching, and seamless version control workflow."
+      },
+      {
+        "title": "Powerful Debugging Tools",
+        "description": "Advanced debugging capabilities with breakpoints, call stacks, variable inspection, and multi-language debugging support."
+      },
+      {
+        "title": "Integrated Terminal",
+        "description": "Built-in terminal that supports multiple shells and allows you to run commands without leaving the editor."
+      },
+      {
+        "title": "Live Share Collaboration",
+        "description": "Real-time collaborative editing and debugging sessions with other developers, including shared terminals and servers."
+      },
+      {
+        "title": "Remote Development",
+        "description": "Develop on remote machines, containers, or WSL with the same local VS Code experience through remote extensions."
+      }
+    ],
+    "useCases": [
+      "Full-stack web development",
+      "Mobile app development",
+      "Data science and machine learning projects",
+      "DevOps and infrastructure as code",
+      "API development and testing",
+      "Database management and queries",
+      "Documentation writing with Markdown",
+      "Multi-language programming projects"
+    ],
+    "learningResources": [
+      {
+        "title": "VS Code Official Documentation",
+        "url": "https://code.visualstudio.com/docs",
+        "type": "Documentation"
+      },
+      {
+        "title": "VS Code Tips and Tricks",
+        "url": "https://code.visualstudio.com/docs/getstarted/tips-and-tricks",
+        "type": "Guide"
+      },
+      {
+        "title": "Extension Development Guide",
+        "url": "https://code.visualstudio.com/api",
+        "type": "API Documentation"
+      },
+      {
+        "title": "VS Code YouTube Channel",
+        "url": "https://www.youtube.com/channel/UCs5Y5_7XK8HLDX0SLNwkd3w",
+        "type": "Video Tutorials"
+      }
+    ]
   },
   {
     "id": 2,
