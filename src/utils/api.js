@@ -62,7 +62,7 @@ export async function getResources(filters = {}) {
 }
 
 /**
- * Get a specific resource by ID
+ * Get a specific resource by ID (for backward compatibility)
  * @param {string} id - Resource ID
  * @returns {Promise<object>} - Resource object
  */
@@ -72,6 +72,21 @@ export async function getResource(id) {
     return response.resource;
   } catch (error) {
     console.error('Failed to fetch resource:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get a specific resource by slug
+ * @param {string} slug - Resource slug
+ * @returns {Promise<object>} - Resource object
+ */
+export async function getResourceBySlug(slug) {
+  try {
+    const response = await apiRequest(`/resources/slug/${slug}`);
+    return response.resource;
+  } catch (error) {
+    console.error('Failed to fetch resource by slug:', error);
     throw error;
   }
 }

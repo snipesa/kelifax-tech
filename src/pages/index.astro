@@ -157,7 +157,7 @@ const otherResources = allResources.filter(resource => !resource.featured).slice
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
         {featuredResources.map((resource) => (
           <ResourceCard
-            id={resource.id}
+            slug={resource.slug}
             title={resource.title}
             description={resource.description}
             category={resource.category}
@@ -186,7 +186,7 @@ const otherResources = allResources.filter(resource => !resource.featured).slice
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
         {otherResources.map((resource) => (
           <ResourceCard
-            id={resource.id}
+            slug={resource.slug}
             title={resource.title}
             description={resource.description}
             category={resource.category}

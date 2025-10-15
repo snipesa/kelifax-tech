@@ -79,7 +79,7 @@ const featuredResources = await getFeaturedResources();
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {enhancedResources.map((resource) => (
               <EnhancedResourceCard
-                id={resource.id}
+                slug={resource.slug}
                 title={resource.title}
                 description={resource.description}
                 category={resource.category}
@@ -109,7 +109,7 @@ const featuredResources = await getFeaturedResources();
         {allResources.map((resource) => (
           <div class="resource-item" data-category={resource.category}>
             <ResourceCard
-              id={resource.id}
+              slug={resource.slug}
               title={resource.title}
               description={resource.description}
               category={resource.category}
