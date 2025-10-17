@@ -91,7 +91,7 @@ async function apiRequest(endpoint, options = {}) {
  * @returns {Promise<Array>} - Array of resources
  */
 export async function getResources(filters = {}, authToken = null) {
-  // If admin token is provided, always use real API for submitted resources
+  // If admin token is provided, use real API for submitted resources
   if (authToken) {
     const queryParams = new URLSearchParams(filters).toString();
     const endpoint = `/resources${queryParams ? `?${queryParams}` : ''}`;
@@ -104,25 +104,29 @@ export async function getResources(filters = {}, authToken = null) {
 
     try {
       const response = await apiRequest(endpoint, options);
-      return response.resources || [];
-    } catch (error) {
-      console.warn('Failed to fetch admin resources from API, using mock data');
       
-      // Filter mock data based on provided filters for admin view
-      let filteredResources = [...MOCK_RESOURCES];
-      
-      if (filters.status) {
-        filteredResources = filteredResources.filter(resource => resource.status === filters.status);
+      // Handle the response format from your Lambda function
+      if (response.success && response.data) {
+        return response.data;
+      } else {
+        console.error('API returned error:', response.message);
+        return [];
       }
-      
-      return filteredResources;
+    } catch (error) {
+      console.error('Failed to fetch admin resources from API:', error);
+      throw error;
     }
   }
   
   // For main site (no admin token), use local resources.json
-  // This will be handled by the existing resource loading logic in the components
-  console.warn('getResources called without admin token - should use local resources.json instead');
-  return [];
+  try {
+    const response = await fetch('/src/data/resources.json');
+    const data = await response.json();
+    return data.resources || [];
+  } catch (error) {
+    console.error('Failed to load local resources:', error);
+    return [];
+  }
 }
 
 /**
@@ -200,18 +204,26 @@ export async function authenticateAdmin(password) {
       method: 'POST',
       body: JSON.stringify({ password }),
     });
-    return response;
-  } catch (error) {
-    console.error('Failed to authenticate admin:', error);
-    // For development testing, allow "admin" as password
-    if (password === 'admin') {
-      console.warn('Using mock authentication for development');
-      return { 
-        success: true, 
-        token: 'mock-admin-token-' + Date.now() 
+    
+    // Handle the response format from your Lambda function
+    if (response.success && response.data) {
+      return {
+        success: true,
+        token: response.data.sessionToken,
+        expiresAt: response.data.expiresAt
+      };
+    } else {
+      return {
+        success: false,
+        message: response.message || 'Authentication failed'
       };
     }
-    return { success: false, message: 'Invalid password' };
+  } catch (error) {
+    console.error('Failed to authenticate admin:', error);
+    return { 
+      success: false, 
+      message: 'Authentication failed. Please try again.' 
+    };
   }
 }
 
@@ -223,7 +235,6 @@ export async function authenticateAdmin(password) {
  * @returns {Promise<object>} - Update response
  */
 export async function updateResourceStatus(resourceSlug, status, authToken) {
-  // Always use real API for admin operations (DynamoDB)
   try {
     const response = await apiRequest(`/resources/${resourceSlug}`, {
       method: 'PATCH',
@@ -232,14 +243,21 @@ export async function updateResourceStatus(resourceSlug, status, authToken) {
       },
       body: JSON.stringify({ status }),
     });
-    return response;
+    
+    // Handle the response format from your Lambda function
+    if (response.success) {
+      return {
+        success: true,
+        message: response.message || `Status updated to ${status}`
+      };
+    } else {
+      return {
+        success: false,
+        message: response.message || 'Failed to update resource status'
+      };
+    }
   } catch (error) {
     console.error('Failed to update resource status:', error);
-    // Keep mock response for development testing
-    if (authToken && authToken.startsWith('mock-admin-token')) {
-      console.warn('Using mock update for development - remove this in production');
-      return { success: true, message: `Status updated to ${status}` };
-    }
     throw error;
   }
 }
@@ -251,7 +269,6 @@ export async function updateResourceStatus(resourceSlug, status, authToken) {
  * @returns {Promise<object>} - Delete response
  */
 export async function deleteResource(resourceSlug, authToken) {
-  // Always use real API for admin operations (DynamoDB)
   try {
     const response = await apiRequest(`/resources/${resourceSlug}`, {
       method: 'DELETE',
@@ -259,14 +276,21 @@ export async function deleteResource(resourceSlug, authToken) {
         'Authorization': `Bearer ${authToken}`,
       },
     });
-    return response;
+    
+    // Handle the response format from your Lambda function
+    if (response.success) {
+      return {
+        success: true,
+        message: response.message || 'Resource deleted successfully'
+      };
+    } else {
+      return {
+        success: false,
+        message: response.message || 'Failed to delete resource'
+      };
+    }
   } catch (error) {
     console.error('Failed to delete resource:', error);
-    // Keep mock response for development testing
-    if (authToken && authToken.startsWith('mock-admin-token')) {
-      console.warn('Using mock delete for development - remove this in production');
-      return { success: true, message: 'Resource deleted successfully' };
-    }
     throw error;
   }
 }
