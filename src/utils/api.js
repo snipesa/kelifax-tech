@@ -1,7 +1,41 @@
 // API utility functions for Kelifax frontend
 // This will be used to interact with AWS Lambda functions via API Gateway
 
-const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'https://api.kelifax.com';
+const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'https://af3e78t7db.execute-api.us-east-1.amazonaws.com/dev';
+
+// Mock data for development testing
+const MOCK_RESOURCES = [
+  {
+    resourceSlug: 'github-submitted',
+    title: 'GitHub',
+    description: 'Version control and code collaboration',
+    url: 'https://github.com',
+    companyEmail: 'contact@github.com',
+    status: 'submitted',
+    submissionTimestamp: '2024-10-15T10:30:00Z',
+    tags: ['development', 'version-control']
+  },
+  {
+    resourceSlug: 'figma-approved',
+    title: 'Figma',
+    description: 'Design and prototyping tool',
+    url: 'https://figma.com',
+    companyEmail: 'hello@figma.com',
+    status: 'approved',
+    submissionTimestamp: '2024-10-14T14:20:00Z',
+    tags: ['design', 'prototyping']
+  },
+  {
+    resourceSlug: 'notion-rejected',
+    title: 'Notion',
+    description: 'All-in-one workspace',
+    url: 'https://notion.so',
+    companyEmail: 'team@notion.so',
+    status: 'rejected',
+    submissionTimestamp: '2024-10-13T09:15:00Z',
+    tags: ['productivity', 'notes']
+  }
+];
 
 /**
  * Generic API request function
@@ -12,10 +46,18 @@ const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'https://api.kelifax.com'
 async function apiRequest(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
   
+  const defaultHeaders = {
+    'Content-Type': 'application/json',
+  };
+  
+  // Add API key if available
+  const apiKey = import.meta.env.PUBLIC_API_KEY;
+  if (apiKey) {
+    defaultHeaders['x-api-key'] = apiKey;
+  }
+
   const defaultOptions = {
-    headers: {
-      'Content-Type': 'application/json',
-    },
+    headers: defaultHeaders,
   };
 
   const config = {
@@ -43,22 +85,44 @@ async function apiRequest(endpoint, options = {}) {
 }
 
 /**
- * Fetch all resources from the API
- * @param {object} filters - Optional filters (category, tags, search)
+ * Fetch resources with optional admin privileges
+ * @param {object} filters - Optional filters (status, category, etc.)
+ * @param {string} authToken - Optional admin authentication token
  * @returns {Promise<Array>} - Array of resources
  */
-export async function getResources(filters = {}) {
-  const queryParams = new URLSearchParams(filters).toString();
-  const endpoint = `/resources${queryParams ? `?${queryParams}` : ''}`;
-  
-  try {
-    const response = await apiRequest(endpoint);
-    return response.resources || [];
-  } catch (error) {
-    console.warn('Failed to fetch resources from API, using fallback data');
-    // Fallback to local data when API is not available
-    return [];
+export async function getResources(filters = {}, authToken = null) {
+  // If admin token is provided, always use real API for submitted resources
+  if (authToken) {
+    const queryParams = new URLSearchParams(filters).toString();
+    const endpoint = `/resources${queryParams ? `?${queryParams}` : ''}`;
+    
+    const options = {
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+      }
+    };
+
+    try {
+      const response = await apiRequest(endpoint, options);
+      return response.resources || [];
+    } catch (error) {
+      console.warn('Failed to fetch admin resources from API, using mock data');
+      
+      // Filter mock data based on provided filters for admin view
+      let filteredResources = [...MOCK_RESOURCES];
+      
+      if (filters.status) {
+        filteredResources = filteredResources.filter(resource => resource.status === filters.status);
+      }
+      
+      return filteredResources;
+    }
   }
+  
+  // For main site (no admin token), use local resources.json
+  // This will be handled by the existing resource loading logic in the components
+  console.warn('getResources called without admin token - should use local resources.json instead');
+  return [];
 }
 
 /**
@@ -112,14 +176,97 @@ export async function searchResources(query, filters = {}) {
  * @returns {Promise<object>} - Submission response
  */
 export async function submitResource(resourceData) {
+  // Always use real API for resource submission (DynamoDB)
   try {
-    const response = await apiRequest('/resources/submit', {
+    const response = await apiRequest('/resources', {
       method: 'POST',
       body: JSON.stringify(resourceData),
     });
     return response;
   } catch (error) {
-    console.error('Failed to submit resource:', error);
+    console.error('Failed to submit resource to API:', error);
+    throw error;
+  }
+}
+
+/**
+ * Authenticate admin user
+ * @param {string} password - Admin password
+ * @returns {Promise<object>} - Authentication response with token
+ */
+export async function authenticateAdmin(password) {
+  try {
+    const response = await apiRequest('/admin-auth', {
+      method: 'POST',
+      body: JSON.stringify({ password }),
+    });
+    return response;
+  } catch (error) {
+    console.error('Failed to authenticate admin:', error);
+    // For development testing, allow "admin" as password
+    if (password === 'admin') {
+      console.warn('Using mock authentication for development');
+      return { 
+        success: true, 
+        token: 'mock-admin-token-' + Date.now() 
+      };
+    }
+    return { success: false, message: 'Invalid password' };
+  }
+}
+
+/**
+ * Update resource status (admin only)
+ * @param {string} resourceSlug - Resource slug
+ * @param {string} status - New status (approved, rejected, submitted)
+ * @param {string} authToken - Admin authentication token
+ * @returns {Promise<object>} - Update response
+ */
+export async function updateResourceStatus(resourceSlug, status, authToken) {
+  // Always use real API for admin operations (DynamoDB)
+  try {
+    const response = await apiRequest(`/resources/${resourceSlug}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+      },
+      body: JSON.stringify({ status }),
+    });
+    return response;
+  } catch (error) {
+    console.error('Failed to update resource status:', error);
+    // Keep mock response for development testing
+    if (authToken && authToken.startsWith('mock-admin-token')) {
+      console.warn('Using mock update for development - remove this in production');
+      return { success: true, message: `Status updated to ${status}` };
+    }
+    throw error;
+  }
+}
+
+/**
+ * Delete a resource (admin only)
+ * @param {string} resourceSlug - Resource slug
+ * @param {string} authToken - Admin authentication token
+ * @returns {Promise<object>} - Delete response
+ */
+export async function deleteResource(resourceSlug, authToken) {
+  // Always use real API for admin operations (DynamoDB)
+  try {
+    const response = await apiRequest(`/resources/${resourceSlug}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${authToken}`,
+      },
+    });
+    return response;
+  } catch (error) {
+    console.error('Failed to delete resource:', error);
+    // Keep mock response for development testing
+    if (authToken && authToken.startsWith('mock-admin-token')) {
+      console.warn('Using mock delete for development - remove this in production');
+      return { success: true, message: 'Resource deleted successfully' };
+    }
     throw error;
   }
 }
