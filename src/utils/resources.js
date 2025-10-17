@@ -24,27 +24,6 @@ export async function getAllResources() {
 }
 
 /**
- * Get a resource by ID
- * @param {number|string} id - Resource ID
- * @returns {Promise<Object|null>} Resource object or null if not found
- */
-export async function getResourceById(id) {
-  if (USE_API) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/resources/${id}`);
-      if (response.ok) {
-        return await response.json();
-      }
-    } catch (error) {
-      console.warn('API failed, falling back to local data:', error);
-    }
-  }
-  // Fallback to local JSON
-  const resourceId = typeof id === 'string' ? parseInt(id) : id;
-  return resourcesData.find(resource => resource.id === resourceId) || null;
-}
-
-/**
  * Get a resource by title (case-insensitive)
  * @param {string} title - Resource title
  * @returns {Promise<Object|null>} Resource object or null if not found
@@ -54,6 +33,28 @@ export async function getResourceByTitle(title) {
   return allResources.find(resource => 
     resource.title.toLowerCase() === title.toLowerCase()
   ) || null;
+}
+
+/**
+ * Get a resource by slug
+ * @param {string} slug - Resource slug
+ * @returns {Promise<Object|null>} Resource object or null if not found
+ */
+export async function getResourceBySlug(slug) {
+  if (USE_API) {
+    try {
+      // For API calls, we might need to map slug to ID or use a different endpoint
+      const response = await fetch(`${API_BASE_URL}/resources/slug/${slug}`);
+      if (response.ok) {
+        return await response.json();
+      }
+    } catch (error) {
+      console.warn('API failed, falling back to local data:', error);
+    }
+  }
+  // Fallback to local JSON
+  const allResources = await getAllResources();
+  return allResources.find(resource => resource.slug === slug) || null;
 }
 
 /**
@@ -133,7 +134,7 @@ export async function getRelatedResources(resource, limit = 3) {
   
   const allResources = await getAllResources();
   return allResources
-    .filter(r => r.id !== resource.id)
+    .filter(r => r.slug !== resource.slug)
     .map(r => {
       let score = 0;
       

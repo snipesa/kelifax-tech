@@ -8,6 +8,21 @@ Sitemap: https://kelifax.com/sitemap.xml
 Disallow: /admin/
 Disallow: /api/internal/
 
+# Allow important pages explicitly
+Allow: /resources/
+Allow: /resources/github
+Allow: /resources/visual-studio-code
+Allow: /resources/figma
+Allow: /resources/notion
+Allow: /resources/tailwind-css
+Allow: /resources/coursera
+Allow: /resources/postman
+Allow: /resources/canva
+Allow: /resources/stack-overflow
+Allow: /resources/slack
+Allow: /about
+Allow: /contact
+
 # Allow common crawlers
 User-agent: Googlebot
 Allow: /

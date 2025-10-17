@@ -22,11 +22,22 @@ import Footer from '../components/Footer.astro';
     <meta name="generator" content={Astro.generator} />
     
     <!-- SEO Meta Tags -->
+    <meta name="keywords" content="developer tools, tech resources, programming, web development, coding tools, software development, learning resources" />
+    <meta name="author" content="Kelifax" />
+    <meta name="robots" content="index, follow" />
+    <link rel="canonical" href={Astro.url} />
+    
+    <!-- Open Graph Tags -->
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={Astro.url} />
+    <meta property="og:site_name" content="Kelifax" />
+    <meta property="og:locale" content="en_US" />
+    
+    <!-- Twitter Card Tags -->
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@kelifax" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     

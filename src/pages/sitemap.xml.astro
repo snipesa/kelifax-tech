@@ -13,7 +13,7 @@ const staticPages = [
 ];
 
 // Dynamic resource pages
-const resourcePages = resourcesData.map(resource => `/resources/${resource.id}`);
+const resourcePages = resourcesData.map(resource => `/resources/${resource.slug}`);
 
 // All pages
 const allPages = [...staticPages, ...resourcePages];

@@ -190,7 +190,7 @@
     }
     
     toggleBookmark(resource) {
-      const existingIndex = this.bookmarks.findIndex(b => b.id === resource.id);
+      const existingIndex = this.bookmarks.findIndex(b => b.slug === resource.slug);
       
       if (existingIndex > -1) {
         // Remove bookmark

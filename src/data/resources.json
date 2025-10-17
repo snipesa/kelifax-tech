@@ -1,6 +1,6 @@
 [
   {
-    "id": 1,
+    "slug": "visual-studio-code",
     "title": "Visual Studio Code",
     "description": "Free, open-source code editor with intelligent code completion, built-in Git integration, extensive extension marketplace, and powerful debugging capabilities for modern development workflows.",
     "category": "development",
@@ -88,7 +88,7 @@
     ]
   },
   {
-    "id": 2,
+    "slug": "figma",
     "title": "Figma",
     "description": "Collaborative interface design tool with real-time collaboration, prototyping, and design system capabilities.",
     "category": "design",
@@ -98,7 +98,7 @@
     "image": "figma.png"
   },
   {
-    "id": 4,
+    "slug": "github",
     "title": "GitHub",
     "description": "Comprehensive platform for Git-based version control, collaborative development, automated CI/CD with GitHub Actions, and AI-powered coding assistance with GitHub Copilot.",
     "category": "development",
@@ -184,7 +184,7 @@
     ]
   },
   {
-    "id": 5,
+    "slug": "notion",
     "title": "Notion",
     "description": "All-in-one workspace combining notes, tasks, wikis, and databases for personal and team productivity.",
     "category": "productivity",
@@ -194,17 +194,16 @@
     "image": "notion.png"
   },
   {
-    "id": 6,
+    "slug": "tailwind-css",
     "title": "Tailwind CSS",
     "description": "Utility-first CSS framework with low-level utility classes for building custom designs without writing CSS.",
     "category": "development",
     "tags": ["css framework", "utility-first", "responsive design", "customizable"],
     "url": "https://tailwindcss.com",
-    "featured": false,
-    "image": "tailwindcss.png"
+    "featured": false
   },
   {
-    "id": 8,
+    "slug": "coursera",
     "title": "Coursera",
     "description": "Online learning platform offering courses, specializations, and degrees from top universities and companies.",
     "category": "learning",
@@ -214,17 +213,16 @@
     "image": "coursera.png"
   },
   {
-    "id": 9,
+    "slug": "postman",
     "title": "Postman",
     "description": "API development platform for building, testing, and documenting APIs with collaborative features.",
     "category": "development",
     "tags": ["api testing", "api development", "documentation", "collaboration"],
     "url": "https://postman.com",
-    "featured": false,
-    "image": "postman.png"
+    "featured": false
   },
   {
-    "id": 10,
+    "slug": "canva",
     "title": "Canva",
     "description": "User-friendly graphic design platform with templates, stock photos, and design tools for non-designers.",
     "category": "design",
@@ -234,7 +232,7 @@
     "image": "canva.png"
   },
   {
-    "id": 11,
+    "slug": "stack-overflow",
     "title": "Stack Overflow",
     "description": "Question and answer community for programmers to share knowledge and solve coding problems.",
     "category": "learning",
@@ -244,7 +242,7 @@
     "image": "stackoverflow.png"
   },
   {
-    "id": 12,
+    "slug": "slack",
     "title": "Slack",
     "description": "Business communication platform with channels, direct messaging, file sharing, and app integrations.",
     "category": "productivity",

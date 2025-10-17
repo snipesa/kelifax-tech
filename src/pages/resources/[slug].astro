@@ -1,11 +1,11 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
-import { getAllResources, getResourceById, getRelatedResources } from '../../utils/resources.js';
+import { getAllResources, getResourceBySlug, getRelatedResources } from '../../utils/resources.js';
 
 export async function getStaticPaths() {
   const resources = await getAllResources();
   return resources.map((resource) => ({
-    params: { slug: resource.id.toString() },
+    params: { slug: resource.slug },
     props: { resource }
   }));
 }
@@ -21,6 +21,24 @@ const relatedResources = await getRelatedResources(resource, 3);
   description={`${resource.description} - Find this and more curated tech resources on Kelifax.`}
   currentPage="resources"
 >
+  <!-- Structured Data for SEO -->
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": resource.title,
+    "description": resource.description,
+    "url": resource.url,
+    "category": resource.category,
+    "keywords": resource.tags.join(", "),
+    "applicationCategory": resource.category === "development" ? "DeveloperApplication" : "ProductivityApplication",
+    "operatingSystem": "Web, Windows, macOS, Linux",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  })} />
+
   <!-- Breadcrumb -->
   <section class="bg-gray-50 py-4">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -316,7 +334,7 @@ const relatedResources = await getRelatedResources(resource, 3);
               
               <div class="p-6">
                 <h3 class="text-lg font-semibold text-gray-900 mb-2">
-                  <a href={`/resources/${related.id}`} class="hover:text-blue-600 transition-colors">
+                  <a href={`/resources/${related.slug}`} class="hover:text-blue-600 transition-colors">
                     {related.title}
                   </a>
                 </h3>
@@ -324,7 +342,7 @@ const relatedResources = await getRelatedResources(resource, 3);
                   {related.description}
                 </p>
                 <a 
-                  href={`/resources/${related.id}`}
+                  href={`/resources/${related.slug}`}
                   class="inline-flex items-center text-blue-600 hover:text-blue-700 text-sm font-medium"
                 >
                   Learn more
