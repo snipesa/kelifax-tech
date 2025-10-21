@@ -2,7 +2,7 @@ import json
 import uuid
 from datetime import datetime, timedelta
 
-def handle_admin_auth(event, headers):
+def handle_admin_auth(event, headers, table_name):
     """Handle admin authentication"""
     body = json.loads(event.get('body', '{}'))
     password = body.get('password', '')

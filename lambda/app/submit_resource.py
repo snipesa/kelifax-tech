@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 
-def handle_submit_resource(event, headers):
+def handle_submit_resource(event, headers, table_name):
     """Handle resource submission"""
     body = json.loads(event.get('body', '{}'))
     
