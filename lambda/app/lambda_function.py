@@ -1,10 +1,10 @@
 import json
 import os
-from admin_auth import handle_admin_auth
-from submit_resource import handle_submit_resource
-from get_resources import handle_get_resources
-from update_resource import handle_update_resource
-from delete_resource import handle_delete_resource
+from app.admin_auth import handle_admin_auth
+from app.submit_resource import handle_submit_resource
+from app.get_resources import handle_get_resources
+from app.update_resource import handle_update_resource
+from app.delete_resource import handle_delete_resource
 
 def lambda_handler(event, context):
     print(event)
