@@ -88,6 +88,27 @@ import MainLayout from '../layouts/MainLayout.astro';
         </div>
       </div>
 
+      <!-- Category Filter -->
+      <div class="mb-6">
+        <label for="category-filter" class="block text-sm font-medium text-gray-700 mb-2">
+          Filter by Category
+        </label>
+        <select 
+          id="category-filter" 
+          class="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        >
+          <option value="">All Categories</option>
+          <option value="development">Development</option>
+          <option value="design">Design</option>
+          <option value="productivity">Productivity</option>
+          <option value="education">Education</option>
+          <option value="communication">Communication</option>
+          <option value="analytics">Analytics</option>
+          <option value="marketing">Marketing</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+
       <!-- Resources List -->
       <div id="resources-container" class="space-y-4">
         <div id="loading-spinner" class="text-center py-8">
@@ -113,6 +134,7 @@ import MainLayout from '../layouts/MainLayout.astro';
     import { authenticateAdmin, getResources, updateResourceStatus, deleteResource } from '../utils/api.js';
 
     let currentStatus = 'submitted';
+    let currentCategory = '';
     let authToken = sessionStorage.getItem('adminToken');
 
     // Check if already authenticated
@@ -156,8 +178,14 @@ import MainLayout from '../layouts/MainLayout.astro';
       button.addEventListener('click', () => {
         currentStatus = button.dataset.status;
         updateActiveTab(button);
-        loadResources(currentStatus);
+        applyFiltersAndLoad();
       });
+    });
+    
+    // Category filter
+    document.getElementById('category-filter').addEventListener('change', (e) => {
+      currentCategory = e.target.value;
+      applyFiltersAndLoad();
     });
 
     function showAuthSection() {
@@ -170,7 +198,7 @@ import MainLayout from '../layouts/MainLayout.astro';
     function showAdminPanel() {
       document.getElementById('auth-section').classList.add('hidden');
       document.getElementById('admin-panel').classList.remove('hidden');
-      loadResources(currentStatus);
+      applyFiltersAndLoad();
       loadStats();
     }
 
@@ -210,7 +238,19 @@ import MainLayout from '../layouts/MainLayout.astro';
       }
     }
 
-    async function loadResources(status) {
+    function applyFiltersAndLoad() {
+      const filters = {
+        status: currentStatus
+      };
+      
+      if (currentCategory) {
+        filters.category = currentCategory;
+      }
+      
+      loadResources(filters);
+    }
+    
+    async function loadResources(filters) {
       const container = document.getElementById('resources-container');
       const loading = document.getElementById('loading-spinner');
       const noResources = document.getElementById('no-resources');
@@ -221,7 +261,7 @@ import MainLayout from '../layouts/MainLayout.astro';
       noResources.classList.add('hidden');
 
       try {
-        const resources = await getResources({ status }, authToken);
+        const resources = await getResources(filters, authToken);
         
         // Hide loading
         loading.remove();
@@ -231,8 +271,22 @@ import MainLayout from '../layouts/MainLayout.astro';
           return;
         }
 
+        // Client-side category filtering if needed (if API doesn't support it yet)
+        let filteredResources = resources;
+        if (filters.category && filters.category !== '') {
+          filteredResources = resources.filter(resource => 
+            (resource.category === filters.category) || 
+            (!resource.category && filters.category === 'development') // Default to development for legacy resources
+          );
+        }
+
+        if (filteredResources.length === 0) {
+          noResources.classList.remove('hidden');
+          return;
+        }
+
         // Render resources
-        resources.forEach(resource => {
+        filteredResources.forEach(resource => {
           const resourceCard = createResourceCard(resource);
           container.appendChild(resourceCard);
         });
@@ -262,6 +316,8 @@ import MainLayout from '../layouts/MainLayout.astro';
         <div class="space-y-2 mb-4">
           <p class="text-sm text-gray-700"><strong>URL:</strong> <a href="${escapeHtml(resource.url || resource.resourceUrl)}" target="_blank" class="text-blue-600 hover:underline">${escapeHtml(resource.url || resource.resourceUrl)}</a></p>
           <p class="text-sm text-gray-700"><strong>Email:</strong> ${escapeHtml(resource.companyEmail || 'N/A')}</p>
+          <p class="text-sm text-gray-700"><strong>Category:</strong> ${escapeHtml(resource.category || 'development')}</p>
+          <p class="text-sm text-gray-700"><strong>Tags:</strong> ${Array.isArray(resource.tags) && resource.tags.length > 0 ? resource.tags.map(tag => `<span class="inline-block bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded mr-1 mb-1">${escapeHtml(tag)}</span>`).join('') : 'None'}</p>
           <p class="text-sm text-gray-700"><strong>Submitted:</strong> ${new Date(resource.submissionTimestamp || Date.now()).toLocaleDateString()}</p>
         </div>
         
@@ -302,7 +358,7 @@ import MainLayout from '../layouts/MainLayout.astro';
     window.updateStatus = async (resourceSlug, newStatus) => {
       try {
         await updateResourceStatus(resourceSlug, newStatus, authToken);
-        loadResources(currentStatus);
+        applyFiltersAndLoad();
         loadStats();
       } catch (error) {
         console.error('Error updating status:', error);
@@ -314,7 +370,7 @@ import MainLayout from '../layouts/MainLayout.astro';
       if (confirm('Are you sure you want to delete this resource? This action cannot be undone.')) {
         try {
           await deleteResource(resourceSlug, authToken);
-          loadResources(currentStatus);
+          applyFiltersAndLoad();
           loadStats();
         } catch (error) {
           console.error('Error deleting resource:', error);

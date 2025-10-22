@@ -57,6 +57,41 @@ import MainLayout from '../layouts/MainLayout.astro';
         </div>
 
         <div>
+          <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+            Category
+          </label>
+          <select 
+            id="category" 
+            name="category" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          >
+            <option value="development">Development</option>
+            <option value="design">Design</option>
+            <option value="productivity">Productivity</option>
+            <option value="education">Education</option>
+            <option value="communication">Communication</option>
+            <option value="analytics">Analytics</option>
+            <option value="marketing">Marketing</option>
+            <option value="other">Other</option>
+          </select>
+          <p class="text-sm text-gray-500 mt-1">Select the most relevant category</p>
+        </div>
+
+        <div>
+          <label for="tags" class="block text-sm font-medium text-gray-700 mb-2">
+            Tags
+          </label>
+          <input 
+            type="text" 
+            id="tags" 
+            name="tags" 
+            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            placeholder="e.g., code editor, javascript, cloud"
+          />
+          <p class="text-sm text-gray-500 mt-1">Comma-separated tags to help with search and discovery</p>
+        </div>
+
+        <div>
           <label for="companyEmail" class="block text-sm font-medium text-gray-700 mb-2">
             Company Email <span class="text-red-500">*</span>
           </label>
@@ -113,6 +148,8 @@ import MainLayout from '../layouts/MainLayout.astro';
         resourceName: formData.get('resourceName').trim(),
         usagePurpose: formData.get('usagePurpose').trim(),
         resourceUrl: formData.get('resourceUrl').trim(),
+        category: formData.get('category'),
+        tags: formData.get('tags') && formData.get('tags').trim() ? formData.get('tags').trim().split(',').map(tag => tag.trim()).filter(Boolean) : [],
         companyEmail: formData.get('companyEmail').trim()
       };
 

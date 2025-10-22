@@ -25,10 +25,10 @@ def handle_submit_resource(event, headers, table_name):
         "slug": resource_slug,
         "title": resource_name,
         "description": body.get('usagePurpose', ''),
-        "category": body.get('category', 'development'),
+        "category": body.get('category', 'development').lower() if body.get('category') else 'development',
         "tags": body.get('tags', []),
         "url": body.get('resourceUrl', ''),
-        "featured": body.get('featured', False)
+        "featured": False
     }
     
     # Save to DynamoDB
