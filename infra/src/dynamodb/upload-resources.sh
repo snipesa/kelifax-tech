@@ -30,7 +30,7 @@ TEMP_FILE="temp-data-$1.json"
 echo "Creating temporary file: $TEMP_FILE"
 
 # Replace "Resources" with the actual table name
-jq ".Resources | {\"$TABLE_NAME\": .}" data.json > $TEMP_FILE
+jq ".Table_name | {\"$TABLE_NAME\": .}" data.json > $TEMP_FILE
 
 # Upload data to DynamoDB
 echo "Uploading resources to $TABLE_NAME..."

@@ -1,0 +1,21 @@
+version = 0.1
+
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "kelifax-lambda-stack-dev"
+s3_bucket = "cf-kelifax-deployment-bucket"
+s3_prefix = "kelifax-lambda-dev"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=dev FunctionPrefix=kelifax"
+
+[prod]
+[prod.deploy]
+[prod.deploy.parameters]
+stack_name = "kelifax-lambda-stack"
+s3_bucket = "cf-kelifax-deployment-bucket"
+s3_prefix = "kelifax-lambda-prod"
+region = "us-east-1"
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "Environment=prod FunctionPrefix=kelifax"

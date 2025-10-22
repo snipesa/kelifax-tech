@@ -1,5 +1,5 @@
 {
-  "Resources": [
+  "Table_name": [
     { "PutRequest": { "Item": { "resourceSlug": { "S": "visual-studio-code" }, "status": { "S": "existing" } } } },
     { "PutRequest": { "Item": { "resourceSlug": { "S": "figma" }, "status": { "S": "existing" } } } },
     { "PutRequest": { "Item": { "resourceSlug": { "S": "github" }, "status": { "S": "existing" } } } },
