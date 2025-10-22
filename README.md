@@ -78,6 +78,13 @@ aws s3 sync ./dist s3://kelifax-dev-project --delete
 # Prod
 aws s3 sync ./dist s3://kelifax.com-website --delete 
 
+# DynamoDB Resources Batch Upload
+# Dev environment
+aws dynamodb batch-write-item --request-items '{"kelifax-SubmittedResources-Dev": '$(cat infra/src/dynamodb/data.json | jq .Resources)'}'
+
+# Prod environment
+aws dynamodb batch-write-item --request-items '{"kelifax-resources-prod": '$(cat infra/src/dynamodb/data.json | jq .Resources)'}'
+
 Visit the s3 website URL
 ```
 
