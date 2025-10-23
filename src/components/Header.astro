@@ -45,10 +45,11 @@ const getMobileLinkClasses = (page: string) => {
       <!-- Logo and Brand -->
       <div class="flex items-center">
         <a href="/" class="flex items-center" style="margin-right:2.5rem;">
-          <div class="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-            <span class="text-white font-bold text-lg">K</span>
-          </div>
-          <span class="text-xl font-bold text-gray-900 ml-4">Kelifax</span>
+          <img 
+            src="/logos/kelifax.png" 
+            alt="Kelifax" 
+            class="w-16 h-16 object-contain hover:opacity-80 transition-opacity"
+          />
         </a>
       </div>
 
@@ -118,9 +119,9 @@ const getMobileLinkClasses = (page: string) => {
 
       <!-- CTA Button -->
       <div class="hidden md:flex items-center">
-        <button class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+        <a href="/submit-resource" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
           Submit Resource
-        </button>
+        </a>
       </div>
 
       <!-- Mobile menu button -->
@@ -168,9 +169,9 @@ const getMobileLinkClasses = (page: string) => {
         Contact
       </a>
       <div class="px-3 py-2">
-        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+        <a href="/submit-resource" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-center">
           Submit Resource
-        </button>
+        </a>
       </div>
     </div>
   </div>

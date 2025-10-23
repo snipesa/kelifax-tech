@@ -1,0 +1,14 @@
+{
+  "Table_name": [
+    { "PutRequest": { "Item": { "resourceSlug": { "S": "visual-studio-code" }, "status": { "S": "existing" } } } },
+    { "PutRequest": { "Item": { "resourceSlug": { "S": "figma" }, "status": { "S": "existing" } } } },
+    { "PutRequest": { "Item": { "resourceSlug": { "S": "github" }, "status": { "S": "existing" } } } },
+    { "PutRequest": { "Item": { "resourceSlug": { "S": "notion" }, "status": { "S": "existing" } } } },
+    { "PutRequest": { "Item": { "resourceSlug": { "S": "tailwind-css" }, "status": { "S": "existing" } } } },
+    { "PutRequest": { "Item": { "resourceSlug": { "S": "coursera" }, "status": { "S": "existing" } } } },
+    { "PutRequest": { "Item": { "resourceSlug": { "S": "postman" }, "status": { "S": "existing" } } } },
+    { "PutRequest": { "Item": { "resourceSlug": { "S": "canva" }, "status": { "S": "existing" } } } },
+    { "PutRequest": { "Item": { "resourceSlug": { "S": "stack-overflow" }, "status": { "S": "existing" } } } },
+    { "PutRequest": { "Item": { "resourceSlug": { "S": "slack" }, "status": { "S": "existing" } } } }
+  ]
+}

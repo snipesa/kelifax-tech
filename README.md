@@ -35,7 +35,7 @@ http://localhost:4321/
 
 ## 📖 Documentation
 
-**📚 [Complete Project Guide](./KELIFAX-GUIDE.md)** - Comprehensive documentation covering:
+**📚 [Complete Project Guide](./kelifax-guide.md)** - Comprehensive documentation covering:
 - Project structure and file organization
 - Component architecture and customization
 - SEO implementation and best practices
@@ -53,7 +53,7 @@ kelifax/
 │   ├── data/           # Static data (resources.json)
 │   └── styles/         # Global styles
 ├── public/             # Static assets
-└── KELIFAX-GUIDE.md    # 📚 Complete documentation
+└── kelifax-guide.md    # 📚 Complete documentation
 ```
 
 ## 🎯 Current Pages
@@ -77,6 +77,17 @@ aws s3 sync ./dist s3://kelifax-dev-project --delete  #Upload to s3 dev bucket
 aws s3 sync ./dist s3://kelifax-dev-project --delete 
 # Prod
 aws s3 sync ./dist s3://kelifax.com-website --delete 
+
+# DynamoDB Resources Batch Upload
+# Use the provided upload script
+
+# For Dev environment
+cd infra/src/dynamodb
+./upload-resources.sh dev
+
+# For Prod environment
+cd infra/src/dynamodb
+./upload-resources.sh prod
 
 Visit the s3 website URL
 ```
@@ -166,7 +177,7 @@ PUBLIC_API_BASE_URL=https://your-api-gateway-url
 
 ## 📞 Support
 
-For detailed guidance, see the [Complete Project Guide](./KELIFAX-GUIDE.md) which covers everything from basic customization to advanced API integration.
+For detailed guidance, see the [Complete Project Guide](./kelifax-guide.md) which covers everything from basic customization to advanced API integration.
 
 ---
 
