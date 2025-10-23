@@ -1,0 +1,157 @@
+Documentation: Simplifying JSON and Integrating External API for Resource Details
+Objective:
+Simplify the resources.json file to include only the main values required for displaying resources in the "View Resources" section.
+When a user clicks on a resource to view its details, trigger an external API call to fetch the additional data from DynamoDB via a Lambda function.
+Steps to Implement:
+1. Simplify resources.json:
+Retain only the fields required for the "View Resources" section.
+Remove detailed fields like keyFeatures, useCases, and learningResources from the JSON file.
+Proposed fields to keep:
+slug: Unique identifier for the resource.
+title: Name of the resource.
+description: Short description of the resource.
+category: Category of the resource (e.g., development, design).
+tags: Tags for filtering or searching.
+url: Link to the resource.
+featured: Boolean to indicate if the resource is featured.
+image: Path to the resource's image.
+2. Update the Frontend:
+Use the simplified resources.json to display the list of resources in the "View Resources" section.
+Each resource card should include:
+Title
+Short description
+Image
+Tags (optional)
+A "View Details" button or link.
+3. Trigger External API for Resource Details:
+When a user clicks on "View Details" for a resource:
+Use the slug as the identifier to fetch detailed data from DynamoDB via a Lambda function.
+The Lambda function will query DynamoDB for the resource details and return the full JSON object.
+
+4. Lambda Function Implementation:
+The Lambda function should:
+Accept the slug as a query parameter.
+Query DynamoDB for the resource details using the slug as the primary key.
+Return the full resource details in JSON format.
+Follow the coding standards:
+Use Python for the Lambda function.
+Fetch major parameters (e.g., table name) from AWS Parameter Store.
+Use print for CloudWatch logging.
+Handle errors gracefully with try-except blocks.
+5. Update the Frontend to Display Details:
+When the API response is received:
+Populate the resource details page with the additional data.
+Include fields like keyFeatures, useCases, and learningResources.
+
+Proposed simplified json
+
+[
+  {
+    "slug": "visual-studio-code",
+    "title": "Visual Studio Code",
+    "description": "Free, open-source code editor with intelligent code completion and debugging capabilities.",
+    "category": "development",
+    "tags": ["code editor", "microsoft", "extensions"],
+    "url": "https://code.visualstudio.com",
+    "featured": true,
+    "image": "vscode.png"
+  },
+  {
+    "slug": "figma",
+    "title": "Figma",
+    "description": "Collaborative interface design tool with real-time collaboration and prototyping.",
+    "category": "design",
+    "tags": ["ui design", "prototyping", "collaboration"],
+    "url": "https://figma.com",
+    "featured": true,
+    "image": "figma.png"
+  },
+  {
+    "slug": "github",
+    "title": "GitHub",
+    "description": "Platform for Git-based version control, collaborative development, and CI/CD automation.",
+    "category": "development",
+    "tags": ["git", "version control", "ci/cd"],
+    "url": "https://github.com",
+    "featured": true,
+    "image": "github.png"
+  },
+  {
+    "slug": "notion",
+    "title": "Notion",
+    "description": "All-in-one workspace for notes, tasks, wikis, and databases.",
+    "category": "productivity",
+    "tags": ["notes", "project management", "collaboration"],
+    "url": "https://notion.so",
+    "featured": false,
+    "image": "notion.png"
+  }
+]
+
+Example API Response for Resource Details:
+When the user clicks on "View Details," the API will return the full resource details. Example response:
+
+{
+  "slug": "visual-studio-code",
+  "title": "Visual Studio Code",
+  "description": "Free, open-source code editor with intelligent code completion and debugging capabilities.",
+  "category": "development",
+  "tags": ["code editor", "microsoft", "extensions"],
+  "url": "https://code.visualstudio.com",
+  "featured": true,
+  "image": "vscode.png",
+  "keyFeatures": [
+    {
+      "title": "IntelliSense Code Completion",
+      "description": "Smart code completion with syntax highlighting, auto-completion, and intelligent suggestions."
+    },
+    {
+      "title": "Built-in Git Integration",
+      "description": "Native Git support with visual diff editor, staging, branching, and seamless version control workflow."
+    }
+  ],
+  "useCases": [
+    "Full-stack web development",
+    "Mobile app development",
+    "DevOps and infrastructure as code"
+  ],
+  "learningResources": [
+    {
+      "title": "VS Code Official Documentation",
+      "url": "https://code.visualstudio.com/docs",
+      "type": "Documentation"
+    },
+    {
+      "title": "VS Code Tips and Tricks",
+      "url": "https://code.visualstudio.com/docs/getstarted/tips-and-tricks",
+      "type": "Guide"
+    }
+  ]
+}
+
+Also there will be no need for the .env value for Public_url=no
+as using this , i want to make sure resources will always stay in this manner locally
+and called the api when clicked on
+
+Note the /admin shows only resources submitted and needs validation
+This should be different from my regular get resources which i have explained above
+
+Next Steps:
+Simplify resources.json:
+
+Update the file to match the proposed format.
+Remove unnecessary fields.
+Implement Lambda Function:
+
+Create a Python Lambda function to fetch resource details from DynamoDB.
+Use the slug as the primary key for querying.
+Update Frontend:
+
+Use the simplified resources.json for the "View Resources" section.
+Add functionality to fetch and display detailed data when a user clicks "View Details."
+Test the Integration:
+
+Ensure the API call works correctly and the frontend displays the detailed data as expected.
+Optimize Performance:
+
+Use caching (e.g., CloudFront or DynamoDB Accelerator) to reduce latency for API calls.
