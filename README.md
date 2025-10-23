@@ -83,11 +83,11 @@ aws s3 sync ./dist s3://kelifax.com-website --delete
 
 # For Dev environment
 cd infra/src/dynamodb
-./upload-resources.sh dev
+./upload-resources.sh dev data.json
 
 # For Prod environment
 cd infra/src/dynamodb
-./upload-resources.sh prod
+./upload-resources.sh prod data.json
 
 Visit the s3 website URL
 ```
