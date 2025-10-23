@@ -1,5 +1,4 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Transform: AWS::Serverless-2016-10-31
 Description: 'Kelifax Lambda Function with DynamoDB and CloudWatch access'
 
 Parameters:
@@ -15,6 +14,16 @@ Parameters:
     Type: String
     Default: kelifax
     Description: Prefix for the Lambda function name
+    
+  DeploymentBucket:
+    Type: String
+    Default: cf-kelifax-deployment-bucket
+    Description: S3 bucket containing the Lambda function code zip files
+    
+  S3KeyPrefix:
+    Type: String
+    Default: lambda-zip-dev
+    Description: S3 key prefix for Lambda function code zip files
 
 Mappings:
   EnvironmentToTableName:
@@ -26,38 +35,111 @@ Mappings:
 Resources:
   # Lambda Function
   KelilaxFunction:
-    Type: AWS::Serverless::Function
+    Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub "${FunctionPrefix}-${Environment}-function"
-      Handler: lambda_function.lambda_handler
+      FunctionName: 
+        Fn::Sub: "${FunctionPrefix}-${Environment}-function"
+      Handler: app.lambda_function.lambda_handler
       Runtime: python3.12
-      CodeUri: ../../../lambda/app/
+      Code:
+        S3Bucket: 
+          Ref: DeploymentBucket
+        S3Key: 
+          Fn::Sub: "${S3KeyPrefix}/lambda-function.zip"
       Timeout: 30
       MemorySize: 256
       Environment:
         Variables:
-          ENVIRONMENT: !Ref Environment
-          DYNAMODB_TABLE: !FindInMap [EnvironmentToTableName, !Ref Environment, TableName]
+          ENVIRONMENT: 
+            Ref: Environment
+          DYNAMODB_TABLE: 
+            Fn::FindInMap: 
+              - EnvironmentToTableName
+              - Ref: Environment
+              - TableName
+      Role: 
+        Fn::GetAtt: 
+          - LambdaExecutionRole
+          - Arn
+
+  # IAM Role for Lambda Execution
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
       Policies:
-        - DynamoDBCrudPolicy:
-            TableName: !FindInMap [EnvironmentToTableName, !Ref Environment, TableName]
-        - CloudWatchLogsFullAccess
+        - PolicyName: DynamoDBAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'dynamodb:GetItem'
+                  - 'dynamodb:PutItem'
+                  - 'dynamodb:UpdateItem'
+                  - 'dynamodb:DeleteItem'
+                  - 'dynamodb:Query'
+                  - 'dynamodb:Scan'
+                Resource:
+                  - Fn::Sub:
+                      - 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${TableName}'
+                      - TableName:
+                          Fn::FindInMap:
+                            - EnvironmentToTableName
+                            - Ref: Environment
+                            - TableName
+                  - Fn::Sub:
+                      - 'arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${TableName}/index/*'
+                      - TableName:
+                          Fn::FindInMap:
+                            - EnvironmentToTableName
+                            - Ref: Environment
+                            - TableName
 
 Outputs:
   FunctionArn:
     Description: "ARN of the Kelifax Lambda function"
-    Value: !GetAtt KelilaxFunction.Arn
+    Value:
+      Fn::GetAtt:
+        - KelilaxFunction
+        - Arn
     Export:
-      Name: !Sub "${AWS::StackName}-FunctionArn"
+      Name:
+        Fn::Sub: "${AWS::StackName}-FunctionArn"
   
   FunctionName:
     Description: "Name of the Kelifax Lambda function"
-    Value: !Ref KelilaxFunction
+    Value:
+      Ref: KelilaxFunction
     Export:
-      Name: !Sub "${AWS::StackName}-FunctionName"
+      Name:
+        Fn::Sub: "${AWS::StackName}-FunctionName"
       
   DynamoDBTableName:
     Description: "Name of the DynamoDB table used by this function"
-    Value: !FindInMap [EnvironmentToTableName, !Ref Environment, TableName]
+    Value:
+      Fn::FindInMap:
+        - EnvironmentToTableName
+        - Ref: Environment
+        - TableName
     Export:
-      Name: !Sub "${AWS::StackName}-DynamoDBTableName"
+      Name:
+        Fn::Sub: "${AWS::StackName}-DynamoDBTableName"
+      
+  RoleArn:
+    Description: "ARN of the IAM role used by the Lambda function"
+    Value:
+      Fn::GetAtt:
+        - LambdaExecutionRole
+        - Arn
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-RoleArn"

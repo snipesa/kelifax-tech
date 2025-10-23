@@ -1,6 +1,6 @@
 # Kelifax Lambda Deployment
 
-This directory contains the CloudFormation/SAM template for deploying the Kelifax API Lambda function.
+This directory contains the CloudFormation template for deploying the Kelifax API Lambda function.
 
 ## Prerequisites
 
@@ -9,90 +9,116 @@ This directory contains the CloudFormation/SAM template for deploying the Kelifa
    aws configure
    ```
 
-2. Install AWS SAM CLI:
+2. Create the deployment S3 bucket (if it doesn't exist):
    ```bash
-   brew install aws/tap/aws-sam-cli
-   ```
-   
-   For other operating systems, follow the [official installation guide](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html).
-
-## Deployment Steps
-
-1. **First-time deployment**:
-   ```bash
-   # Create a deployment bucket if you don't have one
-   aws s3 mb s3://kelifax-deployment-bucket
-
-   # Navigate to the lambda directory
-   cd infra/cloudformation/lambda
-
-   # Build the Lambda package
-   sam build
-
-   # Deploy the stack for development (default)
-   sam deploy
-   
-   # Or for production
-   sam deploy --config-env prod
+   aws s3 mb s3://cf-kelifax-deployment-bucket
    ```
 
-2. **Subsequent deployments**:
-   ```bash
-   # For development (default)
-   sam build
-   sam deploy
-   
-   # For production
-   sam build
-   sam deploy --config-env prod
-   ```
+## Deployment Process
 
-## Environment Specific Deployments
+### All-in-One Deployment
 
-This project supports different environments:
+Use the provided script to package your Lambda function, upload it to S3, and deploy the CloudFormation stack in one step:
 
-### Development Deployment (Default)
 ```bash
-sam build
-sam deploy
+# For development environment (default)
+./package-lambda.sh dev
+
+# For production environment
+./package-lambda.sh prod
 ```
 
-### Production Deployment
+This script will:
+1. Package your Lambda code and dependencies
+2. Create a ZIP file named `lambda-function.zip`
+3. Upload it to S3 with the appropriate prefix:
+   - `lambda-zip-dev` for development
+   - `lambda-zip-prod` for production
+4. Deploy the CloudFormation stack with the correct parameters
+5. Display the stack outputs when complete
+
+You'll be prompted to confirm before the deployment starts, giving you a chance to skip the CloudFormation deployment if you only want to package the Lambda code.
+
+## Updating Lambda Function
+
+To update an existing Lambda function:
+
+1. Make your code changes in the Lambda source directory
+2. Run the package script again with the appropriate environment:
+   ```bash
+   ./package-lambda.sh dev  # or prod
+   ```
+
+The script will package your updated code, upload it to S3, and redeploy the CloudFormation stack. This will update your Lambda function with the new code.
+
+## Accessing Stack Outputs
+
+After deployment, you can retrieve information about your Lambda function:
+
 ```bash
-sam build
-sam deploy --config-env prod
+# Get Lambda ARN for development environment
+aws cloudformation describe-stacks \
+  --stack-name kelifax-lambda-stack-dev \
+  --query "Stacks[0].Outputs[?OutputKey=='FunctionArn'].OutputValue" \
+  --output text
+
+# Get Lambda Function Name for production environment
+aws cloudformation describe-stacks \
+  --stack-name kelifax-lambda-stack \
+  --query "Stacks[0].Outputs[?OutputKey=='FunctionName'].OutputValue" \
+  --output text
 ```
 
-## Parameters
+## Template Parameters
 
-The template accepts the following parameters:
+The CloudFormation template accepts the following parameters:
 
 - `Environment`: Deployment environment (dev, prod)
 - `FunctionPrefix`: Prefix for the Lambda function name
+- `DeploymentBucket`: S3 bucket containing the Lambda function code
+- `S3KeyPrefix`: Prefix path within the bucket where the Lambda ZIP file is located
 
 DynamoDB table names are automatically determined based on the environment:
 - `prod`: Uses the table name `kelifax-resources-prod`
 - `dev`: Uses the table name `kelifax-SubmittedResources-Dev`
 
-You can override parameters during deployment:
+## Directory Structure in S3
 
-```bash
-sam deploy --parameter-overrides Environment=dev FunctionPrefix=kelifax
+The deployment creates the following structure in your S3 bucket:
+
+```
+cf-kelifax-deployment-bucket/
+├── lambda-zip-dev/           # Lambda code for dev environment
+│   └── lambda-function.zip
+├── lambda-zip-prod/          # Lambda code for prod environment
+│   └── lambda-function.zip
+├── cloudformation-dev/       # CloudFormation artifacts for dev
+│   └── [template files]
+└── cloudformation-prod/      # CloudFormation artifacts for prod
+    └── [template files]
 ```
 
-## Accessing the API
+## Understanding S3 Bucket Usage
 
-After deployment, the Lambda function ARN and name will be available in the CloudFormation stack outputs.
-You can retrieve them using:
+The deployment uses a single S3 bucket (`cf-kelifax-deployment-bucket`) for two distinct purposes, separated by prefixes:
 
-```bash
-# For development (default)
-aws cloudformation describe-stacks --stack-name kelifax-lambda-stack-dev --query "Stacks[0].Outputs[?OutputKey=='FunctionArn'].OutputValue" --output text
+1. **Lambda Code Storage**:
+   - Prefix: `lambda-zip-dev` or `lambda-zip-prod`
+   - Contains the Lambda function ZIP file (`lambda-function.zip`)
+   - Referenced by the CloudFormation template via the `S3KeyPrefix` parameter
+   - Example path: `s3://cf-kelifax-deployment-bucket/lambda-zip-dev/lambda-function.zip`
 
-# For production
-aws cloudformation describe-stacks --stack-name kelifax-lambda-stack --query "Stacks[0].Outputs[?OutputKey=='FunctionArn'].OutputValue" --output text
-```
+2. **CloudFormation Template Storage**:
+   - Prefix: `cloudformation-dev` or `cloudformation-prod`
+   - Used by the CloudFormation service to store the packaged template
+   - Specified via the `--s3-prefix` parameter in the CloudFormation deploy command
+   - Example path: `s3://cf-kelifax-deployment-bucket/cloudformation-dev/[template-files]`
 
-## Note
+### Important Notes:
 
-The default environment is now development. To deploy to production, you must explicitly specify `--config-env prod`.
+- The `DeploymentBucket` referenced in the CloudFormation template must already exist before deployment
+- The package-lambda.sh script must upload the Lambda ZIP file before you deploy the CloudFormation stack
+- If you change the S3 bucket name in one place, make sure to update it in all relevant locations:
+  - The package-lambda.sh script
+  - The CloudFormation deploy command
+  - Any parameter overrides

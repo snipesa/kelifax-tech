@@ -7,7 +7,7 @@ from app.update_resource import handle_update_resource
 from app.delete_resource import handle_delete_resource
 
 def lambda_handler(event, context):
-    print(event)
+    # print(event)
     """
     Single Lambda function to handle all Kelifax API endpoints
     Routes: POST /resources, POST /admin-auth, GET /resources, PATCH /resources/{slug}, DELETE /resources/{slug}

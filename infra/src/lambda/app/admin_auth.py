@@ -8,7 +8,7 @@ def handle_admin_auth(event, headers, table_name):
     password = body.get('password', '')
     
     # Simple password check for testing
-    if password == 'admin':
+    if password == 'prettoShow':
         session_token = str(uuid.uuid4())
         expires_at = (datetime.utcnow() + timedelta(hours=2)).isoformat() + 'Z'
         
