@@ -1,14 +1,94 @@
 {
   "Table_name": [
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "visual-studio-code" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "figma" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "github" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "notion" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "tailwind-css" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "coursera" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "postman" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "canva" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "stack-overflow" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "slack" }, "status": { "S": "existing" } } } }
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "visual-studio-code" },
+          "status": { "S": "existing" },
+          "resource": { "S": "{\"slug\":\"visual-studio-code\",\"title\":\"Visual Studio Code\",\"description\":\"Free, open-source code editor with intelligent code completion, built-in Git integration, extensive extension marketplace, and powerful debugging capabilities for modern development workflows.\",\"category\":\"development\",\"tags\":[\"code editor\",\"microsoft\",\"extensions\",\"debugging\",\"git\",\"intellisense\",\"syntax highlighting\",\"integrated terminal\",\"live share\",\"remote development\",\"multi-language support\",\"code completion\",\"refactoring\",\"linting\",\"version control\"],\"url\":\"https://code.visualstudio.com\",\"featured\":true,\"image\":\"vscode.png\",\"keyFeatures\":[{\"title\":\"IntelliSense Code Completion\",\"description\":\"Smart code completion with syntax highlighting, auto-completion, and intelligent suggestions based on variable types and function definitions.\"},{\"title\":\"Extensive Extension Marketplace\",\"description\":\"Thousands of extensions for languages, themes, debuggers, and tools to customize and enhance your coding experience.\"},{\"title\":\"Built-in Git Integration\",\"description\":\"Native Git support with visual diff editor, staging, branching, and seamless version control workflow.\"},{\"title\":\"Powerful Debugging Tools\",\"description\":\"Advanced debugging capabilities with breakpoints, call stacks, variable inspection, and multi-language debugging support.\"},{\"title\":\"Integrated Terminal\",\"description\":\"Built-in terminal that supports multiple shells and allows you to run commands without leaving the editor.\"},{\"title\":\"Live Share Collaboration\",\"description\":\"Real-time collaborative editing and debugging sessions with other developers, including shared terminals and servers.\"},{\"title\":\"Remote Development\",\"description\":\"Develop on remote machines, containers, or WSL with the same local VS Code experience through remote extensions.\"}],\"useCases\":[\"Full-stack web development\",\"Mobile app development\",\"Data science and machine learning projects\",\"DevOps and infrastructure as code\",\"API development and testing\",\"Database management and queries\",\"Documentation writing with Markdown\",\"Multi-language programming projects\"],\"learningResources\":[{\"title\":\"VS Code Official Documentation\",\"url\":\"https://code.visualstudio.com/docs\",\"type\":\"Documentation\"},{\"title\":\"VS Code Tips and Tricks\",\"url\":\"https://code.visualstudio.com/docs/getstarted/tips-and-tricks\",\"type\":\"Guide\"},{\"title\":\"Extension Development Guide\",\"url\":\"https://code.visualstudio.com/api\",\"type\":\"API Documentation\"},{\"title\":\"VS Code YouTube Channel\",\"url\":\"https://www.youtube.com/channel/UCs5Y5_7XK8HLDX0SLNwkd3w\",\"type\":\"Video Tutorials\"}]}" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "figma" },
+          "status": { "S": "existing" },
+          "resource": { "S": "{\"slug\":\"figma\",\"title\":\"Figma\",\"description\":\"Collaborative interface design tool with real-time collaboration, prototyping, and design system capabilities.\",\"category\":\"design\",\"tags\":[\"ui design\",\"prototyping\",\"collaboration\",\"vector graphics\"],\"url\":\"https://figma.com\",\"featured\":true,\"image\":\"figma.png\"}" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "github" },
+          "status": { "S": "existing" },
+          "resource": { "S": "{\"slug\":\"github\",\"title\":\"GitHub\",\"description\":\"Comprehensive platform for Git-based version control, collaborative development, automated CI/CD with GitHub Actions, and AI-powered coding assistance with GitHub Copilot.\",\"category\":\"development\",\"tags\":[\"git\",\"version control\",\"collaboration\",\"open source\",\"ci/cd\",\"github actions\",\"github copilot\",\"code review\",\"automation\",\"ai assistant\",\"repository management\",\"pull requests\",\"branching\",\"merging\",\"continuous integration\",\"continuous deployment\"],\"url\":\"https://github.com\",\"featured\":true,\"image\":\"github.png\",\"keyFeatures\":[{\"title\":\"Git Version Control\",\"description\":\"Complete Git-based version control system for tracking changes, managing branches, and collaborative development.\"},{\"title\":\"GitHub Actions CI/CD\",\"description\":\"Powerful automation platform for building, testing, and deploying code with custom workflows and pre-built actions.\"},{\"title\":\"GitHub Copilot\",\"description\":\"AI-powered coding assistant that provides intelligent code suggestions, auto-completion, and code generation.\"},{\"title\":\"Code Review & Collaboration\",\"description\":\"Built-in tools for code reviews, pull requests, issue tracking, and team collaboration.\"},{\"title\":\"Repository Management\",\"description\":\"Organize code with repositories, manage access permissions, and integrate with third-party tools.\"},{\"title\":\"Open Source Community\",\"description\":\"World's largest platform for open source projects with millions of repositories and developers.\"}],\"useCases\":[\"Version control and source code management\",\"Collaborative software development\",\"Automated testing and deployment pipelines\",\"Code review and quality assurance\",\"Open source project hosting\",\"Documentation and project wikis\",\"Issue and bug tracking\",\"Team project management\"],\"learningResources\":[{\"title\":\"Git Handbook\",\"url\":\"https://guides.github.com/introduction/git-handbook/\",\"type\":\"Guide\"},{\"title\":\"GitHub Actions Documentation\",\"url\":\"https://docs.github.com/en/actions\",\"type\":\"Documentation\"},{\"title\":\"GitHub Copilot Guide\",\"url\":\"https://docs.github.com/en/copilot\",\"type\":\"Documentation\"},{\"title\":\"Git Branching Tutorial\",\"url\":\"https://learngitbranching.js.org/\",\"type\":\"Interactive Tutorial\"}]}" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "notion" },
+          "status": { "S": "existing" },
+          "resource": { "S": "{\"slug\":\"notion\",\"title\":\"Notion\",\"description\":\"All-in-one workspace combining notes, tasks, wikis, and databases for personal and team productivity.\",\"category\":\"productivity\",\"tags\":[\"notes\",\"project management\",\"collaboration\",\"database\",\"wiki\"],\"url\":\"https://notion.so\",\"featured\":false,\"image\":\"notion.png\"}" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "tailwind-css" },
+          "status": { "S": "existing" },
+          "resource": { "S": "{\"slug\":\"tailwind-css\",\"title\":\"Tailwind CSS\",\"description\":\"Utility-first CSS framework with low-level utility classes for building custom designs without writing CSS.\",\"category\":\"development\",\"tags\":[\"css framework\",\"utility-first\",\"responsive design\",\"customizable\"],\"url\":\"https://tailwindcss.com\",\"featured\":false}" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "coursera" },
+          "status": { "S": "existing" },
+          "resource": { "S": "{\"slug\":\"coursera\",\"title\":\"Coursera\",\"description\":\"Online learning platform offering courses, specializations, and degrees from top universities and companies.\",\"category\":\"learning\",\"tags\":[\"online courses\",\"universities\",\"certificates\",\"degrees\",\"skills\"],\"url\":\"https://coursera.org\",\"featured\":false,\"image\":\"coursera.png\"}" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "postman" },
+          "status": { "S": "existing" },
+          "resource": { "S": "{\"slug\":\"postman\",\"title\":\"Postman\",\"description\":\"API development platform for building, testing, and documenting APIs with collaborative features.\",\"category\":\"development\",\"tags\":[\"api testing\",\"api development\",\"documentation\",\"collaboration\"],\"url\":\"https://postman.com\",\"featured\":false}" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "canva" },
+          "status": { "S": "existing" },
+          "resource": { "S": "{\"slug\":\"canva\",\"title\":\"Canva\",\"description\":\"User-friendly graphic design platform with templates, stock photos, and design tools for non-designers.\",\"category\":\"design\",\"tags\":[\"graphic design\",\"templates\",\"social media\",\"presentations\",\"easy-to-use\"],\"url\":\"https://canva.com\",\"featured\":false,\"image\":\"canva.png\"}" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "stack-overflow" },
+          "status": { "S": "existing" },
+          "resource": { "S": "{\"slug\":\"stack-overflow\",\"title\":\"Stack Overflow\",\"description\":\"Question and answer community for programmers to share knowledge and solve coding problems.\",\"category\":\"learning\",\"tags\":[\"programming\",\"qa community\",\"problem solving\",\"knowledge sharing\"],\"url\":\"https://stackoverflow.com\",\"featured\":true,\"image\":\"stackoverflow.png\"}" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "slack" },
+          "status": { "S": "existing" },
+          "resource": { "S": "{\"slug\":\"slack\",\"title\":\"Slack\",\"description\":\"Business communication platform with channels, direct messaging, file sharing, and app integrations.\",\"category\":\"productivity\",\"tags\":[\"team communication\",\"messaging\",\"collaboration\",\"integrations\"],\"url\":\"https://slack.com\",\"featured\":false,\"image\":\"slack.png\"}" }
+        }
+      }
+    }
   ]
 }
