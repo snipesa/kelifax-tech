@@ -8,6 +8,7 @@
 
 ## 🚀 Quick Start
 
+### **Local Development**
 ```bash
 # Install dependencies
 npm install
@@ -18,6 +19,19 @@ npm run dev
 # Open in browser
 http://localhost:4321/
 ```
+
+### **Quick Deployment**
+```bash
+# Deploy to development
+./deploy.sh -dev
+
+# Deploy to production (with confirmation)
+./deploy.sh -prod
+```
+
+**Prerequisites for deployment:**
+- AWS CLI installed and configured
+- Access to S3 buckets: `kelifax-dev-project` (dev) and `kelifax.com-website` (prod)
 
 ## 📋 Features
 
@@ -66,31 +80,75 @@ kelifax/
 
 ## 🔧 Development Commands
 
+### **Local Development**
 ```bash
-npm run dev      # Start development server
+npm install      # Install dependencies
+npm run dev      # Start development server (http://localhost:4321)
 npm run build    # Build for production  
-npm run preview  # Preview production build
+npm run preview  # Preview production build locally
+```
 
-aws s3 sync ./dist s3://kelifax-dev-project --delete  #Upload to s3 dev bucket
+### **Environment Configuration**
+```bash
+# Development environment (uses .env.development)
+# - API: https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev
+# - S3: kelifax-dev-project
 
-# Example dev
-aws s3 sync ./dist s3://kelifax-dev-project --delete 
-# Prod
-aws s3 sync ./dist s3://kelifax.com-website --delete 
+# Production environment (uses .env.production)  
+# - API: https://ru8vee8krh.execute-api.us-east-1.amazonaws.com/prod
+# - S3: kelifax.com-website
+```
 
-# DynamoDB Resources Batch Upload
-# Use the provided upload script
+### **🚀 Automated Deployment**
+```bash
+# Deploy to development environment
+./deploy.sh -dev
+
+# Deploy to production environment (with confirmation)
+./deploy.sh -prod
+
+# Show deployment help
+./deploy.sh -h
+```
+
+**What the deployment script does:**
+- ✅ Switches to correct environment configuration
+- ✅ Builds project with proper API URLs
+- ✅ Deploys to appropriate S3 bucket
+- ✅ Auto-detects and invalidates CloudFront CDN
+- ✅ Restores original .env after deployment
+- ✅ Comprehensive error handling and rollback
+
+### **Manual Deployment (if needed)**
+```bash
+# Development
+cp .env.development .env
+npm run build
+aws s3 sync ./dist s3://kelifax-dev-project --delete
+
+# Production
+cp .env.production .env
+npm run build
+aws s3 sync ./dist s3://kelifax.com-website --delete
+```
+
+### **DynamoDB Resources Management**
+```bash
+# Upload enhanced resource data to DynamoDB
 
 # For Dev environment
 cd infra/src/dynamodb
 ./upload-resources.sh dev data.json
 
-# For Prod environment
+# For Prod environment  
 cd infra/src/dynamodb
 ./upload-resources.sh prod data.json
-
-Visit the s3 website URL
 ```
+
+### **Environment Files**
+- `.env` - Local development (not committed to git)
+- `.env.development` - Development deployment config
+- `.env.production` - Production deployment config
 
 ## 🌟 Recent Updates - SEO & Navigation Enhancements
 
