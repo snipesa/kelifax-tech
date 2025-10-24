@@ -121,8 +121,11 @@ export async function getResources(filters = {}, authToken = null) {
   // For main site (no admin token), use local resources.json
   try {
     const response = await fetch('/src/data/resources.json');
+    if (!response.ok) {
+      throw new Error(`Failed to fetch resources.json: ${response.status}`);
+    }
     const data = await response.json();
-    return data.resources || [];
+    return Array.isArray(data) ? data : (data.resources || []);
   } catch (error) {
     console.error('Failed to load local resources:', error);
     return [];
@@ -145,16 +148,26 @@ export async function getResource(id) {
 }
 
 /**
- * Get a specific resource by slug
+ * Get detailed resource data from DynamoDB via API
+ * This is used when user visits a resource detail page (/resources/{slug})
  * @param {string} slug - Resource slug
- * @returns {Promise<object>} - Resource object
+ * @returns {Promise<object>} - Full resource details from DynamoDB
  */
-export async function getResourceBySlug(slug) {
+export async function getResourceDetails(slug) {
   try {
-    const response = await apiRequest(`/resources/slug/${slug}`);
-    return response.resource;
+    const response = await apiRequest(`/get-resource`, {
+      method: 'POST',
+      body: JSON.stringify({ slug: slug })
+    });
+    
+    // Handle the response format from your Lambda function
+    if (response.success && response.data) {
+      return response.data;
+    } else {
+      throw new Error(response.message || 'Resource details not found');
+    }
   } catch (error) {
-    console.error('Failed to fetch resource by slug:', error);
+    console.error('Failed to fetch resource details:', error);
     throw error;
   }
 }

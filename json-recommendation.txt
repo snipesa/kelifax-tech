@@ -21,7 +21,7 @@ Each resource card should include:
 Title
 Short description
 Image
-Tags (optional)
+Tags (optional) Allow tags as is as well as description
 A "View Details" button or link.
 3. Trigger External API for Resource Details:
 When a user clicks on "View Details" for a resource:

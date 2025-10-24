@@ -1,25 +1,11 @@
 import resourcesData from '../data/resources.json';
 
-// Check if we should use API (environment variable)
-const USE_API = import.meta.env.PUBLIC_USE_API === 'true';
-const API_BASE_URL = import.meta.env.PUBLIC_API_BASE_URL || '';
-
 /**
- * Get all resources
+ * Get all resources from local JSON
  * @returns {Promise<Array>} All resources
  */
 export async function getAllResources() {
-  if (USE_API) {
-    try {
-      const response = await fetch(`${API_BASE_URL}/resources`);
-      if (response.ok) {
-        return await response.json();
-      }
-    } catch (error) {
-      console.warn('API failed, falling back to local data:', error);
-    }
-  }
-  // Fallback to local JSON
+  // Always use local JSON for main resource listing
   return resourcesData;
 }
 
@@ -36,23 +22,12 @@ export async function getResourceByTitle(title) {
 }
 
 /**
- * Get a resource by slug
+ * Get a resource by slug from local JSON
  * @param {string} slug - Resource slug
  * @returns {Promise<Object|null>} Resource object or null if not found
  */
 export async function getResourceBySlug(slug) {
-  if (USE_API) {
-    try {
-      // For API calls, we might need to map slug to ID or use a different endpoint
-      const response = await fetch(`${API_BASE_URL}/resources/slug/${slug}`);
-      if (response.ok) {
-        return await response.json();
-      }
-    } catch (error) {
-      console.warn('API failed, falling back to local data:', error);
-    }
-  }
-  // Fallback to local JSON
+  // Always use local JSON for basic resource lookup
   const allResources = await getAllResources();
   return allResources.find(resource => resource.slug === slug) || null;
 }

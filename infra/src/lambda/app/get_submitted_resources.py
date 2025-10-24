@@ -1,6 +1,6 @@
 import json
 
-def handle_get_resources(event, headers, table_name):
+def handle_get_submitted_resources(event, headers, table_name):
     """Handle getting submitted resources for admin"""
     query_params = event.get('queryStringParameters') or {}
     status_filter = query_params.get('status', 'submitted')
