@@ -92,7 +92,24 @@ deploy_to_env() {
     cp "$env_file" .env
     print_success "Switched to $env environment configuration"
     
-    # Build the project
+    # Clean previous build and cache
+    print_status "Cleaning previous build and cache..."
+    rm -rf ./dist .astro
+    
+    # Extract environment variables from the env file
+    print_status "Loading environment variables from $env_file..."
+    export PUBLIC_USE_API=$(grep "^PUBLIC_USE_API=" "$env_file" | cut -d'=' -f2)
+    export PUBLIC_API_URL=$(grep "^PUBLIC_API_URL=" "$env_file" | cut -d'=' -f2)
+    export PUBLIC_API_KEY=$(grep "^PUBLIC_API_KEY=" "$env_file" | cut -d'=' -f2)
+    export PUBLIC_CONTACT_EMAIL=$(grep "^PUBLIC_CONTACT_EMAIL=" "$env_file" | cut -d'=' -f2)
+    
+    # Display the configuration being used
+    print_status "Building with configuration:"
+    print_status "  - API URL: $PUBLIC_API_URL"
+    print_status "  - Use API: $PUBLIC_USE_API"
+    print_status "  - Contact Email: $PUBLIC_CONTACT_EMAIL"
+    
+    # Build the project with explicit environment variables
     print_status "Building project for $env..."
     if npm run build; then
         print_success "Build completed successfully"

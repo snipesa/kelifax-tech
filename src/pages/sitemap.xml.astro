@@ -13,7 +13,7 @@ const staticPages = [
 ];
 
 // Dynamic resource pages
-const resourcePages = resourcesData.map(resource => `/resources/${resource.slug}`);
+const resourcePages = resourcesData.map(resource => `/resource/${resource.slug}`);
 
 // All pages
 const allPages = [...staticPages, ...resourcePages];
@@ -25,8 +25,8 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 ${allPages.map(page => `  <url>
     <loc>${baseUrl}${page}</loc>
     <lastmod>${currentDate}</lastmod>
-    <changefreq>${page === '' ? 'daily' : page.includes('/resources/') ? 'weekly' : 'monthly'}</changefreq>
-    <priority>${page === '' ? '1.0' : page.includes('/resources/') ? '0.8' : '0.7'}</priority>
+    <changefreq>${page === '' ? 'daily' : page.includes('/resource/') ? 'weekly' : 'monthly'}</changefreq>
+    <priority>${page === '' ? '1.0' : page.includes('/resource/') ? '0.8' : '0.7'}</priority>
   </url>`).join('\n')}
 </urlset>`;
 

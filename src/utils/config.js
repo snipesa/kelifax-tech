@@ -5,6 +5,9 @@
  * API Configuration
  */
 export const API_CONFIG = {
+  // API mode - true to use API Gateway, false to use local JSON
+  USE_API: import.meta.env.PUBLIC_USE_API === 'true',
+  
   // Default API endpoints
   BASE_URL: import.meta.env.PUBLIC_API_URL || 'https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev',
   API_KEY: import.meta.env.PUBLIC_API_KEY,

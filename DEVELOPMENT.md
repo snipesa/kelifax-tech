@@ -77,7 +77,7 @@ Use `src/utils/config.js` FEATURES object to control:
 ## 🔒 Security Notes
 
 - API keys are handled client-side (public environment variables)
-- CORS is configured in API Gateway for domain restrictions
+- CORS is configured in API Gateway on Lambda for domain restrictions
 - No sensitive data in client-side code
 - Admin functions require server-side authentication
 

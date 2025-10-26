@@ -1,0 +1,144 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import resourcesData from '../../data/resources.json';
+
+// Required for static generation
+export async function getStaticPaths() {
+  return resourcesData.map((resource) => ({
+    params: { slug: resource.slug },
+    props: { resource }
+  }));
+}
+
+const { resource } = Astro.props;
+
+if (!resource) {
+  return Astro.redirect('/404');
+}
+
+// Get related resources from same category
+const relatedResources = resourcesData
+  .filter(r => r.slug !== resource.slug && r.category === resource.category)
+  .slice(0, 3);
+---
+
+<MainLayout title={`${resource.title} - Kelifax`} description={resource.description} currentPage="resources">
+  <!-- Breadcrumb -->
+  <section class="bg-gray-50 py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="flex items-center space-x-2 text-sm text-gray-600">
+        <a href="/" class="hover:text-blue-600 transition-colors">Home</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <a href="/resources" class="hover:text-blue-600 transition-colors">Resources</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span class="text-gray-900 capitalize">{resource.category}</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span class="text-gray-500">{resource.title}</span>
+      </nav>
+    </div>
+  </section>
+
+  <!-- Resource Content -->
+  <section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        
+        <!-- Main Content -->
+        <div class="lg:col-span-2">
+          <!-- Resource Header -->
+          <div class="mb-8">
+            <div class="flex items-start gap-6">
+              <!-- Logo -->
+              {resource.image && (
+                <div class="flex-shrink-0">
+                  <img 
+                    src={`/logos/${resource.image}`}
+                    alt={resource.title}
+                    class="w-16 h-16 rounded-lg object-contain bg-gray-100 p-2"
+                  />
+                </div>
+              )}
+              
+              <!-- Header Info -->
+              <div class="flex-1">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">{resource.title}</h1>
+                <p class="text-lg text-gray-600 mb-4">{resource.description}</p>
+                
+                <!-- Category & Tags -->
+                <div class="flex flex-wrap items-center gap-4 mb-6">
+                  <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full capitalize">
+                    {resource.category}
+                  </span>
+                  {resource.featured && (
+                    <span class="bg-yellow-100 text-yellow-800 text-sm font-medium px-3 py-1 rounded-full">
+                      Featured
+                    </span>
+                  )}
+                </div>
+                
+                <!-- Tags -->
+                {resource.tags && resource.tags.length > 0 && (
+                  <div class="flex flex-wrap gap-2 mb-6">
+                    {resource.tags.slice(0, 8).map(tag => (
+                      <span class="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                
+                <!-- Action Button -->
+                <a 
+                  href={resource.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 inline-flex items-center gap-2 font-medium transition-colors"
+                >
+                  Visit {resource.title}
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+          <!-- Related Resources -->
+          {relatedResources.length > 0 && (
+            <div class="bg-gray-50 p-6 rounded-lg">
+              <h3 class="text-lg font-semibold text-gray-900 mb-4">Related Resources</h3>
+              <div class="space-y-4">
+                {relatedResources.map(related => (
+                  <a href={`/resource/${related.slug}`} class="block p-4 bg-white rounded-lg hover:shadow-md transition-shadow">
+                    <div class="flex items-center gap-3">
+                      {related.image && (
+                        <img 
+                          src={`/logos/${related.image}`}
+                          alt={related.title}
+                          class="w-10 h-10 rounded object-contain bg-gray-100 p-1"
+                        />
+                      )}
+                      <div>
+                        <h4 class="font-medium text-gray-900">{related.title}</h4>
+                        <p class="text-sm text-gray-600 capitalize">{related.category}</p>
+                      </div>
+                    </div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  </section>
+</MainLayout>

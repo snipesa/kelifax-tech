@@ -127,24 +127,47 @@ export async function getResource(id) {
 }
 
 /**
- * Get detailed resource data from DynamoDB via API
+ * Get detailed resource data from DynamoDB via API or local fallback
  * This is used when user visits a resource detail page (/resources/{slug})
  * @param {string} slug - Resource slug
- * @returns {Promise<object>} - Full resource details from DynamoDB
+ * @returns {Promise<object>} - Full resource details
  */
 export async function getResourceDetails(slug) {
-  try {
-    const response = await apiRequest(`/get-resource`, {
-      method: 'POST',
-      body: JSON.stringify({ slug: slug })
-    });
-    
-    // Handle the response format from your Lambda function
-    if (response.success && response.data) {
-      return response.data;
-    } else {
-      throw new Error(response.message || 'Resource details not found');
+  // Check if API is enabled
+  if (API_CONFIG.USE_API) {
+    try {
+      const response = await apiRequest(`/get-resource`, {
+        method: 'POST',
+        body: JSON.stringify({ slug: slug })
+      });
+      
+      // Handle the response format from your Lambda function
+      if (response.success && response.data) {
+        return response.data;
+      } else {
+        throw new Error(response.message || 'Resource details not found');
+      }
+    } catch (error) {
+      console.error('Failed to fetch resource details from API, falling back to local data:', error);
+      // Fall through to local data fallback
     }
+  }
+  
+  // Fallback to local resources.json
+  try {
+    const response = await fetch('/src/data/resources.json');
+    if (!response.ok) {
+      throw new Error(`Failed to fetch resources.json: ${response.status}`);
+    }
+    const data = await response.json();
+    const resources = Array.isArray(data) ? data : (data.resources || []);
+    const resource = resources.find(r => r.slug === slug);
+    
+    if (!resource) {
+      throw new Error('Resource not found in local data');
+    }
+    
+    return resource;
   } catch (error) {
     console.error('Failed to fetch resource details:', error);
     throw error;
