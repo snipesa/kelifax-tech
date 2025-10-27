@@ -144,6 +144,13 @@ Resources:
       ParentId: !GetAtt [ApiGatewayRestApi, RootResourceId]
       PathPart: "get-resource"
 
+  ApiGatewayResourceSubmitResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !GetAtt [ApiGatewayRestApi, RootResourceId]
+      PathPart: "submit-resource"
+
   # OPTIONS Methods for CORS
   ApiGatewayMethodAdminAuthOptions:
     Type: AWS::ApiGateway::Method
@@ -202,6 +209,32 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
       ResourceId: !Ref ApiGatewayResourceGetResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  ApiGatewayMethodSubmitResourceOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceSubmitResource
       HttpMethod: OPTIONS
       AuthorizationType: NONE
       Integration:
@@ -314,6 +347,21 @@ Resources:
       MethodResponses:
         - StatusCode: 200
 
+  ApiGatewayMethodSubmitResourcePost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceSubmitResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      ApiKeyRequired: true
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
   # Lambda Permissions for API Gateway
   LambdaInvokePermission:
     Type: AWS::Lambda::Permission
@@ -339,6 +387,8 @@ Resources:
       - ApiGatewayMethodResourcesOptions
       - ApiGatewayMethodGetResourcePost
       - ApiGatewayMethodGetResourceOptions
+      - ApiGatewayMethodSubmitResourcePost
+      - ApiGatewayMethodSubmitResourceOptions
 
   # Usage Plan
   ApiGatewayUsagePlan:

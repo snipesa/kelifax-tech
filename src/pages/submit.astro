@@ -1,221 +1,588 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
+import ProgressIndicator from '../components/ProgressIndicator.astro';
+import SubmitterInfoForm from '../components/SubmitterInfoForm.astro';
+import ResourceInfoForm from '../components/ResourceInfoForm.astro';
+import ExtendedDetailsForm from '../components/ExtendedDetailsForm.astro';
 ---
 
 <MainLayout title="Submit Resource - Kelifax" description="Submit a new tech resource to Kelifax platform">
-  <main class="container mx-auto px-4 py-8 max-w-2xl">
-    <div class="bg-white rounded-lg shadow-lg p-8">
-      <h1 class="text-3xl font-bold text-gray-800 mb-2">Submit Resource</h1>
-      <p class="text-gray-600 mb-8">Share a valuable tech resource with the community. All submissions are reviewed before publishing.</p>
-      
-      <form id="submit-resource-form" class="space-y-6">
-        <div>
-          <label for="resourceName" class="block text-sm font-medium text-gray-700 mb-2">
-            Resource Name <span class="text-red-500">*</span>
-          </label>
-          <input 
-            type="text" 
-            id="resourceName" 
-            name="resourceName" 
-            maxlength="50"
-            required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="e.g., Kelifax"
-          />
-          <p class="text-sm text-gray-500 mt-1">Maximum 50 characters</p>
-        </div>
-
-        <div>
-          <label for="usagePurpose" class="block text-sm font-medium text-gray-700 mb-2">
-            Usage Purpose <span class="text-red-500">*</span>
-          </label>
-          <input 
-            type="text" 
-            id="usagePurpose" 
-            name="usagePurpose" 
-            maxlength="100"
-            required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="e.g., Curated tools for developer productivity"
-          />
-          <p class="text-sm text-gray-500 mt-1">Maximum 100 characters</p>
-        </div>
-
-        <div>
-          <label for="resourceUrl" class="block text-sm font-medium text-gray-700 mb-2">
-            URL <span class="text-red-500">*</span>
-          </label>
-          <input 
-            type="url" 
-            id="resourceUrl" 
-            name="resourceUrl" 
-            required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="https://kelifax.com"
-          />
-          <p class="text-sm text-gray-500 mt-1">Please provide a valid URL</p>
-        </div>
-
-        <div>
-          <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
-            Category
-          </label>
-          <select 
-            id="category" 
-            name="category" 
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          >
-            <option value="development">Development</option>
-            <option value="design">Design</option>
-            <option value="productivity">Productivity</option>
-            <option value="education">Education</option>
-            <option value="communication">Communication</option>
-            <option value="analytics">Analytics</option>
-            <option value="marketing">Marketing</option>
-            <option value="other">Other</option>
-          </select>
-          <p class="text-sm text-gray-500 mt-1">Select the most relevant category</p>
-        </div>
-
-        <div>
-          <label for="tags" class="block text-sm font-medium text-gray-700 mb-2">
-            Tags
-          </label>
-          <input 
-            type="text" 
-            id="tags" 
-            name="tags" 
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="e.g., tools, resources, productivity"
-          />
-          <p class="text-sm text-gray-500 mt-1">Comma-separated tags to help with search and discovery</p>
-        </div>
-
-        <div>
-          <label for="companyEmail" class="block text-sm font-medium text-gray-700 mb-2">
-            Company Email <span class="text-red-500">*</span>
-          </label>
-          <input 
-            type="email" 
-            id="companyEmail" 
-            name="companyEmail" 
-            required
-            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            placeholder="contact@company.com"
-          />
-          <p class="text-sm text-gray-500 mt-1">We'll use this to contact you about your submission</p>
-        </div>
-
-        <div class="flex gap-4">
-          <button 
-            type="submit" 
-            class="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200"
-          >
-            Submit Resource
-          </button>
-          <button 
-            type="button" 
-            onclick="window.history.back()"
-            class="flex-1 bg-gray-300 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200"
-          >
-            Cancel
-          </button>
-        </div>
-      </form>
-
-      <!-- Success Message -->
-      <div id="success-message" class="hidden mt-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-md">
-        <h3 class="font-semibold">Resource Submitted Successfully!</h3>
-        <p>Thank you for your submission. We'll review it and get back to you soon.</p>
+  <main class="container mx-auto px-4 py-8 max-w-4xl">
+    <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+      <!-- Header -->
+      <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6">
+        <h1 class="text-3xl font-bold text-white mb-2">Submit Resource</h1>
+        <p class="text-blue-100">Share a valuable tech resource with the community. All submissions are reviewed before publishing.</p>
       </div>
 
-      <!-- Error Message -->
-      <div id="error-message" class="hidden mt-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-md">
-        <h3 class="font-semibold">Submission Failed</h3>
-        <p id="error-text">Please try again or contact support if the problem persists.</p>
+      <div class="px-8 py-6">
+        <!-- Progress Indicator -->
+        <ProgressIndicator currentStep={1} totalSteps={3} />
+
+        <!-- Multi-step Form -->
+        <form id="resource-submission-form" class="max-w-3xl mx-auto">
+          
+          <!-- Page 1: Submitter Information -->
+          <div id="page-1" class="form-page">
+            <SubmitterInfoForm />
+          </div>
+
+          <!-- Page 2: Resource Information -->
+          <div id="page-2" class="form-page hidden">
+            <ResourceInfoForm />
+          </div>
+
+          <!-- Page 3: Extended Details -->
+          <div id="page-3" class="form-page hidden">
+            <ExtendedDetailsForm />
+          </div>
+
+          <!-- Navigation Buttons -->
+          <div class="flex justify-between items-center mt-12 pt-6 border-t border-gray-200">
+            <button 
+              type="button" 
+              id="prev-button" 
+              class="hidden px-6 py-3 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition duration-200 font-medium"
+            >
+              ← Previous
+            </button>
+            
+            <div class="flex-1"></div>
+            
+            <button 
+              type="button" 
+              id="next-button" 
+              class="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled
+            >
+              Next →
+            </button>
+            
+            <button 
+              type="submit" 
+              id="submit-button" 
+              class="hidden px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled
+            >
+              <span class="submit-text">Submit Resource</span>
+              <span class="loading-text hidden">
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Submitting...
+              </span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Success Message -->
+        <div id="success-message" class="hidden max-w-3xl mx-auto mt-8 p-6 bg-green-100 border border-green-400 text-green-800 rounded-lg">
+          <div class="flex items-start space-x-3">
+            <svg class="w-6 h-6 text-green-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+              <h3 class="font-semibold text-lg">Resource Submitted Successfully!</h3>
+              <p class="mt-2">Thank you for your submission. We'll review it and get back to you soon.</p>
+              <p class="mt-2 text-sm">
+                <strong>What happens next:</strong><br>
+                • Your submission will be reviewed within 2-3 business days<br>
+                • We'll contact you at the provided email address with updates<br>
+                • Approved resources will be published on our platform
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Error Message -->
+        <div id="error-message" class="hidden max-w-3xl mx-auto mt-8 p-6 bg-red-100 border border-red-400 text-red-800 rounded-lg">
+          <div class="flex items-start space-x-3">
+            <svg class="w-6 h-6 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <div>
+              <h3 class="font-semibold text-lg">Submission Failed</h3>
+              <p id="error-text" class="mt-2">Please try again or contact support if the problem persists.</p>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </main>
 
   <script>
-    import { submitResource } from '../utils/api.js';
+    import { validateFormPage } from '../utils/form-validation.js';
+    import { uploadLogoToS3, isS3Configured } from '../utils/s3-upload.js';
+    import { submitResourceSubmission } from '../utils/api.js';
 
-    document.getElementById('submit-resource-form').addEventListener('submit', async (e) => {
+    // Form state management
+    let currentPage = 1;
+    const totalPages = 3;
+    let formData = {
+      // Page 1: Submitter Information
+      firstName: '',
+      lastName: '',
+      company: '',
+      phoneNumber: '',
+      companyEmail: '',
+      
+      // Page 2: Resource Information
+      resourceName: '',
+      usagePurpose: '',
+      resourceUrl: '',
+      category: '',
+      logoImage: null,
+      tags: '',
+      
+      // Page 3: Extended Details
+      keyFeatures: [],
+      useCases: [],
+      learningResources: []
+    };
+
+    // DOM elements
+    const form = document.getElementById('resource-submission-form');
+    const prevButton = document.getElementById('prev-button');
+    const nextButton = document.getElementById('next-button');
+    const submitButton = document.getElementById('submit-button');
+    const successMessage = document.getElementById('success-message');
+    const errorMessage = document.getElementById('error-message');
+
+    // Initialize form
+    document.addEventListener('DOMContentLoaded', function() {
+      updatePageDisplay();
+      setupFormValidation();
+      setupNavigation();
+      
+      // Check S3 configuration
+      if (!isS3Configured()) {
+        console.warn('S3 not configured properly. Logo uploads will not work.');
+      }
+    });
+
+    // Update page display and progress
+    function updatePageDisplay() {
+      // Hide all pages
+      document.querySelectorAll('.form-page').forEach(page => page.classList.add('hidden'));
+      
+      // Show current page
+      document.getElementById(`page-${currentPage}`).classList.remove('hidden');
+      
+      // Update progress indicator
+      updateProgressIndicator();
+      
+      // Update navigation buttons
+      updateNavigationButtons();
+    }
+
+    function updateProgressIndicator() {
+      // Update step counter
+      const stepCounter = document.getElementById('step-counter');
+      if (stepCounter) {
+        stepCounter.textContent = `Step ${currentPage} of ${totalPages}`;
+      }
+      
+      // Update progress bar
+      const progressBar = document.getElementById('progress-bar');
+      if (progressBar) {
+        progressBar.style.width = `${(currentPage / totalPages) * 100}%`;
+      }
+      
+      // Update progress line
+      const progressLine = document.getElementById('progress-line');
+      if (progressLine) {
+        progressLine.style.width = `${((currentPage - 1) / (totalPages - 1)) * 100}%`;
+      }
+      
+      // Update step circles
+      const progressSteps = document.querySelectorAll('.progress-step');
+      progressSteps.forEach((step, index) => {
+        const stepNumber = index + 1;
+        const circle = step.querySelector('.step-circle');
+        const label = step.querySelector('.step-label');
+        
+        if (stepNumber < currentPage) {
+          circle.className = 'step-circle w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 bg-green-500 text-white';
+          circle.innerHTML = '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+        } else if (stepNumber === currentPage) {
+          circle.className = 'step-circle w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 bg-blue-500 text-white';
+          circle.textContent = stepNumber;
+        } else {
+          circle.className = 'step-circle w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300 bg-gray-300 text-gray-600';
+          circle.textContent = stepNumber;
+        }
+        
+        // Update label colors
+        if (label) {
+          if (stepNumber <= currentPage) {
+            label.className = 'step-label text-sm font-medium text-gray-900';
+          } else {
+            label.className = 'step-label text-sm font-medium text-gray-500';
+          }
+        }
+      });
+    }
+
+    function updateNavigationButtons() {
+      // Previous button
+      if (currentPage > 1) {
+        prevButton.classList.remove('hidden');
+      } else {
+        prevButton.classList.add('hidden');
+      }
+
+      // Next/Submit buttons
+      if (currentPage < totalPages) {
+        nextButton.classList.remove('hidden');
+        submitButton.classList.add('hidden');
+      } else {
+        nextButton.classList.add('hidden');
+        submitButton.classList.remove('hidden');
+      }
+    }
+
+    // Form validation setup
+    function setupFormValidation() {
+      // Real-time validation for all form inputs
+      form.addEventListener('input', debounce(validateCurrentPage, 300));
+      form.addEventListener('change', validateCurrentPage);
+    }
+
+    // Navigation setup
+    function setupNavigation() {
+      prevButton.addEventListener('click', () => {
+        if (currentPage > 1) {
+          saveCurrentPageData();
+          currentPage--;
+          updatePageDisplay();
+          loadPageData();
+        }
+      });
+
+      nextButton.addEventListener('click', () => {
+        if (validateCurrentPage().isValid && currentPage < totalPages) {
+          saveCurrentPageData();
+          currentPage++;
+          updatePageDisplay();
+          loadPageData();
+        }
+      });
+
+      form.addEventListener('submit', handleFormSubmission);
+    }
+
+    // Validate current page
+    function validateCurrentPage() {
+      const pageData = collectCurrentPageData();
+      const validation = validateFormPage(currentPage, pageData);
+      
+      // Display validation errors
+      clearValidationErrors();
+      if (!validation.isValid) {
+        displayValidationErrors(validation.errors);
+      }
+      
+      // Update button states
+      if (currentPage < totalPages) {
+        nextButton.disabled = !validation.isValid;
+      } else {
+        submitButton.disabled = !validation.isValid;
+      }
+      
+      return validation;
+    }
+
+    // Collect data from current page
+    function collectCurrentPageData() {
+      const pageData = {};
+      const currentPageElement = document.getElementById(`page-${currentPage}`);
+      
+      switch (currentPage) {
+        case 1:
+          pageData.firstName = currentPageElement.querySelector('#firstName')?.value || '';
+          pageData.lastName = currentPageElement.querySelector('#lastName')?.value || '';
+          pageData.company = currentPageElement.querySelector('#company')?.value || '';
+          pageData.phoneNumber = currentPageElement.querySelector('#phoneNumber')?.value || '';
+          pageData.companyEmail = currentPageElement.querySelector('#companyEmail')?.value || '';
+          break;
+          
+        case 2:
+          pageData.resourceName = currentPageElement.querySelector('#resourceName')?.value || '';
+          pageData.usagePurpose = currentPageElement.querySelector('#usagePurpose')?.value || '';
+          pageData.resourceUrl = currentPageElement.querySelector('#resourceUrl')?.value || '';
+          pageData.category = currentPageElement.querySelector('#category')?.value || '';
+          pageData.tags = currentPageElement.querySelector('#tags')?.value || '';
+          pageData.logoImage = currentPageElement.querySelector('#logoImage')?.files[0] || null;
+          break;
+          
+        case 3:
+          // Collect key features
+          const features = Array.from(currentPageElement.querySelectorAll('textarea[name="keyFeature"]'))
+            .map(textarea => textarea.value.trim())
+            .filter(value => value.length > 0);
+          pageData.keyFeatures = features;
+          
+          // Collect use cases
+          const useCases = Array.from(currentPageElement.querySelectorAll('textarea[name="useCase"]'))
+            .map(textarea => textarea.value.trim())
+            .filter(value => value.length > 0);
+          pageData.useCases = useCases;
+          
+          // Collect learning resources
+          const learningResources = [];
+          currentPageElement.querySelectorAll('.learning-resource-group').forEach(group => {
+            const title = group.querySelector('input[name="learningResourceTitle"]')?.value.trim();
+            const url = group.querySelector('input[name="learningResourceUrl"]')?.value.trim();
+            const type = group.querySelector('select[name="learningResourceType"]')?.value;
+            
+            if (title && url && type) {
+              learningResources.push({ title, url, type });
+            }
+          });
+          pageData.learningResources = learningResources;
+          break;
+      }
+      
+      return pageData;
+    }
+
+    // Save current page data to form state
+    function saveCurrentPageData() {
+      const pageData = collectCurrentPageData();
+      Object.assign(formData, pageData);
+    }
+
+    // Load saved data into current page
+    function loadPageData() {
+      const currentPageElement = document.getElementById(`page-${currentPage}`);
+      
+      switch (currentPage) {
+        case 1:
+          setInputValue(currentPageElement, '#firstName', formData.firstName);
+          setInputValue(currentPageElement, '#lastName', formData.lastName);
+          setInputValue(currentPageElement, '#company', formData.company);
+          setInputValue(currentPageElement, '#phoneNumber', formData.phoneNumber);
+          setInputValue(currentPageElement, '#companyEmail', formData.companyEmail);
+          break;
+          
+        case 2:
+          setInputValue(currentPageElement, '#resourceName', formData.resourceName);
+          setInputValue(currentPageElement, '#usagePurpose', formData.usagePurpose);
+          setInputValue(currentPageElement, '#resourceUrl', formData.resourceUrl);
+          setInputValue(currentPageElement, '#category', formData.category);
+          setInputValue(currentPageElement, '#tags', formData.tags);
+          break;
+          
+        case 3:
+          // Load saved features, use cases, and learning resources if navigating back
+          // This would require more complex logic to rebuild the dynamic form elements
+          break;
+      }
+    }
+
+    // Handle form submission
+    async function handleFormSubmission(e) {
       e.preventDefault();
       
-      const formData = new FormData(e.target);
-      const resourceData = {
-        resourceName: formData.get('resourceName').trim(),
-        usagePurpose: formData.get('usagePurpose').trim(),
-        resourceUrl: formData.get('resourceUrl').trim(),
-        category: formData.get('category'),
-        tags: formData.get('tags') && formData.get('tags').trim() ? formData.get('tags').trim().split(',').map(tag => tag.trim()).filter(Boolean) : [],
-        companyEmail: formData.get('companyEmail').trim()
-      };
-
-      // Hide previous messages
-      document.getElementById('success-message').classList.add('hidden');
-      document.getElementById('error-message').classList.add('hidden');
-
-      // Validate form data
-      if (!resourceData.resourceName || !resourceData.usagePurpose || !resourceData.resourceUrl || !resourceData.companyEmail) {
-        showError('Please fill in all required fields.');
+      // Final validation
+      saveCurrentPageData();
+      const finalValidation = validateCompleteForm();
+      
+      if (!finalValidation.isValid) {
+        showError('Please correct the validation errors before submitting.');
         return;
       }
 
-      if (resourceData.resourceName.length > 50) {
-        showError('Resource name must be 50 characters or less.');
-        return;
-      }
-
-      if (resourceData.usagePurpose.length > 100) {
-        showError('Usage purpose must be 100 characters or less.');
-        return;
-      }
-
-      // URL validation
+      // Show loading state
+      setSubmitButtonLoading(true);
+      
       try {
-        new URL(resourceData.resourceUrl);
-      } catch {
-        showError('Please provide a valid URL.');
-        return;
-      }
+        // Upload logo if provided
+        let logoUploadResult = null;
+        if (formData.logoImage) {
+          if (isS3Configured()) {
+            logoUploadResult = await uploadLogoToS3(formData.logoImage, formData.resourceName);
+          } else {
+            // Use mock upload for development
+            const { mockLogoUpload } = await import('../utils/s3-upload.js');
+            logoUploadResult = await mockLogoUpload(formData.logoImage, formData.resourceName);
+            console.warn('Using mock S3 upload - configure AWS credentials for actual uploads');
+          }
+          
+          if (!logoUploadResult.success) {
+            throw new Error(logoUploadResult.error);
+          }
+        }
 
-      // Email validation
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(resourceData.companyEmail)) {
-        showError('Please provide a valid email address.');
-        return;
-      }
+        // Prepare submission data
+        const submissionData = {
+          submitter: {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            company: formData.company || null,
+            phoneNumber: formData.phoneNumber || null,
+            companyEmail: formData.companyEmail
+          },
+          resource: {
+            resourceName: formData.resourceName,
+            usagePurpose: formData.usagePurpose,
+            resourceUrl: formData.resourceUrl,
+            category: formData.category,
+            logoImage: logoUploadResult ? logoUploadResult.filename : null,
+            tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(Boolean) : []
+          },
+          details: {
+            keyFeatures: formData.keyFeatures,
+            useCases: formData.useCases,
+            learningResources: formData.learningResources
+          },
+          metadata: {
+            submittedAt: new Date().toISOString(),
+            status: 'pending'
+          }
+        };
 
-      try {
-        const submitButton = e.target.querySelector('button[type="submit"]');
-        submitButton.disabled = true;
-        submitButton.textContent = 'Submitting...';
-
-        await submitResource(resourceData);
+        // Submit to backend API
+        const result = await submitResourceSubmission(submissionData);
         
-        // Show success message and reset form
-        document.getElementById('success-message').classList.remove('hidden');
-        e.target.reset();
-        
-        // Scroll to success message
-        document.getElementById('success-message').scrollIntoView({ behavior: 'smooth' });
+        if (result.success) {
+          console.log('Submission successful:', result);
+          showSuccess();
+        } else {
+          throw new Error(result.message || 'Submission failed');
+        }
         
       } catch (error) {
         console.error('Submission error:', error);
         showError(error.message || 'An error occurred while submitting the resource.');
       } finally {
-        const submitButton = e.target.querySelector('button[type="submit"]');
-        submitButton.disabled = false;
-        submitButton.textContent = 'Submit Resource';
+        setSubmitButtonLoading(false);
       }
-    });
+    }
+
+    // Utility functions
+    function setInputValue(container, selector, value) {
+      const input = container.querySelector(selector);
+      if (input && value) {
+        input.value = value;
+      }
+    }
+
+    function clearValidationErrors() {
+      document.querySelectorAll('.error-message').forEach(error => {
+        error.classList.add('hidden');
+        error.textContent = '';
+      });
+    }
+
+    function displayValidationErrors(errors) {
+      Object.keys(errors).forEach(fieldName => {
+        const errorElement = document.querySelector(`[data-field="${fieldName}"]`);
+        if (errorElement) {
+          errorElement.textContent = errors[fieldName];
+          errorElement.classList.remove('hidden');
+        }
+      });
+    }
+
+    function validateCompleteForm() {
+      // Validate all pages
+      const page1Validation = validateFormPage(1, {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        company: formData.company,
+        phoneNumber: formData.phoneNumber,
+        companyEmail: formData.companyEmail
+      });
+
+      const page2Validation = validateFormPage(2, {
+        resourceName: formData.resourceName,
+        usagePurpose: formData.usagePurpose,
+        resourceUrl: formData.resourceUrl,
+        category: formData.category,
+        tags: formData.tags
+      });
+
+      const page3Validation = validateFormPage(3, {
+        keyFeatures: formData.keyFeatures,
+        useCases: formData.useCases,
+        learningResources: formData.learningResources
+      });
+
+      const isValid = page1Validation.isValid && page2Validation.isValid && page3Validation.isValid;
+      const errors = { ...page1Validation.errors, ...page2Validation.errors, ...page3Validation.errors };
+
+      return { isValid, errors };
+    }
+
+    function setSubmitButtonLoading(loading) {
+      const loadingText = submitButton.querySelector('.loading-text');
+      const submitText = submitButton.querySelector('.submit-text');
+      
+      if (loading) {
+        submitText.classList.add('hidden');
+        loadingText.classList.remove('hidden');
+        submitButton.disabled = true;
+      } else {
+        submitText.classList.remove('hidden');
+        loadingText.classList.add('hidden');
+        submitButton.disabled = false;
+      }
+    }
+
+    function showSuccess() {
+      successMessage.classList.remove('hidden');
+      successMessage.classList.add('success-fade-in');
+      errorMessage.classList.add('hidden');
+      successMessage.scrollIntoView({ behavior: 'smooth' });
+      
+      // Reset form
+      form.reset();
+      formData = {
+        // Page 1: Submitter Information
+        firstName: '',
+        lastName: '',
+        company: '',
+        phoneNumber: '',
+        companyEmail: '',
+        
+        // Page 2: Resource Information
+        resourceName: '',
+        usagePurpose: '',
+        resourceUrl: '',
+        category: '',
+        logoImage: null,
+        tags: '',
+        
+        // Page 3: Extended Details
+        keyFeatures: [],
+        useCases: [],
+        learningResources: []
+      };
+      currentPage = 1;
+      updatePageDisplay();
+    }
 
     function showError(message) {
       document.getElementById('error-text').textContent = message;
-      document.getElementById('error-message').classList.remove('hidden');
-      document.getElementById('error-message').scrollIntoView({ behavior: 'smooth' });
+      errorMessage.classList.remove('hidden');
+      successMessage.classList.add('hidden');
+      errorMessage.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function debounce(func, wait) {
+      let timeout;
+      return function executedFunction(...args) {
+        const later = () => {
+          clearTimeout(timeout);
+          func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+      };
     }
   </script>
+</MainLayout> 
+
 </MainLayout>

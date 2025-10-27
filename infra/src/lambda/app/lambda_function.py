@@ -42,7 +42,11 @@ def lambda_handler(event, context):
         if method == 'POST' and 'admin-auth' in path:
             return handle_admin_auth(event, headers, table_name)
         
-        # Route: POST /resources (Submit Resource)
+        # Route: POST /submit-resource (Submit Resource)
+        elif method == 'POST' and path.endswith('/submit-resource'):
+            return handle_submit_resource(event, headers, table_name)
+        
+        # Route: POST /resources (Submit Resource) - Legacy support
         elif method == 'POST' and path.endswith('/resources'):
             return handle_submit_resource(event, headers, table_name)
         

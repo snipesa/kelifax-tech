@@ -1,0 +1,54 @@
+---
+import MinimalLayout from '../../layouts/MinimalLayout.astro';
+
+// Required for static generation
+export async function getStaticPaths() {
+  // Mock resource data for testing
+  const mockResources = {
+    "github": {
+      slug: "github",
+      title: "GitHub",
+      description: "Git-based version control and collaboration platform",
+      category: "development",
+      tags: ["git", "version control", "collaboration"],
+      url: "https://github.com",
+      featured: true,
+      image: "github.png"
+    },
+    "visual-studio-code": {
+      slug: "visual-studio-code", 
+      title: "Visual Studio Code",
+      description: "Free code editor with extensions and debugging",
+      category: "development", 
+      tags: ["code editor", "microsoft", "extensions"],
+      url: "https://code.visualstudio.com",
+      featured: true,
+      image: "vscode.png"
+    }
+  };
+
+  return Object.keys(mockResources).map(slug => ({
+    params: { slug },
+    props: { resource: mockResources[slug] }
+  }));
+}
+
+const { resource } = Astro.props;
+
+if (!resource) {
+  return Astro.redirect('/404');
+}
+
+// No related resources for now
+const relatedResources = [];
+---
+
+<MinimalLayout title={`${resource.title} - Kelifax`}>
+  <h1>{resource.title}</h1>
+  <p>{resource.description}</p>
+  <p>Category: {resource.category}</p>
+  <p>Tags: {resource.tags.join(', ')}</p>
+  <a href={resource.url} target="_blank" rel="noopener noreferrer">
+    Visit {resource.title}
+  </a>
+</MinimalLayout>

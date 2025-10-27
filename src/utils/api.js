@@ -193,6 +193,39 @@ export async function submitResource(resourceData) {
 }
 
 /**
+ * Submit a new resource for review
+ * @param {object} resourceSubmission - Complete resource submission data
+ * @returns {Promise<object>} - Submission response
+ */
+export async function submitResourceSubmission(resourceSubmission) {
+  try {
+    console.log('Resource submission data:', resourceSubmission);
+    
+    const response = await apiRequest('/submit-resource', {
+      method: 'POST',
+      body: JSON.stringify(resourceSubmission),
+    });
+    
+    if (response.success) {
+      return {
+        success: true,
+        message: response.message || 'Resource submitted successfully',
+        data: response.data
+      };
+    } else {
+      return {
+        success: false,
+        message: response.message || 'Failed to submit resource',
+        errors: response.errors
+      };
+    }
+  } catch (error) {
+    console.error('Failed to submit resource:', error);
+    throw error;
+  }
+}
+
+/**
  * Authenticate admin user
  * @param {string} password - Admin password
  * @returns {Promise<object>} - Authentication response with token

@@ -75,3 +75,150 @@ select:focus {
 ::-webkit-scrollbar-thumb:hover {
   background: rgb(107 114 128);
 }
+
+/* Resource Submission Form Styles */
+.form-page {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Progress indicator enhancements */
+.progress-step {
+  position: relative;
+}
+
+.step-circle {
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.step-circle:hover {
+  transform: scale(1.05);
+}
+
+/* Form input enhancements */
+.form-input {
+  transition: all 0.2s ease;
+}
+
+.form-input:focus {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* Character counter styling */
+.character-count {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Logo upload area */
+.logo-upload-area {
+  transition: all 0.2s ease;
+}
+
+.logo-upload-area:hover {
+  background-color: rgb(249 250 251);
+  border-color: rgb(59 130 246);
+}
+
+/* Button animations */
+button {
+  transition: all 0.2s ease;
+}
+
+button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Loading spinner */
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+/* Error message animations */
+.error-message {
+  animation: slideDown 0.2s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Success message animations */
+.success-fade-in {
+  animation: successFadeIn 0.5s ease-out;
+}
+
+@keyframes successFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Dynamic form elements */
+.feature-input-group,
+.use-case-input-group,
+.learning-resource-group {
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .progress-step {
+    margin: 0 -8px;
+  }
+  
+  .step-circle {
+    width: 32px;
+    height: 32px;
+    font-size: 12px;
+  }
+  
+  .step-label {
+    font-size: 12px;
+  }
+}
