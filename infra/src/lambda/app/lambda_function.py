@@ -6,6 +6,7 @@ from app.get_submitted_resources import handle_get_submitted_resources
 from app.update_resource import handle_update_resource
 from app.delete_resource import handle_delete_resource
 from app.get_resource import handle_get_resource
+from app.get_existing_resources import handle_get_existing_resources
 
 def lambda_handler(event, context):
     # print(event)
@@ -46,10 +47,10 @@ def lambda_handler(event, context):
         elif method == 'POST' and path.endswith('/submit-resource'):
             return handle_submit_resource(event, headers, table_name)
         
-        # Route: POST /resources (Submit Resource) - Legacy support
+        # Route: POST /resources existing resources in batches
         elif method == 'POST' and path.endswith('/resources'):
-            return handle_submit_resource(event, headers, table_name)
-        
+            return handle_get_existing_resources(event, headers, table_name)
+
         # Route: GET /resources (Get Submitted Resources for Admin)
         elif method == 'GET' and path.endswith('/resources'):
             return handle_get_submitted_resources(event, headers, table_name)
@@ -65,7 +66,7 @@ def lambda_handler(event, context):
         # Route: POST /get-resource (Get Resource by Slug)
         elif method == 'POST' and path.endswith('/get-resource'):
             return handle_get_resource(event, headers, table_name)
-        
+      
         else:
             return {
                 'statusCode': 404,

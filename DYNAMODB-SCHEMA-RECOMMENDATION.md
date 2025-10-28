@@ -29,7 +29,8 @@
     # METADATA ATTRIBUTES
     "submissionId": "uuid-v4-string",    # String - Unique submission tracking
     "status": "pending",                 # String - pending|approved|rejected
-    "submittedAt": "2025-10-25T10:30:00Z",  # String (ISO 8601)
+    "createdAt": "2025-10-25T10:30:00Z", # String (ISO 8601) - Used as sort key in GSIs
+    "submittedAt": "2025-10-25T10:30:00Z",  # String (ISO 8601) - Same as createdAt for backward compatibility
     "approvedAt": "",                    # String (ISO 8601) - Empty if not approved
     "rejectedAt": "",                    # String (ISO 8601) - Empty if not rejected
     "rejectionReason": "",               # String - Empty if not rejected
@@ -72,29 +73,40 @@
 
 ## 🔍 **Global Secondary Index (GSI) Design**
 
-### **GSI 1: Status Index**
+### **GSI 1: StatusIndex** (CRITICAL - Required)
 ```python
-# For filtering resources by approval status
+# For admin functions and public all-categories listing
 GSI_NAME: "StatusIndex"
 PARTITION_KEY: "status"        # String (pending|approved|rejected)
-SORT_KEY: "submittedAt"        # String (ISO 8601) - For chronological ordering
+SORT_KEY: "createdAt"          # String (ISO 8601) - Consistent chronological ordering
 
 # Query Examples:
-# - Get all pending resources: status = "pending"
-# - Get recently submitted: status = "pending", submittedAt > "2025-10-01"
+# - Get all pending resources (admin): status = "pending"
+# - Get all approved resources (public): status = "approved"
+# - Get recently submitted: status = "pending", createdAt > "2025-10-01"
+# - Pagination works reliably with createdAt sort key
 ```
 
-### **GSI 2: Category Index** (Optional)
+### **GSI 2: CategoryIndex** (RECOMMENDED - For performance)
 ```python
-# For filtering approved resources by category
+# For public category-specific resource listing
 GSI_NAME: "CategoryIndex"
 PARTITION_KEY: "category"      # String (development|design|productivity, etc.)
-SORT_KEY: "approvedAt"         # String (ISO 8601)
+SORT_KEY: "createdAt"          # String (ISO 8601) - Consistent chronological ordering
 
 # Query Examples:
 # - Get all development resources: category = "development"
-# - Get recent design tools: category = "design", approvedAt > "2025-10-01"
+# - Get recent design tools: category = "design", createdAt > "2025-10-01"
+# - Pagination works reliably with createdAt sort key
+# - Filter by status post-query: + FilterExpression status = "approved"
 ```
+
+### **Why createdAt as Sort Key for Both GSIs?**
+1. **Consistent Ordering**: Resources always appear in chronological order
+2. **Reliable Pagination**: No duplicate items across batches
+3. **Admin Workflow**: Perfect for reviewing pending resources chronologically
+4. **User Experience**: Newest approved resources appear first
+5. **Performance**: Optimal for DynamoDB query patterns
 
 ---
 
@@ -165,10 +177,31 @@ resources_list = [json.loads(item) for item in item['learningResources'].split('
 
 ### **Query Patterns Supported**
 1. **Get Resource by Slug**: Direct PK lookup
-2. **List by Status**: GSI query on StatusIndex
-3. **Filter by Category**: GSI query on CategoryIndex (if implemented)
-4. **Text Search**: Scan with filter on searchText (for simple search)
-5. **Analytics Queries**: Filter by submitterDomain, viewCount, etc.
+2. **List All Approved Resources**: GSI query on StatusIndex (status='approved')
+3. **List Approved by Category**: GSI query on CategoryIndex + FilterExpression
+4. **Admin: List Pending Resources**: GSI query on StatusIndex (status='pending')
+5. **Text Search**: Scan with filter on searchText (for simple search)
+6. **Analytics Queries**: Filter by submitterDomain, viewCount, etc.
+
+### **Optimal Query Strategy (Used in get_existing_resources.py)**
+```python
+# For category-specific requests:
+if category_filter != 'all':
+    # Use CategoryIndex - more efficient for specific categories
+    query_params = {
+        'IndexName': 'CategoryIndex',
+        'KeyConditionExpression': Key('category').eq(category_filter),
+        'FilterExpression': Key('status').eq('approved'),  # Post-filter for status
+        'ScanIndexForward': False  # Newest first
+    }
+else:
+    # Use StatusIndex - most efficient for all approved resources
+    query_params = {
+        'IndexName': 'StatusIndex', 
+        'KeyConditionExpression': Key('status').eq('approved'),
+        'ScanIndexForward': False  # Newest first
+    }
+```
 
 ---
 
@@ -223,7 +256,8 @@ def create_dynamo_item(form_data, resource_slug):
         'resourceSlug': resource_slug,
         'submissionId': str(uuid.uuid4()),
         'status': 'pending',
-        'submittedAt': datetime.utcnow().isoformat() + 'Z',
+        'createdAt': datetime.utcnow().isoformat() + 'Z',
+        'submittedAt': datetime.utcnow().isoformat() + 'Z',  # Same as createdAt for backward compatibility
         'approvedAt': '',
         'rejectedAt': '',
         'rejectionReason': '',
