@@ -81,10 +81,9 @@ export const CATEGORIES = [
  * Resource Status Types (for admin)
  */
 export const RESOURCE_STATUS = {
-  SUBMITTED: 'submitted',
+  PENDING: 'pending',
   APPROVED: 'approved', 
-  REJECTED: 'rejected',
-  PENDING: 'pending'
+  REJECTED: 'rejected'
 };
 
 /**

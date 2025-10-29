@@ -4,7 +4,7 @@ import boto3
 def handle_get_submitted_resources(event, headers, table_name):
     """Handle getting submitted resources for admin"""
     query_params = event.get('queryStringParameters') or {}
-    status_filter = query_params.get('status', 'submitted')
+    status_filter = query_params.get('resourceStatus', 'pending')
     
     # Scan DynamoDB for items with the specified status
     dynamodb = boto3.client('dynamodb')
@@ -12,9 +12,9 @@ def handle_get_submitted_resources(event, headers, table_name):
     try:
         response = dynamodb.scan(
             TableName=table_name,
-            FilterExpression='#status = :status',
-            ExpressionAttributeNames={'#status': 'status'},
-            ExpressionAttributeValues={':status': {'S': status_filter}}
+            FilterExpression='#resourceStatus = :resourceStatus',
+            ExpressionAttributeNames={'#resourceStatus': 'resourceStatus'},
+            ExpressionAttributeValues={':resourceStatus': {'S': status_filter}}
         )
         
         # Format the resources from DynamoDB
@@ -23,7 +23,7 @@ def handle_get_submitted_resources(event, headers, table_name):
             resource_data = json.loads(item['resource']['S'])
             formatted_resource = {
                 'resourceSlug': item['resourceSlug']['S'],
-                'status': item['status']['S'],
+                'resourceStatus': item['resourceStatus']['S'],
                 'title': resource_data.get('title', ''),
                 'description': resource_data.get('description', ''),
                 'url': resource_data.get('url', ''),

@@ -15,7 +15,7 @@ def handle_update_resource(event, headers, table_name):
             'message': f'Resource {resource_slug} updated successfully',
             'data': {
                 'resourceSlug': resource_slug,
-                'status': body.get('status', 'approved'),
+                'resourceStatus': body.get('resourceStatus', 'approved'),
                 'updatedAt': datetime.utcnow().isoformat() + 'Z'
             }
         })

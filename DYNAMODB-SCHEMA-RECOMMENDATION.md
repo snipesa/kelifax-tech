@@ -28,7 +28,7 @@
     
     # METADATA ATTRIBUTES
     "submissionId": "uuid-v4-string",    # String - Unique submission tracking
-    "status": "pending",                 # String - pending|approved|rejected
+    "resourceStatus": "pending",         # String - pending|approved|rejected
     "createdAt": "2025-10-25T10:30:00Z", # String (ISO 8601) - Used as sort key in GSIs
     "submittedAt": "2025-10-25T10:30:00Z",  # String (ISO 8601) - Same as createdAt for backward compatibility
     "approvedAt": "",                    # String (ISO 8601) - Empty if not approved
@@ -73,17 +73,17 @@
 
 ## 🔍 **Global Secondary Index (GSI) Design**
 
-### **GSI 1: StatusIndex** (CRITICAL - Required)
+### **GSI 1: ResourceStatusIndex** (CRITICAL - Required)
 ```python
 # For admin functions and public all-categories listing
-GSI_NAME: "StatusIndex"
-PARTITION_KEY: "status"        # String (pending|approved|rejected)
+GSI_NAME: "ResourceStatusIndex"
+PARTITION_KEY: "resourceStatus" # String (pending|approved|rejected)
 SORT_KEY: "createdAt"          # String (ISO 8601) - Consistent chronological ordering
 
 # Query Examples:
-# - Get all pending resources (admin): status = "pending"
-# - Get all approved resources (public): status = "approved"
-# - Get recently submitted: status = "pending", createdAt > "2025-10-01"
+# - Get all pending resources (admin): resourceStatus = "pending"
+# - Get all approved resources (public): resourceStatus = "approved"
+# - Get recently submitted: resourceStatus = "pending", createdAt > "2025-10-01"
 # - Pagination works reliably with createdAt sort key
 ```
 
@@ -98,7 +98,7 @@ SORT_KEY: "createdAt"          # String (ISO 8601) - Consistent chronological or
 # - Get all development resources: category = "development"
 # - Get recent design tools: category = "design", createdAt > "2025-10-01"
 # - Pagination works reliably with createdAt sort key
-# - Filter by status post-query: + FilterExpression status = "approved"
+# - Filter by status post-query: + FilterExpression resourceStatus = "approved"
 ```
 
 ### **Why createdAt as Sort Key for Both GSIs?**
@@ -177,9 +177,9 @@ resources_list = [json.loads(item) for item in item['learningResources'].split('
 
 ### **Query Patterns Supported**
 1. **Get Resource by Slug**: Direct PK lookup
-2. **List All Approved Resources**: GSI query on StatusIndex (status='approved')
+2. **List All Approved Resources**: GSI query on ResourceStatusIndex (resourceStatus='approved')
 3. **List Approved by Category**: GSI query on CategoryIndex + FilterExpression
-4. **Admin: List Pending Resources**: GSI query on StatusIndex (status='pending')
+4. **Admin: List Pending Resources**: GSI query on ResourceStatusIndex (resourceStatus='pending')
 5. **Text Search**: Scan with filter on searchText (for simple search)
 6. **Analytics Queries**: Filter by submitterDomain, viewCount, etc.
 
@@ -191,14 +191,14 @@ if category_filter != 'all':
     query_params = {
         'IndexName': 'CategoryIndex',
         'KeyConditionExpression': Key('category').eq(category_filter),
-        'FilterExpression': Key('status').eq('approved'),  # Post-filter for status
+        'FilterExpression': Key('resourceStatus').eq('approved'),  # Post-filter for status
         'ScanIndexForward': False  # Newest first
     }
 else:
-    # Use StatusIndex - most efficient for all approved resources
+    # Use ResourceStatusIndex - most efficient for all approved resources
     query_params = {
-        'IndexName': 'StatusIndex', 
-        'KeyConditionExpression': Key('status').eq('approved'),
+        'IndexName': 'ResourceStatusIndex', 
+        'KeyConditionExpression': Key('resourceStatus').eq('approved'),
         'ScanIndexForward': False  # Newest first
     }
 ```
@@ -255,7 +255,7 @@ def create_dynamo_item(form_data, resource_slug):
     return {
         'resourceSlug': resource_slug,
         'submissionId': str(uuid.uuid4()),
-        'status': 'pending',
+        'resourceStatus': 'pending',
         'createdAt': datetime.utcnow().isoformat() + 'Z',
         'submittedAt': datetime.utcnow().isoformat() + 'Z',  # Same as createdAt for backward compatibility
         'approvedAt': '',

@@ -6,7 +6,7 @@ from app.get_submitted_resources import handle_get_submitted_resources
 from app.update_resource import handle_update_resource
 from app.delete_resource import handle_delete_resource
 from app.get_resource import handle_get_resource
-from app.get_existing_resources import handle_get_existing_resources
+from app.get_approved_resources import handle_get_approved_resources
 from app.utils import get_parameter
 
 def lambda_handler(event, context):
@@ -50,7 +50,7 @@ def lambda_handler(event, context):
         
         # Route: POST /resources existing resources in batches
         elif method == 'POST' and path.endswith('/resources'):
-            return handle_get_existing_resources(event, headers, table_name)
+            return handle_get_approved_resources(event, headers, table_name)
 
         # Route: GET /resources (Get Submitted Resources for Admin)
         elif method == 'GET' and path.endswith('/resources'):

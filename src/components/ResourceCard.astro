@@ -5,7 +5,6 @@ export interface Props {
   description: string;
   category: string;
   tags: string[];
-  url: string;
   image?: string;
   featured?: boolean;
   keyFeatures?: Array<{
@@ -26,7 +25,6 @@ const {
   description, 
   category, 
   tags, 
-  url, 
   image, 
   featured = false,
   keyFeatures,
@@ -102,21 +100,11 @@ const {
       <div class="flex space-x-2">
         <a 
           href={`/resource/${slug}`}
-          class="inline-flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-900 text-sm font-medium rounded-lg transition-colors"
-        >
-          Details
-        </a>
-        <a 
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
           class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
         >
-          Visit
-          <svg class="ml-1 w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-          </svg>
+          View Details
         </a>
+
       </div>
       
       <button class="text-gray-400 hover:text-red-500 transition-colors" title="Add to favorites">

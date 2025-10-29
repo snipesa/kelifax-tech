@@ -128,7 +128,7 @@ def handle_submit_resource(event, headers, table_name):
             'data': {
                 'resourceSlug': resource_slug,
                 'submissionId': dynamo_item['submissionId']['S'],
-                'status': 'pending',
+                'resourceStatus': 'pending',
                 'logoProcessed': bool(resource.get('logoImage'))
             }
         })
@@ -193,7 +193,7 @@ def create_dynamo_item(form_data, resource_slug):
         
         # Metadata
         'submissionId': {'S': submission_id},
-        'status': {'S': 'pending'},
+        'resourceStatus': {'S': 'pending'},
         'submittedAt': {'S': submission_timestamp},
         'approvedAt': {'S': ''},
         'rejectedAt': {'S': ''},

@@ -5,16 +5,15 @@
         "Item": {
           "resourceSlug": { "S": "visual-studio-code" },
           "submissionId": { "S": "existing-vscode-2025" },
-          "status": { "S": "approved" },
+          "resourceStatus": { "S": "approved" },
           "submittedAt": { "S": "2025-01-01T00:00:00Z" },
           "approvedAt": { "S": "2025-01-01T00:00:00Z" },
-          "rejectedAt": { "S": "" },
-          "rejectionReason": { "S": "" },
+          "createdAt": { "S": "2024-12-15T09:23:45Z" },
+          "updatedAt": { "S": "2025-01-12T14:30:22Z" },
           "submitterFirstName": { "S": "System" },
           "submitterLastName": { "S": "Admin" },
           "submitterEmail": { "S": "admin@kelifax.com" },
           "submitterCompany": { "S": "Kelifax" },
-          "submitterPhone": { "S": "" },
           "submitterDomain": { "S": "kelifax.com" },
           "resourceName": { "S": "Visual Studio Code" },
           "resourceUrl": { "S": "https://code.visualstudio.com" },
@@ -28,7 +27,7 @@
           "searchText": { "S": "visual studio code development code editor microsoft extensions debugging git intellisense syntax highlighting integrated terminal live share remote development" },
           "featured": { "BOOL": true },
           "viewCount": { "N": "0" },
-          "lastViewed": { "S": "" }
+          "lastViewed": { "S": "2025-01-20T16:45:12Z" }
         }
       }
     },
@@ -37,16 +36,15 @@
         "Item": {
           "resourceSlug": { "S": "figma" },
           "submissionId": { "S": "existing-figma-2025" },
-          "status": { "S": "approved" },
+          "resourceStatus": { "S": "approved" },
           "submittedAt": { "S": "2025-01-01T00:00:00Z" },
           "approvedAt": { "S": "2025-01-01T00:00:00Z" },
-          "rejectedAt": { "S": "" },
-          "rejectionReason": { "S": "" },
+          "createdAt": { "S": "2024-11-28T11:15:33Z" },
+          "updatedAt": { "S": "2025-01-08T08:22:17Z" },
           "submitterFirstName": { "S": "System" },
           "submitterLastName": { "S": "Admin" },
           "submitterEmail": { "S": "admin@kelifax.com" },
           "submitterCompany": { "S": "Kelifax" },
-          "submitterPhone": { "S": "" },
           "submitterDomain": { "S": "kelifax.com" },
           "resourceName": { "S": "Figma" },
           "resourceUrl": { "S": "https://figma.com" },
@@ -60,7 +58,7 @@
           "searchText": { "S": "figma design ui design prototyping collaboration vector graphics interface design" },
           "featured": { "BOOL": true },
           "viewCount": { "N": "0" },
-          "lastViewed": { "S": "" }
+          "lastViewed": { "S": "2025-01-18T13:27:45Z" }
         }
       }
     },
@@ -69,16 +67,15 @@
         "Item": {
           "resourceSlug": { "S": "github" },
           "submissionId": { "S": "existing-github-2025" },
-          "status": { "S": "approved" },
+          "resourceStatus": { "S": "approved" },
           "submittedAt": { "S": "2025-01-01T00:00:00Z" },
           "approvedAt": { "S": "2025-01-01T00:00:00Z" },
-          "rejectedAt": { "S": "" },
-          "rejectionReason": { "S": "" },
+          "createdAt": { "S": "2024-12-03T07:42:18Z" },
+          "updatedAt": { "S": "2025-01-15T19:33:51Z" },
           "submitterFirstName": { "S": "System" },
           "submitterLastName": { "S": "Admin" },
           "submitterEmail": { "S": "admin@kelifax.com" },
           "submitterCompany": { "S": "Kelifax" },
-          "submitterPhone": { "S": "" },
           "submitterDomain": { "S": "kelifax.com" },
           "resourceName": { "S": "GitHub" },
           "resourceUrl": { "S": "https://github.com" },
@@ -92,7 +89,7 @@
           "searchText": { "S": "github development git version control collaboration open source ci cd github actions github copilot code review automation ai assistant repository management" },
           "featured": { "BOOL": true },
           "viewCount": { "N": "0" },
-          "lastViewed": { "S": "" }
+          "lastViewed": { "S": "2025-01-22T10:14:29Z" }
         }
       }
     },
@@ -101,16 +98,15 @@
         "Item": {
           "resourceSlug": { "S": "notion" },
           "submissionId": { "S": "existing-notion-2025" },
-          "status": { "S": "approved" },
+          "resourceStatus": { "S": "approved" },
           "submittedAt": { "S": "2025-01-01T00:00:00Z" },
           "approvedAt": { "S": "2025-01-01T00:00:00Z" },
-          "rejectedAt": { "S": "" },
-          "rejectionReason": { "S": "" },
+          "createdAt": { "S": "2024-12-20T15:18:07Z" },
+          "updatedAt": { "S": "2025-01-05T12:45:33Z" },
           "submitterFirstName": { "S": "System" },
           "submitterLastName": { "S": "Admin" },
           "submitterEmail": { "S": "admin@kelifax.com" },
           "submitterCompany": { "S": "Kelifax" },
-          "submitterPhone": { "S": "" },
           "submitterDomain": { "S": "kelifax.com" },
           "resourceName": { "S": "Notion" },
           "resourceUrl": { "S": "https://notion.so" },
@@ -124,7 +120,7 @@
           "searchText": { "S": "notion productivity notes project management collaboration database wiki workspace" },
           "featured": { "BOOL": false },
           "viewCount": { "N": "0" },
-          "lastViewed": { "S": "" }
+          "lastViewed": { "S": "2025-01-17T09:52:18Z" }
         }
       }
     },
@@ -133,16 +129,15 @@
         "Item": {
           "resourceSlug": { "S": "tailwind-css" },
           "submissionId": { "S": "existing-tailwind-2025" },
-          "status": { "S": "approved" },
+          "resourceStatus": { "S": "approved" },
           "submittedAt": { "S": "2025-01-01T00:00:00Z" },
           "approvedAt": { "S": "2025-01-01T00:00:00Z" },
-          "rejectedAt": { "S": "" },
-          "rejectionReason": { "S": "" },
+          "createdAt": { "S": "2024-11-10T13:55:41Z" },
+          "updatedAt": { "S": "2025-01-11T17:28:09Z" },
           "submitterFirstName": { "S": "System" },
           "submitterLastName": { "S": "Admin" },
           "submitterEmail": { "S": "admin@kelifax.com" },
           "submitterCompany": { "S": "Kelifax" },
-          "submitterPhone": { "S": "" },
           "submitterDomain": { "S": "kelifax.com" },
           "resourceName": { "S": "Tailwind CSS" },
           "resourceUrl": { "S": "https://tailwindcss.com" },
@@ -156,7 +151,7 @@
           "searchText": { "S": "tailwind css development css framework utility-first responsive design customizable" },
           "featured": { "BOOL": false },
           "viewCount": { "N": "0" },
-          "lastViewed": { "S": "" }
+          "lastViewed": { "S": "2025-01-14T11:39:57Z" }
         }
       }
     },
@@ -165,16 +160,15 @@
         "Item": {
           "resourceSlug": { "S": "coursera" },
           "submissionId": { "S": "existing-coursera-2025" },
-          "status": { "S": "approved" },
+          "resourceStatus": { "S": "approved" },
           "submittedAt": { "S": "2025-01-01T00:00:00Z" },
           "approvedAt": { "S": "2025-01-01T00:00:00Z" },
-          "rejectedAt": { "S": "" },
-          "rejectionReason": { "S": "" },
+          "createdAt": { "S": "2024-12-08T16:33:22Z" },
+          "updatedAt": { "S": "2025-01-09T14:17:46Z" },
           "submitterFirstName": { "S": "System" },
           "submitterLastName": { "S": "Admin" },
           "submitterEmail": { "S": "admin@kelifax.com" },
           "submitterCompany": { "S": "Kelifax" },
-          "submitterPhone": { "S": "" },
           "submitterDomain": { "S": "kelifax.com" },
           "resourceName": { "S": "Coursera" },
           "resourceUrl": { "S": "https://coursera.org" },
@@ -188,7 +182,7 @@
           "searchText": { "S": "coursera learning online courses universities certificates degrees skills education" },
           "featured": { "BOOL": false },
           "viewCount": { "N": "0" },
-          "lastViewed": { "S": "" }
+          "lastViewed": { "S": "2025-01-19T15:21:34Z" }
         }
       }
     },
@@ -197,16 +191,15 @@
         "Item": {
           "resourceSlug": { "S": "postman" },
           "submissionId": { "S": "existing-postman-2025" },
-          "status": { "S": "approved" },
+          "resourceStatus": { "S": "approved" },
           "submittedAt": { "S": "2025-01-01T00:00:00Z" },
           "approvedAt": { "S": "2025-01-01T00:00:00Z" },
-          "rejectedAt": { "S": "" },
-          "rejectionReason": { "S": "" },
+          "createdAt": { "S": "2024-11-22T10:47:15Z" },
+          "updatedAt": { "S": "2025-01-06T18:52:28Z" },
           "submitterFirstName": { "S": "System" },
           "submitterLastName": { "S": "Admin" },
           "submitterEmail": { "S": "admin@kelifax.com" },
           "submitterCompany": { "S": "Kelifax" },
-          "submitterPhone": { "S": "" },
           "submitterDomain": { "S": "kelifax.com" },
           "resourceName": { "S": "Postman" },
           "resourceUrl": { "S": "https://postman.com" },
@@ -220,7 +213,7 @@
           "searchText": { "S": "postman development api testing api development documentation collaboration" },
           "featured": { "BOOL": false },
           "viewCount": { "N": "0" },
-          "lastViewed": { "S": "" }
+          "lastViewed": { "S": "2025-01-16T12:08:42Z" }
         }
       }
     },
@@ -229,16 +222,15 @@
         "Item": {
           "resourceSlug": { "S": "canva" },
           "submissionId": { "S": "existing-canva-2025" },
-          "status": { "S": "approved" },
+          "resourceStatus": { "S": "approved" },
           "submittedAt": { "S": "2025-01-01T00:00:00Z" },
           "approvedAt": { "S": "2025-01-01T00:00:00Z" },
-          "rejectedAt": { "S": "" },
-          "rejectionReason": { "S": "" },
+          "createdAt": { "S": "2024-12-12T08:29:53Z" },
+          "updatedAt": { "S": "2025-01-07T20:41:16Z" },
           "submitterFirstName": { "S": "System" },
           "submitterLastName": { "S": "Admin" },
           "submitterEmail": { "S": "admin@kelifax.com" },
           "submitterCompany": { "S": "Kelifax" },
-          "submitterPhone": { "S": "" },
           "submitterDomain": { "S": "kelifax.com" },
           "resourceName": { "S": "Canva" },
           "resourceUrl": { "S": "https://canva.com" },
@@ -252,7 +244,7 @@
           "searchText": { "S": "canva design graphic design templates social media presentations easy-to-use" },
           "featured": { "BOOL": false },
           "viewCount": { "N": "0" },
-          "lastViewed": { "S": "" }
+          "lastViewed": { "S": "2025-01-21T14:35:27Z" }
         }
       }
     },
@@ -261,16 +253,15 @@
         "Item": {
           "resourceSlug": { "S": "stack-overflow" },
           "submissionId": { "S": "existing-stackoverflow-2025" },
-          "status": { "S": "approved" },
+          "resourceStatus": { "S": "approved" },
           "submittedAt": { "S": "2025-01-01T00:00:00Z" },
           "approvedAt": { "S": "2025-01-01T00:00:00Z" },
-          "rejectedAt": { "S": "" },
-          "rejectionReason": { "S": "" },
+          "createdAt": { "S": "2024-11-05T14:12:38Z" },
+          "updatedAt": { "S": "2025-01-13T11:25:49Z" },
           "submitterFirstName": { "S": "System" },
           "submitterLastName": { "S": "Admin" },
           "submitterEmail": { "S": "admin@kelifax.com" },
           "submitterCompany": { "S": "Kelifax" },
-          "submitterPhone": { "S": "" },
           "submitterDomain": { "S": "kelifax.com" },
           "resourceName": { "S": "Stack Overflow" },
           "resourceUrl": { "S": "https://stackoverflow.com" },
@@ -284,7 +275,7 @@
           "searchText": { "S": "stack overflow learning programming qa community problem solving knowledge sharing" },
           "featured": { "BOOL": true },
           "viewCount": { "N": "0" },
-          "lastViewed": { "S": "" }
+          "lastViewed": { "S": "2025-01-23T17:48:13Z" }
         }
       }
     },
@@ -293,16 +284,15 @@
         "Item": {
           "resourceSlug": { "S": "slack" },
           "submissionId": { "S": "existing-slack-2025" },
-          "status": { "S": "approved" },
+          "resourceStatus": { "S": "approved" },
           "submittedAt": { "S": "2025-01-01T00:00:00Z" },
           "approvedAt": { "S": "2025-01-01T00:00:00Z" },
-          "rejectedAt": { "S": "" },
-          "rejectionReason": { "S": "" },
+          "createdAt": { "S": "2024-11-18T12:07:24Z" },
+          "updatedAt": { "S": "2025-01-10T16:19:55Z" },
           "submitterFirstName": { "S": "System" },
           "submitterLastName": { "S": "Admin" },
           "submitterEmail": { "S": "admin@kelifax.com" },
           "submitterCompany": { "S": "Kelifax" },
-          "submitterPhone": { "S": "" },
           "submitterDomain": { "S": "kelifax.com" },
           "resourceName": { "S": "Slack" },
           "resourceUrl": { "S": "https://slack.com" },
@@ -316,7 +306,7 @@
           "searchText": { "S": "slack productivity team communication messaging collaboration integrations business remote work channels file sharing" },
           "featured": { "BOOL": false },
           "viewCount": { "N": "0" },
-          "lastViewed": { "S": "" }
+          "lastViewed": { "S": "2025-01-24T09:33:08Z" }
         }
       }
     }

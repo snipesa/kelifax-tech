@@ -1,88 +1,33 @@
+
 {
-    "slug": "visual-studio-code",
-    "title": "Visual Studio Code",
-    "description": "This is just an example of how the detailed json which is saved in dynamodb looks like for development.",
-    "category": "development",
-    "tags": [
-      "code editor",
-      "microsoft",
-      "extensions",
-      "debugging",
-      "git",
-      "intellisense",
-      "syntax highlighting",
-      "integrated terminal",
-      "live share",
-      "remote development",
-      "multi-language support",
-      "code completion",
-      "refactoring",
-      "linting",
-      "version control"
-    ],
-    "url": "https://code.visualstudio.com",
-    "featured": true,
-    "image": "vscode.png",
-    "keyFeatures": [
-      {
-        "title": "IntelliSense Code Completion",
-        "description": "Smart code completion with syntax highlighting, auto-completion, and intelligent suggestions based on variable types and function definitions."
-      },
-      {
-        "title": "Extensive Extension Marketplace",
-        "description": "Thousands of extensions for languages, themes, debuggers, and tools to customize and enhance your coding experience."
-      },
-      {
-        "title": "Built-in Git Integration",
-        "description": "Native Git support with visual diff editor, staging, branching, and seamless version control workflow."
-      },
-      {
-        "title": "Powerful Debugging Tools",
-        "description": "Advanced debugging capabilities with breakpoints, call stacks, variable inspection, and multi-language debugging support."
-      },
-      {
-        "title": "Integrated Terminal",
-        "description": "Built-in terminal that supports multiple shells and allows you to run commands without leaving the editor."
-      },
-      {
-        "title": "Live Share Collaboration",
-        "description": "Real-time collaborative editing and debugging sessions with other developers, including shared terminals and servers."
-      },
-      {
-        "title": "Remote Development",
-        "description": "Develop on remote machines, containers, or WSL with the same local VS Code experience through remote extensions."
-      }
-    ],
-    "useCases": [
-      "Full-stack web development",
-      "Mobile app development",
-      "Data science and machine learning projects",
-      "DevOps and infrastructure as code",
-      "API development and testing",
-      "Database management and queries",
-      "Documentation writing with Markdown",
-      "Multi-language programming projects"
-    ],
-    "learningResources": [
-      {
-        "title": "VS Code Official Documentation",
-        "url": "https://code.visualstudio.com/docs",
-        "type": "Documentation"
-      },
-      {
-        "title": "VS Code Tips and Tricks",
-        "url": "https://code.visualstudio.com/docs/getstarted/tips-and-tricks",
-        "type": "Guide"
-      },
-      {
-        "title": "Extension Development Guide",
-        "url": "https://code.visualstudio.com/api",
-        "type": "API Documentation"
-      },
-      {
-        "title": "VS Code YouTube Channel",
-        "url": "https://www.youtube.com/channel/UCs5Y5_7XK8HLDX0SLNwkd3w",
-        "type": "Video Tutorials"
-      }
-    ]
+  "PutRequest": {
+    "Item": {
+      "resourceSlug": { "S": "figma" },
+      "submissionId": { "S": "existing-figma-2025" },
+      "status": { "S": "approved" },
+      "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+      "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+      "rejectedAt": { "S": "" },
+      "rejectionReason": { "S": "" },
+      "submitterFirstName": { "S": "System" },
+      "submitterLastName": { "S": "Admin" },
+      "submitterEmail": { "S": "admin@kelifax.com" },
+      "submitterCompany": { "S": "Kelifax" },
+      "submitterPhone": { "S": "" },
+      "submitterDomain": { "S": "kelifax.com" },
+      "resourceName": { "S": "Figma" },
+      "resourceUrl": { "S": "https://figma.com" },
+      "usagePurpose": { "S": "Collaborative interface design tool with real-time collaboration, prototyping, and design system capabilities." },
+      "category": { "S": "design" },
+      "logoImage": { "S": "figma.png" },
+      "tags": { "S": "ui design,prototyping,collaboration,vector graphics" },
+      "keyFeatures": { "S": "Real-time Collaboration - Multiple designers can work on the same file simultaneously|Vector Graphics Tools - Professional vector editing tools for creating scalable designs|Prototyping - Interactive prototypes with animations and transitions|Design Systems - Reusable components and styles for consistent design" },
+      "useCases": { "S": "UI/UX design for web and mobile applications|Design system creation and maintenance|Interactive prototyping and user testing|Collaborative design workflow with teams" },
+      "learningResources": { "S": "{\"title\":\"Figma Academy\",\"url\":\"https://help.figma.com\",\"type\":\"tutorial\"}|{\"title\":\"Figma Community\",\"url\":\"https://www.figma.com/community\",\"type\":\"documentation\"}" },
+      "searchText": { "S": "figma design ui design prototyping collaboration vector graphics interface design" },
+      "featured": { "BOOL": true },
+      "viewCount": { "N": "0" },
+      "lastViewed": { "S": "" }
+    }
   }
+}

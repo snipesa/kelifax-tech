@@ -22,6 +22,8 @@ async function apiRequest(endpoint, options = {}) {
   const apiKey = API_CONFIG.API_KEY;
   if (apiKey) {
     defaultHeaders['X-Api-Key'] = apiKey;
+  } else if (API_CONFIG.USE_API) {
+    console.warn('API is enabled but no API key is configured. Requests may fail.');
   }
 
   const defaultOptions = {
@@ -64,8 +66,55 @@ async function apiRequest(endpoint, options = {}) {
 }
 
 /**
- * Fetch resources with optional admin privileges
- * @param {object} filters - Optional filters (status, category, etc.)
+ * Get existing approved resources in batches for public listing
+ * @param {object} options - Request options
+ * @param {number} options.batchSize - Number of resources per batch (default: 10, max: 50)
+ * @param {string} options.pageToken - Token for pagination (optional)
+ * @param {string} options.category - Category filter ('all' or specific category)
+ * @returns {Promise<object>} - Response with resources and pagination info
+ */
+export async function getExistingResources(options = {}) {
+  const { batchSize = 10, pageToken = null, category = 'all' } = options;
+  
+  // Check if API is enabled
+  if (API_CONFIG.USE_API) {
+    try {
+      const requestBody = {
+        batchSize: Math.min(batchSize, 50), // Enforce max batch size
+        category: category
+      };
+      
+      // Add page token if provided
+      if (pageToken) {
+        requestBody.pageToken = pageToken;
+      }
+      
+      const response = await apiRequest('/resources', {
+        method: 'POST',
+        body: JSON.stringify(requestBody)
+      });
+      
+      if (response.success && response.data) {
+        return {
+          resources: response.data.resources || [],
+          pagination: response.data.pagination || {}
+        };
+      } else {
+        throw new Error(response.message || 'Failed to fetch resources');
+      }
+    } catch (error) {
+      console.error('Failed to fetch resources from API:', error);
+      throw error;
+    }
+  }
+  
+  // Throw error if API is disabled - no fallback to local data
+  throw new Error('API is disabled. Please enable API access to load resources.');
+}
+
+/**
+ * Fetch resources with optional admin privileges (legacy function for admin use)
+ * @param {object} filters - Optional filters (resourceStatus, category, etc.)
  * @param {string} authToken - Optional admin authentication token
  * @returns {Promise<Array>} - Array of resources
  */
@@ -97,18 +146,9 @@ export async function getResources(filters = {}, authToken = null) {
     }
   }
   
-  // For main site (no admin token), use local resources.json
-  try {
-    const response = await fetch('/src/data/resources.json');
-    if (!response.ok) {
-      throw new Error(`Failed to fetch resources.json: ${response.status}`);
-    }
-    const data = await response.json();
-    return Array.isArray(data) ? data : (data.resources || []);
-  } catch (error) {
-    console.error('Failed to load local resources:', error);
-    return [];
-  }
+  // For non-admin usage, use the batched function
+  const result = await getExistingResources({ batchSize: 50 });
+  return result.resources;
 }
 
 /**
@@ -262,25 +302,25 @@ export async function authenticateAdmin(password) {
 /**
  * Update resource status (admin only)
  * @param {string} resourceSlug - Resource slug
- * @param {string} status - New status (approved, rejected, submitted)
+ * @param {string} resourceStatus - New status (approved, rejected, pending)
  * @param {string} authToken - Admin authentication token
  * @returns {Promise<object>} - Update response
  */
-export async function updateResourceStatus(resourceSlug, status, authToken) {
+export async function updateResourceStatus(resourceSlug, resourceStatus, authToken) {
   try {
     const response = await apiRequest(`/resources/${resourceSlug}`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${authToken}`,
       },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ resourceStatus }),
     });
     
     // Handle the response format from your Lambda function
     if (response.success) {
       return {
         success: true,
-        message: response.message || `Status updated to ${status}`
+        message: response.message || `Resource status updated to ${resourceStatus}`
       };
     } else {
       return {

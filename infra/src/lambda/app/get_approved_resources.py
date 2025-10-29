@@ -10,14 +10,14 @@ def decimal_default(obj):
         return float(obj)
     raise TypeError
 
-def handle_get_existing_resources(event, headers, table_name):
+def handle_get_approved_resources(event, headers, table_name):
     """
     Get approved resources for public listing page in batches
     Returns minimal data: slug, title, description, category, tags, featured, image
     """
     # Configuration variables
     region = 'us-east-1'
-    status_gsi_name = 'StatusIndex'      # status + createdAt
+    status_gsi_name = 'ResourceStatusIndex'      # resourceStatus + createdAt
     category_gsi_name = 'CategoryIndex'  # category + createdAt
     default_batch_size = 10
     max_batch_size = 50
@@ -62,28 +62,28 @@ def handle_get_existing_resources(event, headers, table_name):
             query_params_dynamo = {
                 'IndexName': category_gsi_name,
                 'KeyConditionExpression': Key('category').eq(category_filter),
-                'FilterExpression': Key('status').eq('approved'),
+                'FilterExpression': Key('resourceStatus').eq('approved'),
                 'ScanIndexForward': False,  # Newest first (createdAt descending)
                 'Limit': batch_size,
                 'ProjectionExpression': (
                     'resourceSlug, resourceName, usagePurpose, category, '
-                    'tags, featured, logoImage, status, createdAt'
+                    'tags, featured, logoImage, resourceStatus, createdAt'
                 )
             }
             print(f"Using CategoryIndex for category: {category_filter}")
         else:
-            # Use StatusIndex for all categories (most efficient for approved-only)
+            # Use ResourceStatusIndex for all categories (most efficient for approved-only)
             query_params_dynamo = {
                 'IndexName': status_gsi_name,
-                'KeyConditionExpression': Key('status').eq('approved'),
+                'KeyConditionExpression': Key('resourceStatus').eq('approved'),
                 'ScanIndexForward': False,  # Newest first (createdAt descending)
                 'Limit': batch_size,
                 'ProjectionExpression': (
-                    'resourceSlug, resourceName, usagePurpose, category, '
-                    'tags, featured, logoImage, status, createdAt'
+                    'resourceSlug, resourceName, usagePurpose, resourceUrl, category, '
+                    'tags, featured, logoImage, resourceStatus, createdAt'
                 )
             }
-            print("Using StatusIndex for all approved resources")
+            print("Using ResourceStatusIndex for all approved resources")
         
         if exclusive_start_key:
             query_params_dynamo['ExclusiveStartKey'] = exclusive_start_key
@@ -156,7 +156,7 @@ def handle_get_existing_resources(event, headers, table_name):
         }
         
     except Exception as e:
-        print(f"Error in handle_get_existing_resources: {str(e)}")
+        print(f"Error in handle_get_approved_resources: {str(e)}")
         return {
             'statusCode': 500,
             'headers': headers,

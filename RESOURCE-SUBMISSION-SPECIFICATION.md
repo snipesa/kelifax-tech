@@ -212,7 +212,7 @@ learningResources.forEach((resource, index) => {
   "metadata": {
     "resourceSlug": "amazing-dev-tool", // Generated from resource name for DynamoDB primary key
     "submittedAt": "2025-10-25T10:30:00Z",
-    "status": "pending", // pending|approved|rejected
+    "resourceStatus": "pending", // pending|approved|rejected
     "submissionId": "uuid-generated-id"
   }
 }
@@ -243,7 +243,7 @@ The complete JSON structure shown above in "Data Flow & Storage Structure"
   "data": {
     "resourceSlug": "amazing-dev-tool",
     "submissionId": "uuid-generated-id",
-    "status": "pending",
+    "resourceStatus": "pending",
     "logoProcessed": true // Indicates if logo was moved from temp to pending
   }
 }
@@ -301,8 +301,8 @@ The complete JSON structure shown above in "Data Flow & Storage Structure"
 Table: SubmittedResources
 Primary Key: resourceSlug (String) // URL-friendly slug generated from resource name
 
-Global Secondary Index (GSI): StatusIndex
-- Partition Key: status (String) // For filtering by pending|approved|rejected
+Global Secondary Index (GSI): ResourceStatusIndex
+- Partition Key: resourceStatus (String) // For filtering by pending|approved|rejected
 - Sort Key: submittedAt (String) // For chronological ordering
 
 Additional Fields:
@@ -311,6 +311,7 @@ Additional Fields:
 - resourceInfo (Map)
 - resourceDetails (Map)
 - submittedAt (String - ISO Date)
+- resourceStatus (String) // pending|approved|rejected
 - approvedAt (String - ISO Date, nullable)
 - rejectedAt (String - ISO Date, nullable)
 - rejectionReason (String, nullable)

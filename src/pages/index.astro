@@ -1,12 +1,12 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 import ResourceCard from '../components/ResourceCard.astro';
-import resourcesData from '../data/resources.json';
 
-// Get featured resources for homepage
-const featuredResources = resourcesData.filter(r => r.featured).slice(0, 6);
-const totalResources = resourcesData.length;
-const categories = [...new Set(resourcesData.map(r => r.category))];
+// Since we're using API-only approach, we'll load resources client-side
+// Set default values for server-side rendering
+const featuredResources = [];
+const totalResources = '50'; // Will be updated client-side
+const categories = ['development', 'other']; // Basic categories
 ---
 
 <MainLayout title="Kelifax - Curated Tech Resources" description="Discover verified and categorized digital tools, platforms, and learning materials for developers, students, and technology enthusiasts." currentPage="home">
@@ -32,7 +32,7 @@ const categories = [...new Set(resourcesData.map(r => r.category))];
             href="/resources" 
             class="bg-white text-blue-600 hover:bg-gray-50 font-semibold py-4 px-8 rounded-lg transition-colors inline-flex items-center justify-center"
           >
-            Browse {totalResources}+ Resources
+            Browse Resources
           </a>
           <a 
             href="/submit" 
@@ -50,11 +50,11 @@ const categories = [...new Set(resourcesData.map(r => r.category))];
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
         <div>
-          <div class="text-4xl font-bold text-blue-600 mb-2">{totalResources}+</div>
+          <div id="total-resources" class="text-4xl font-bold text-blue-600 mb-2">50+</div>
           <div class="text-lg text-gray-600">Curated Resources</div>
         </div>
         <div>
-          <div class="text-4xl font-bold text-blue-600 mb-2">{categories.length}</div>
+          <div id="total-categories" class="text-4xl font-bold text-blue-600 mb-2">2+</div>
           <div class="text-lg text-gray-600">Categories</div>
         </div>
         <div>
@@ -77,19 +77,14 @@ const categories = [...new Set(resourcesData.map(r => r.category))];
         </p>
       </div>
       
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-        {featuredResources.map((resource) => (
-          <ResourceCard
-            slug={resource.slug}
-            title={resource.title}
-            description={resource.description}
-            category={resource.category}
-            tags={resource.tags}
-            url={resource.url}
-            image={resource.image}
-            featured={resource.featured}
-          />
-        ))}
+      <div id="featured-resources" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
+        <!-- Featured resources will be loaded here -->
+        <div class="col-span-full text-center py-8">
+          <div class="inline-flex items-center space-x-2">
+            <div class="w-4 h-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
+            <span class="text-gray-600">Loading featured resources...</span>
+          </div>
+        </div>
       </div>
 
       <div class="text-center">
@@ -118,32 +113,14 @@ const categories = [...new Set(resourcesData.map(r => r.category))];
         </p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {categories.map((category) => {
-          const categoryCount = resourcesData.filter(r => r.category === category).length;
-          const categoryIcons = {
-            'development': '💻',
-            'design': '🎨', 
-            'productivity': '⚡',
-            'learning': '📚',
-            'other': '🔧'
-          };
-          
-          return (
-            <a 
-              href={`/resources?category=${category}`}
-              class="bg-gray-50 hover:bg-gray-100 p-6 rounded-lg transition-colors text-center group"
-            >
-              <div class="text-4xl mb-3">{categoryIcons[category] || '🔧'}</div>
-              <h3 class="text-lg font-semibold text-gray-900 mb-2 capitalize group-hover:text-blue-600 transition-colors">
-                {category}
-              </h3>
-              <p class="text-gray-600 text-sm">
-                {categoryCount} resource{categoryCount !== 1 ? 's' : ''}
-              </p>
-            </a>
-          );
-        })}
+      <div id="categories-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Categories will be loaded here -->
+        <div class="col-span-full text-center py-8">
+          <div class="inline-flex items-center space-x-2">
+            <div class="w-4 h-4 animate-spin rounded-full border-2 border-gray-300 border-t-blue-600"></div>
+            <span class="text-gray-600">Loading categories...</span>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -168,4 +145,257 @@ const categories = [...new Set(resourcesData.map(r => r.category))];
       </a>
     </div>
   </section>
+
+  <script>
+    // API Configuration - using Astro environment variables
+    const API_CONFIG = {
+      USE_API: import.meta.env.PUBLIC_USE_API === 'true',
+      BASE_URL: import.meta.env.PUBLIC_API_URL || 'https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev',
+      API_KEY: import.meta.env.PUBLIC_API_KEY,
+    };
+
+    // Generic API request function
+    async function apiRequest(endpoint, options = {}) {
+      const url = `${API_CONFIG.BASE_URL}${endpoint}`;
+      
+      const defaultHeaders = {
+        'Content-Type': 'application/json',
+      };
+      
+      if (API_CONFIG.API_KEY) {
+        defaultHeaders['X-Api-Key'] = API_CONFIG.API_KEY;
+      }
+
+      const config = {
+        headers: defaultHeaders,
+        ...options,
+        headers: {
+          ...defaultHeaders,
+          ...options.headers,
+        },
+      };
+
+      try {
+        const response = await fetch(url, config);
+        
+        if (!response.ok) {
+          throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('API Request Error:', error);
+        throw error;
+      }
+    }
+
+    // Get resources from API
+    async function getHomePageResources() {
+      if (!API_CONFIG.USE_API) {
+        throw new Error('API is disabled');
+      }
+      
+      try {
+        const response = await apiRequest('/resources', {
+          method: 'POST',
+          body: JSON.stringify({
+            batchSize: 50, // Get more resources to calculate stats
+            category: 'all'
+          })
+        });
+        
+        if (response.success && response.data) {
+          return response.data.resources || [];
+        } else {
+          throw new Error(response.message || 'Failed to fetch resources');
+        }
+      } catch (error) {
+        console.error('Failed to fetch resources:', error);
+        throw error;
+      }
+    }
+
+    // Create resource card HTML
+    function createResourceCardHTML(resource) {
+      const imageUrl = resource.image ? `/logos/${resource.image}` : '/logos/kelifax.png';
+      const tagsHTML = resource.tags?.slice(0, 3).map(tag => 
+        `<span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-md">${tag}</span>`
+      ).join('') || '';
+      
+      return `
+        <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden ring-2 ring-blue-500">
+          <div class="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
+            <img 
+              src="${imageUrl}" 
+              alt="${resource.title} logo"
+              class="w-full h-full object-contain p-4"
+              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+            />
+            <div class="w-full h-full flex items-center justify-center" style="display: none;">
+              <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
+                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                </svg>
+              </div>
+            </div>
+            
+            <div class="absolute top-4 left-4">
+              <span class="bg-blue-600 text-white text-sm font-semibold px-3 py-1 rounded-full capitalize">
+                ${resource.category}
+              </span>
+            </div>
+            
+            <div class="absolute top-4 right-4">
+              <span class="bg-yellow-400 text-yellow-900 text-sm font-semibold px-3 py-1 rounded-full">
+                Featured
+              </span>
+            </div>
+          </div>
+
+          <div class="p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-3 line-clamp-1">
+              <a href="/resource/${resource.slug}" class="hover:text-blue-600 transition-colors">
+                ${resource.title}
+              </a>
+            </h3>
+            
+            <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+              ${resource.description}
+            </p>
+
+            <div class="flex flex-wrap gap-2 mb-4">
+              ${tagsHTML}
+              ${resource.tags?.length > 3 ? `<span class="bg-gray-100 text-gray-500 text-xs px-2 py-1 rounded-md">+${resource.tags.length - 3}</span>` : ''}
+            </div>
+
+            <div class="flex items-center justify-between">
+              <div class="flex space-x-2">
+                <a 
+                  href="/resource/${resource.slug}"
+                  class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors"
+                >
+                  View Details
+                </a>
+              </div>
+              
+              <button class="text-gray-400 hover:text-red-500 transition-colors" title="Add to favorites">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Create category card HTML
+    function createCategoryCardHTML(category, count) {
+      const categoryIcons = {
+        'development': '💻',
+        'design': '🎨', 
+        'productivity': '⚡',
+        'learning': '📚',
+        'other': '🔧'
+      };
+      
+      return `
+        <a 
+          href="/resources?category=${category}"
+          class="bg-gray-50 hover:bg-gray-100 p-6 rounded-lg transition-colors text-center group"
+        >
+          <div class="text-4xl mb-3">${categoryIcons[category] || '🔧'}</div>
+          <h3 class="text-lg font-semibold text-gray-900 mb-2 capitalize group-hover:text-blue-600 transition-colors">
+            ${category}
+          </h3>
+          <p class="text-gray-600 text-sm">
+            ${count} resource${count !== 1 ? 's' : ''}
+          </p>
+        </a>
+      `;
+    }
+
+    // Load and render homepage data
+    async function loadHomePageData() {
+      try {
+        const resources = await getHomePageResources();
+        
+        // Get featured resources
+        const featuredResources = resources.filter(r => r.featured).slice(0, 6);
+        
+        // Calculate stats
+        const totalResources = resources.length;
+        const categories = [...new Set(resources.map(r => r.category))];
+        
+        // Update stats
+        document.getElementById('total-resources').textContent = `${totalResources}+`;
+        document.getElementById('total-categories').textContent = `${categories.length}+`;
+        
+        // Render featured resources
+        const featuredGrid = document.getElementById('featured-resources');
+        if (featuredResources.length > 0) {
+          featuredGrid.innerHTML = featuredResources.map(resource => 
+            createResourceCardHTML(resource)
+          ).join('');
+        } else {
+          featuredGrid.innerHTML = `
+            <div class="col-span-full text-center py-8">
+              <p class="text-gray-600">No featured resources available at the moment.</p>
+            </div>
+          `;
+        }
+        
+        // Render categories
+        const categoriesGrid = document.getElementById('categories-grid');
+        const categoryStats = {};
+        resources.forEach(r => {
+          categoryStats[r.category] = (categoryStats[r.category] || 0) + 1;
+        });
+        
+        categoriesGrid.innerHTML = categories.map(category => 
+          createCategoryCardHTML(category, categoryStats[category] || 0)
+        ).join('');
+        
+      } catch (error) {
+        console.error('Error loading homepage data:', error);
+        
+        // Show error state
+        document.getElementById('featured-resources').innerHTML = `
+          <div class="col-span-full text-center py-8">
+            <p class="text-red-600">Failed to load featured resources. Please try again later.</p>
+          </div>
+        `;
+        
+        document.getElementById('categories-grid').innerHTML = `
+          <div class="col-span-full text-center py-8">
+            <p class="text-red-600">Failed to load categories. Please try again later.</p>
+          </div>
+        `;
+      }
+    }
+
+    // Initialize when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadHomePageData);
+    } else {
+      loadHomePageData();
+    }
+  </script>
+
+  <style>
+    .line-clamp-1 {
+      display: -webkit-box;
+      -webkit-line-clamp: 1;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
 </MainLayout>
