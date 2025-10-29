@@ -7,6 +7,7 @@ from app.update_resource import handle_update_resource
 from app.delete_resource import handle_delete_resource
 from app.get_resource import handle_get_resource
 from app.get_existing_resources import handle_get_existing_resources
+from app.utils import get_parameter
 
 def lambda_handler(event, context):
     # print(event)
