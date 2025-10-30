@@ -95,8 +95,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "🔍 Stack outputs:"
     aws cloudformation describe-stacks \
       --stack-name $STACK_NAME \
-      --query "Stacks[0].Outputs" \
-      --output table
+      --query "Stacks[0].Outputs[].{Key:OutputKey,Value:OutputValue}" \
+      --output text
     echo "✨ Deployment process completed successfully."
     exit 0
   else

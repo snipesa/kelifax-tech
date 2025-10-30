@@ -47,17 +47,14 @@ show_usage() {
     exit 1
 }
 
-# Function to check if AWS CLI is installed and configured
+# Function to check if AWS CLI is installed
 check_aws_cli() {
     if ! command -v aws &> /dev/null; then
         print_error "AWS CLI is not installed. Please install it first."
         exit 1
     fi
     
-    if ! aws sts get-caller-identity &> /dev/null; then
-        print_error "AWS CLI is not configured. Please run 'aws configure' first."
-        exit 1
-    fi
+    print_status "AWS CLI found. Authentication will be handled by your configured credentials/SSO."
 }
 
 # Function to check and create environment files if needed
@@ -71,12 +68,6 @@ PUBLIC_USE_API=true
 PUBLIC_API_URL=https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev
 PUBLIC_API_KEY=your-dev-api-key
 PUBLIC_CONTACT_EMAIL=dev@kelifax.com
-
-# AWS S3 Configuration for Development
-AWS_ACCESS_KEY_ID=your_dev_access_key
-AWS_SECRET_ACCESS_KEY=your_dev_secret_key
-AWS_REGION=us-east-1
-S3_BUCKET_NAME=kelifax-dev-resources-bucket
 
 # Public environment variables
 PUBLIC_AWS_REGION=us-east-1
@@ -94,12 +85,6 @@ PUBLIC_USE_API=true
 PUBLIC_API_URL=https://your-prod-api-gateway-url.amazonaws.com/prod
 PUBLIC_API_KEY=your-prod-api-key
 PUBLIC_CONTACT_EMAIL=contact@kelifax.com
-
-# AWS S3 Configuration for Production
-AWS_ACCESS_KEY_ID=your_prod_access_key
-AWS_SECRET_ACCESS_KEY=your_prod_secret_key
-AWS_REGION=us-east-1
-S3_BUCKET_NAME=kelifax-prod-resources-bucket
 
 # Public environment variables
 PUBLIC_AWS_REGION=us-east-1
