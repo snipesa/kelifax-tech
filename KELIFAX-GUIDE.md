@@ -52,8 +52,6 @@ kelifax/
 │   │       ├── index.astro        # Resources listing
 │   │       └── [slug].astro       # Dynamic resource pages
 │   │
-│   ├── 📂 data/                   # Static data
-│   │   └── resources.json         # Resource database
 │   │
 │   ├── 📂 styles/                 # CSS styles
 │   │   └── global.css             # Global styles + Tailwind
@@ -92,17 +90,20 @@ kelifax/
 ## 🔧 Key Files to Modify
 
 ### 1. Adding New Resources
-**File**: `src/data/resources.json`
+**Method**: Submit via API or Admin Dashboard
 ```json
 {
-  "id": 13,
+  "slug": "your-resource-slug",
   "title": "Your Resource Name",
   "description": "Brief description of the resource",
   "category": "development|design|learning|productivity",
   "tags": ["tag1", "tag2", "tag3"],
   "url": "https://external-resource-url.com",
   "featured": false,
-  "image": null
+  "image": null,
+  "keyFeatures": ["feature1", "feature2"],
+  "useCases": ["usecase1", "usecase2"],
+  "learningResources": []
 }
 ```
 

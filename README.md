@@ -64,7 +64,7 @@ kelifax/
 │   ├── components/     # UI components
 │   ├── layouts/        # Page layouts
 │   ├── pages/          # Site pages (auto-routed)
-│   ├── data/           # Static data (resources.json)
+│   ├── utils/          # API utilities and configuration
 │   └── styles/         # Global styles
 ├── public/             # Static assets
 └── kelifax-guide.md    # 📚 Complete documentation
@@ -174,7 +174,7 @@ cd infra/src/dynamodb
 
 ## 🌟 Phase 2a Complete - Enhanced GitHub Resource
 
-- ✅ **Dynamic JSON Integration** - GitHub resource now uses dynamic data from resources.json
+- ✅ **Dynamic API Integration** - GitHub resource now uses dynamic data from API
 - ✅ **Enhanced Resource Data** - Added keyFeatures, useCases, and learningResources
 - ✅ **Dedicated GitHub Page** - Comprehensive page showcasing Git, GitHub Actions, and GitHub Copilot
 - ✅ **Improved ResourceCard** - Enhanced to display key features and additional metadata
@@ -193,29 +193,22 @@ The codebase has been restructured to seamlessly support both **static JSON** (c
 
 ### 🔧 **How It Works**
 
-**Current Development Mode:**
-```env
-PUBLIC_USE_API=false
-PUBLIC_API_BASE_URL=
-```
-- Uses static `src/data/resources.json`
-- Fast, reliable, no network calls
-
-**Future Production Mode:**
+**Current Production Mode:**
 ```env
 PUBLIC_USE_API=true
 PUBLIC_API_BASE_URL=https://your-api-gateway-url
 ```
-- Fetches from API Gateway: `/resources/{id}`
-- Falls back to local JSON if API fails
+- All resources fetched from API Gateway
+- Static generation uses API data during build
+- Dynamic enhancement loads detailed data at runtime
 
-### 📋 **Migration Path**
+### 📋 **API-First Architecture**
 
-1. **Current**: All resources from local JSON ✅
-2. **Hybrid**: Migrate resources to API one by one
-3. **Full API**: All resources served dynamically
+1. **Static Generation**: Uses API data to generate pages at build time ✅
+2. **Runtime Enhancement**: Loads detailed resource data dynamically ✅  
+3. **Full Integration**: All data comes from DynamoDB via Lambda functions ✅
 
-**API Contract**: Lambda functions should return the same JSON structure as `resources.json`
+**API Contract**: Lambda functions return structured JSON data for all resource information
 
 ## 🌟 What's Next (Phase 3)
 

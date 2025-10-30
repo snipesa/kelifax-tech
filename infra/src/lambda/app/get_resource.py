@@ -1,6 +1,23 @@
 import boto3
 import json
 
+def parse_learning_resources(learning_resources_str):
+    """
+    Parse pipe-separated JSON learning resources string
+    Returns list of dictionaries
+    """
+    if not learning_resources_str:
+        return []
+    
+    try:
+        resources = []
+        for resource_json in learning_resources_str.split('|'):
+            if resource_json.strip():
+                resources.append(json.loads(resource_json))
+        return resources
+    except json.JSONDecodeError:
+        return []
+
 def handle_get_resource(event, headers, table_name):
     # Initialize DynamoDB client
     dynamodb = boto3.resource('dynamodb')
@@ -35,64 +52,61 @@ def handle_get_resource(event, headers, table_name):
                 })
             }
 
-        # Extract the resource attribute from the DynamoDB item
-        resource_data = item.get('resource')
-        
-        if not resource_data:
+        # Only return approved resources to the public
+        if item.get('resourceStatus') != 'approved':
             return {
                 'statusCode': 404,
                 'headers': headers,
                 'body': json.dumps({
                     'success': False,
-                    'message': 'Resource data not found.',
-                    'debug_item': item  # For debugging
+                    'message': 'Resource not found.'
                 })
             }
 
-        # The resource data should be a JSON string, parse it
-        if isinstance(resource_data, str):
-            try:
-                parsed_resource = json.loads(resource_data)
-                return {
-                    'statusCode': 200,
-                    'headers': headers,
-                    'body': json.dumps({
-                        'success': True,
-                        'data': parsed_resource  # Return the parsed JSON object
-                    })
+        # Transform DynamoDB item to frontend format
+        resource_data = {
+            'slug': item.get('resourceSlug', ''),
+            'title': item.get('resourceName', ''),
+            'name': item.get('resourceName', ''),
+            'url': item.get('resourceUrl', ''),
+            'description': item.get('usagePurpose', ''),
+            'category': item.get('category', ''),
+            'tags': item.get('tags', '').split(',') if item.get('tags') else [],
+            'featured': item.get('featured', False),
+            'image': item.get('logoImage', ''),
+            'keyFeatures': item.get('keyFeatures', '').split('|') if item.get('keyFeatures') else [],
+            'useCases': item.get('useCases', '').split('|') if item.get('useCases') else [],
+            'learningResources': parse_learning_resources(item.get('learningResources', '')),
+            'submittedAt': item.get('submittedAt', ''),
+            'approvedAt': item.get('approvedAt', ''),
+            'viewCount': int(item.get('viewCount', 0))
+        }
+
+        # Update view count (optional - can be done asynchronously)
+        try:
+            from datetime import datetime
+            current_view_count = int(item.get('viewCount', 0))
+            table.update_item(
+                Key={'resourceSlug': resource_slug},
+                UpdateExpression='ADD viewCount :inc SET lastViewed = :timestamp',
+                ExpressionAttributeValues={
+                    ':inc': 1,
+                    ':timestamp': datetime.utcnow().isoformat() + 'Z'
                 }
-            except json.JSONDecodeError as e:
-                return {
-                    'statusCode': 500,
-                    'headers': headers,
-                    'body': json.dumps({
-                        'success': False,
-                        'message': 'Invalid resource data format.',
-                        'error': str(e),
-                        'raw_data': resource_data
-                    })
-                }
-        # If it's already a dict, use it as is
-        elif isinstance(resource_data, dict):
-            return {
-                'statusCode': 200,
-                'headers': headers,
-                'body': json.dumps({
-                    'success': True,
-                    'data': resource_data
-                })
-            }
-        else:
-            return {
-                'statusCode': 500,
-                'headers': headers,
-                'body': json.dumps({
-                    'success': False,
-                    'message': 'Unexpected resource data type.',
-                    'data_type': str(type(resource_data)),
-                    'raw_data': str(resource_data)
-                })
-            }
+            )
+            resource_data['viewCount'] = current_view_count + 1
+        except Exception as view_error:
+            # Don't fail the request if view count update fails
+            pass
+
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'success': True,
+                'data': resource_data
+            })
+        }
 
     except Exception as e:
         return {

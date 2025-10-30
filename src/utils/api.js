@@ -108,7 +108,7 @@ export async function getExistingResources(options = {}) {
     }
   }
   
-  // Throw error if API is disabled - no fallback to local data
+  // Throw error if API is disabled
   throw new Error('API is disabled. Please enable API access to load resources.');
 }
 
@@ -146,9 +146,19 @@ export async function getResources(filters = {}, authToken = null) {
     }
   }
   
-  // For non-admin usage, use the batched function
-  const result = await getExistingResources({ batchSize: 50 });
-  return result.resources;
+  // For non-admin usage, always use API
+  if (API_CONFIG.USE_API) {
+    try {
+      const result = await getExistingResources({ batchSize: 100 });
+      return result.resources;
+    } catch (error) {
+      console.error('Failed to fetch resources from API:', error);
+      throw error;
+    }
+  }
+  
+  // Throw error if API is disabled
+  throw new Error('API is disabled. Please enable API access to load resources.');
 }
 
 /**
@@ -188,30 +198,13 @@ export async function getResourceDetails(slug) {
         throw new Error(response.message || 'Resource details not found');
       }
     } catch (error) {
-      console.error('Failed to fetch resource details from API, falling back to local data:', error);
-      // Fall through to local data fallback
+      console.error('Failed to fetch resource details from API:', error);
+      throw error;
     }
   }
   
-  // Fallback to local resources.json
-  try {
-    const response = await fetch('/src/data/resources.json');
-    if (!response.ok) {
-      throw new Error(`Failed to fetch resources.json: ${response.status}`);
-    }
-    const data = await response.json();
-    const resources = Array.isArray(data) ? data : (data.resources || []);
-    const resource = resources.find(r => r.slug === slug);
-    
-    if (!resource) {
-      throw new Error('Resource not found in local data');
-    }
-    
-    return resource;
-  } catch (error) {
-    console.error('Failed to fetch resource details:', error);
-    throw error;
-  }
+  // Throw error if API is disabled
+  throw new Error('API is disabled. Please enable API access to load resource details.');
 }
 
 /**

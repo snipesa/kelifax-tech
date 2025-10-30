@@ -191,8 +191,39 @@ import LoadingSpinner from '../components/LoadingSpinner.astro';
         }
       }
       
-      // Throw error if API is disabled - no fallback to local data
-      throw new Error('API is disabled. Please enable API access to load resources.');
+      // Fallback to local JSON data when API is disabled
+      try {
+        const response = await fetch('/src/data/resources.json');
+        if (!response.ok) {
+          throw new Error('Failed to load local resources');
+        }
+        const allResources = await response.json();
+        
+        // Filter by category if specified
+        let filteredResources = allResources;
+        if (category !== 'all') {
+          filteredResources = allResources.filter(resource => resource.category === category);
+        }
+        
+        // Simulate pagination for local data
+        const startIndex = pageToken ? parseInt(pageToken) : 0;
+        const endIndex = startIndex + batchSize;
+        const paginatedResources = filteredResources.slice(startIndex, endIndex);
+        const hasMore = endIndex < filteredResources.length;
+        const nextPageToken = hasMore ? endIndex.toString() : null;
+        
+        return {
+          resources: paginatedResources,
+          pagination: {
+            hasMore,
+            nextPageToken,
+            total: filteredResources.length
+          }
+        };
+      } catch (error) {
+        console.error('Failed to load local resources:', error);
+        throw new Error('Failed to load resources. Please check your configuration.');
+      }
     }
 
     // Initialize page

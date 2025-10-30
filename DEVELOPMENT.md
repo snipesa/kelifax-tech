@@ -38,10 +38,10 @@ Dynamic resource pages with:
 
 ## 🚀 API Integration Flow
 
-1. **Static Build**: Astro generates pages using local `resources.json`
-2. **Runtime Enhancement**: JavaScript fetches enhanced data from API
+1. **Static Build**: Astro generates pages using API data during build time
+2. **Runtime Enhancement**: JavaScript fetches detailed data from API
 3. **Dynamic Updates**: Page content updated with key features, use cases, learning resources
-4. **Error Handling**: Graceful fallback if API unavailable
+4. **Error Handling**: Proper error messages if API unavailable
 
 ## 🔑 Environment Variables
 
@@ -63,10 +63,10 @@ PUBLIC_CONTACT_EMAIL=contact@yoursite.com
 4. Test with both success and failure scenarios
 
 ### Adding New Resource Fields
-1. Update `src/data/resources.json` for static data
-2. Update DynamoDB schema if enhanced data needed
+1. Update DynamoDB schema for the new fields
+2. Update Lambda functions to handle new fields
 3. Update UI components to display new fields
-4. Test API integration
+4. Test API integration end-to-end
 
 ### Feature Flags
 Use `src/utils/config.js` FEATURES object to control:
