@@ -23,8 +23,6 @@ kelifax/
 │   │       ├── index.astro               # Resource list page
 │   │       └── [slug].astro              # Individual resource details page
 │   │
-│   ├── data/                             # Optional static/local data
-│   │   └── resources.json
 │   │
 │   ├── styles/                           # Tailwind or custom CSS
 │   │   └── global.css

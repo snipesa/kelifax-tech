@@ -4,8 +4,8 @@
   "version": "1.0.0",
   "scripts": {
     "dev": "astro dev",
-    "build": "PUBLIC_USE_API=true PUBLIC_API_URL=https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev PUBLIC_API_KEY=C50mHXZdBz2JCCArzXIYu6XkapO08G56UhoU9kN0 astro build",
-    "preview": "PUBLIC_USE_API=true PUBLIC_API_URL=https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev PUBLIC_API_KEY=C50mHXZdBz2JCCArzXIYu6XkapO08G56UhoU9kN0 astro preview",
+    "build": "astro build",
+    "preview": "astro preview",
     "astro": "astro"
   },
   "dependencies": {

@@ -32,15 +32,18 @@ print_error() {
 
 # Function to show usage
 show_usage() {
-    echo "Usage: $0 [-dev|-prod]"
+    echo "Usage: $0 [-dev|-prod] [options]"
     echo ""
     echo "Options:"
     echo "  -dev     Deploy to development environment (kelifax-dev-project)"
     echo "  -prod    Deploy to production environment (kelifax.com-website)"
+    echo "  --dry-run  Build only, don't deploy to S3"
+    echo "  -h, --help Show this help message"
     echo ""
     echo "Examples:"
-    echo "  $0 -dev      # Deploy to development"
-    echo "  $0 -prod     # Deploy to production"
+    echo "  $0 -dev         # Build and deploy to development"
+    echo "  $0 -prod        # Build and deploy to production"
+    echo "  $0 -dev --dry-run # Build for dev but don't deploy"
     exit 1
 }
 
@@ -54,6 +57,55 @@ check_aws_cli() {
     if ! aws sts get-caller-identity &> /dev/null; then
         print_error "AWS CLI is not configured. Please run 'aws configure' first."
         exit 1
+    fi
+}
+
+# Function to check and create environment files if needed
+check_env_files() {
+    # Check for .env.development
+    if [ ! -f ".env.development" ]; then
+        print_warning ".env.development not found. Creating template..."
+        cat > .env.development << EOF
+# Development Environment Configuration
+PUBLIC_USE_API=true
+PUBLIC_API_URL=https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev
+PUBLIC_API_KEY=your-dev-api-key
+PUBLIC_CONTACT_EMAIL=dev@kelifax.com
+
+# AWS S3 Configuration for Development
+AWS_ACCESS_KEY_ID=your_dev_access_key
+AWS_SECRET_ACCESS_KEY=your_dev_secret_key
+AWS_REGION=us-east-1
+S3_BUCKET_NAME=kelifax-dev-resources-bucket
+
+# Public environment variables
+PUBLIC_AWS_REGION=us-east-1
+PUBLIC_S3_BUCKET_NAME=kelifax-dev-resources-bucket
+EOF
+        print_warning "Please update .env.development with your actual values before deploying!"
+    fi
+    
+    # Check for .env.production
+    if [ ! -f ".env.production" ]; then
+        print_warning ".env.production not found. Creating template..."
+        cat > .env.production << EOF
+# Production Environment Configuration
+PUBLIC_USE_API=true
+PUBLIC_API_URL=https://your-prod-api-gateway-url.amazonaws.com/prod
+PUBLIC_API_KEY=your-prod-api-key
+PUBLIC_CONTACT_EMAIL=contact@kelifax.com
+
+# AWS S3 Configuration for Production
+AWS_ACCESS_KEY_ID=your_prod_access_key
+AWS_SECRET_ACCESS_KEY=your_prod_secret_key
+AWS_REGION=us-east-1
+S3_BUCKET_NAME=kelifax-prod-resources-bucket
+
+# Public environment variables
+PUBLIC_AWS_REGION=us-east-1
+PUBLIC_S3_BUCKET_NAME=kelifax-prod-resources-bucket
+EOF
+        print_warning "Please update .env.production with your actual values before deploying!"
     fi
 }
 
@@ -78,6 +130,7 @@ deploy_to_env() {
     local env=$1
     local env_file=$2
     local s3_bucket=$3
+    local dry_run=${4:-false}
     
     print_status "Starting deployment to $env environment..."
     
@@ -96,33 +149,82 @@ deploy_to_env() {
     print_status "Cleaning previous build and cache..."
     rm -rf ./dist .astro
     
-    # Extract environment variables from the env file
+    # Extract and export environment variables from the env file
     print_status "Loading environment variables from $env_file..."
-    export PUBLIC_USE_API=$(grep "^PUBLIC_USE_API=" "$env_file" | cut -d'=' -f2)
-    export PUBLIC_API_URL=$(grep "^PUBLIC_API_URL=" "$env_file" | cut -d'=' -f2)
-    export PUBLIC_API_KEY=$(grep "^PUBLIC_API_KEY=" "$env_file" | cut -d'=' -f2)
-    export PUBLIC_CONTACT_EMAIL=$(grep "^PUBLIC_CONTACT_EMAIL=" "$env_file" | cut -d'=' -f2)
+    
+    # Source all environment variables from the file
+    set -a  # automatically export all variables
+    source "$env_file"
+    set +a  # disable automatic export
+    
+    # Validate required environment variables
+    if [ -z "$PUBLIC_API_URL" ] || [ -z "$PUBLIC_USE_API" ]; then
+        print_error "Required environment variables missing in $env_file"
+        print_error "Please ensure PUBLIC_API_URL and PUBLIC_USE_API are set"
+        restore_env
+        exit 1
+    fi
     
     # Display the configuration being used
     print_status "Building with configuration:"
+    print_status "  - Environment: $env"
     print_status "  - API URL: $PUBLIC_API_URL"
     print_status "  - Use API: $PUBLIC_USE_API"
+    if [ -n "$PUBLIC_API_KEY" ]; then
+        print_status "  - API Key: ${PUBLIC_API_KEY:0:10}..." # Show only first 10 chars for security
+    fi
     print_status "  - Contact Email: $PUBLIC_CONTACT_EMAIL"
     
-    # Build the project with explicit environment variables
+    # Build the project with environment variables
     print_status "Building project for $env..."
     if npm run build; then
         print_success "Build completed successfully"
+        
+        # Show build output info
+        if [ -d "./dist" ]; then
+            build_size=$(du -sh ./dist | cut -f1)
+            file_count=$(find ./dist -type f | wc -l | tr -d ' ')
+            print_status "Build output: $build_size ($file_count files)"
+        fi
     else
         print_error "Build failed!"
         restore_env
         exit 1
     fi
     
+    # Handle dry run
+    if [ "$dry_run" = true ]; then
+        print_success "🏗️  Dry run completed successfully!"
+        print_status "Build files are ready in ./dist"
+        print_status "To deploy, run the same command without --dry-run"
+        restore_env
+        return 0
+    fi
+    
+    # Confirmation before S3 deployment
+    print_warning "Ready to deploy to S3 bucket: $s3_bucket"
+    print_status "This will:"
+    print_status "  - Upload all files from ./dist to S3"
+    print_status "  - Delete files in S3 that are not in ./dist"
+    print_status "  - Make the site live immediately"
+    echo
+    read -p "Do you want to proceed with the S3 deployment? (y/N): " -n 1 -r
+    echo
+    
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        print_status "Deployment cancelled. Build files are ready in ./dist"
+        restore_env
+        exit 0
+    fi
+    
     # Deploy to S3
-    print_status "Deploying to S3 bucket: $s3_bucket"
-    if aws s3 sync ./dist "s3://$s3_bucket" --delete; then
+    print_status "Deploying to S3 bucket: $s3_bucket..."
+    if aws s3 sync ./dist "s3://$s3_bucket" --delete --exact-timestamps; then
         print_success "Successfully deployed to S3"
+        
+        # Show deployment summary
+        uploaded_files=$(aws s3 ls "s3://$s3_bucket" --recursive 2>/dev/null | wc -l | tr -d ' ')
+        print_status "Deployment summary: $uploaded_files files in S3 bucket"
     else
         print_error "S3 deployment failed!"
         restore_env
@@ -147,30 +249,71 @@ main() {
     # Check AWS CLI
     check_aws_cli
     
+    # Check and create environment files if needed
+    check_env_files
+    
     # Parse command line arguments
-    case $1 in
-        -dev|--dev|dev)
-            print_status "🔧 Deploying to DEVELOPMENT environment"
-            deploy_to_env "development" ".env.development" "kelifax-dev-project"
-            ;;
-        -prod|--prod|prod)
-            print_status "🚀 Deploying to PRODUCTION environment"
-            print_warning "You are about to deploy to PRODUCTION!"
-            read -p "Are you sure you want to continue? (y/N): " -n 1 -r
-            echo
-            if [[ $REPLY =~ ^[Yy]$ ]]; then
-                deploy_to_env "production" ".env.production" "kelifax.com-website"
+    local env_type=""
+    local dry_run=false
+    
+    # Process all arguments
+    while [[ $# -gt 0 ]]; do
+        case $1 in
+            -dev|--dev|dev)
+                env_type="dev"
+                shift
+                ;;
+            -prod|--prod|prod)
+                env_type="prod"
+                shift
+                ;;
+            --dry-run)
+                dry_run=true
+                shift
+                ;;
+            -h|--help|help)
+                show_usage
+                ;;
+            *)
+                print_error "Unknown option: $1"
+                show_usage
+                ;;
+        esac
+    done
+    
+    # Check if environment type was specified
+    if [ -z "$env_type" ]; then
+        print_error "No environment specified!"
+        show_usage
+    fi
+    
+    # Execute based on environment type
+    case $env_type in
+        dev)
+            if [ "$dry_run" = true ]; then
+                print_status "🏗️  Building for DEVELOPMENT environment (dry run)"
             else
-                print_status "Deployment cancelled."
-                exit 0
+                print_status "🔧 Deploying to DEVELOPMENT environment"
             fi
+            deploy_to_env "development" ".env.development" "kelifax-dev-project" "$dry_run"
             ;;
-        -h|--help|help)
-            show_usage
-            ;;
-        *)
-            print_error "Unknown option: $1"
-            show_usage
+        prod)
+            if [ "$dry_run" = true ]; then
+                print_status "🏗️  Building for PRODUCTION environment (dry run)"
+            else
+                print_status "🚀 Deploying to PRODUCTION environment"
+                print_warning "⚠️  PRODUCTION DEPLOYMENT WARNING ⚠️"
+                print_warning "This will deploy to the live website (kelifax.com-website)"
+                print_warning "Make sure you have tested everything in development first!"
+                echo
+                read -p "Are you absolutely sure you want to deploy to PRODUCTION? (y/N): " -n 1 -r
+                echo
+                if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+                    print_status "Production deployment cancelled."
+                    exit 0
+                fi
+            fi
+            deploy_to_env "production" ".env.production" "kelifax.com-website" "$dry_run"
             ;;
     esac
 }

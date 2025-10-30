@@ -210,9 +210,48 @@ PUBLIC_API_BASE_URL=https://your-api-gateway-url
 
 **API Contract**: Lambda functions return structured JSON data for all resource information
 
+## 🚀 Deployment
+
+The project includes a comprehensive deployment script that handles environment-specific builds and deployments.
+
+### Deploy Script Usage
+
+```bash
+# Development deployment
+./deploy.sh -dev                    # Build and deploy to development
+./deploy.sh -dev --dry-run         # Build for dev but don't deploy
+
+# Production deployment  
+./deploy.sh -prod                   # Build and deploy to production
+./deploy.sh -prod --dry-run        # Build for prod but don't deploy
+
+# Help
+./deploy.sh --help                 # Show usage information
+```
+
+### Key Deployment Features
+
+✅ **Environment-Specific Builds**: Automatically uses correct environment variables  
+✅ **API-First Architecture**: All data comes from DynamoDB via API Gateway  
+✅ **Pre-deployment Confirmation**: Asks for approval before S3 sync  
+✅ **Dry Run Support**: Test builds without deploying  
+✅ **Comprehensive Validation**: Checks AWS CLI, environment files, and variables  
+✅ **Build Information**: Shows file count and size after build  
+✅ **Graceful Cleanup**: Restores original environment files on exit  
+
+### Environment Files
+
+The script automatically creates template environment files if they don't exist:
+- `.env.development` - Development environment configuration
+- `.env.production` - Production environment configuration
+
+### Deployment Targets
+
+- **Development**: `kelifax-dev-project` S3 bucket
+- **Production**: `kelifax.com-website` S3 bucket
+
 ## 🌟 What's Next (Phase 3)
 
-- Backend integration with AWS Lambda and API Gateway
 - User accounts and authentication system  
 - Resource bookmarking and favorites functionality
 - Admin dashboard for resource management
