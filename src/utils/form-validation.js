@@ -135,8 +135,7 @@ export const validateResourceInfo = {
 
   category: (value) => {
     const validCategories = [
-      'development', 'design', 'productivity', 'learning', 
-      'communication', 'analytics', 'marketing', 'ai', 'other'
+      'development', 'design', 'productivity', 'learning'
     ];
     if (!value || !validCategories.includes(value)) {
       return 'Please select a valid category';

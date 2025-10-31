@@ -154,11 +154,6 @@ import ExtendedDetailsForm from '../components/ExtendedDetailsForm.astro';
       updatePageDisplay();
       setupFormValidation();
       setupNavigation();
-      
-      // Check S3 configuration
-      if (!isS3Configured()) {
-        console.warn('S3 not configured properly. Logo uploads will not work.');
-      }
     });
 
     // Update page display and progress
@@ -169,11 +164,24 @@ import ExtendedDetailsForm from '../components/ExtendedDetailsForm.astro';
       // Show current page
       document.getElementById(`page-${currentPage}`).classList.remove('hidden');
       
+      // Initialize page-specific functionality
+      initializePageComponents();
+      
       // Update progress indicator
       updateProgressIndicator();
       
       // Update navigation buttons
       updateNavigationButtons();
+    }
+    
+    // Initialize components for the current page
+    function initializePageComponents() {
+      if (currentPage === 2) {
+        // Initialize ResourceInfoForm functionality when Page 2 becomes visible
+        if (typeof window.initializeResourceInfoForm === 'function') {
+          window.initializeResourceInfoForm();
+        }
+      }
     }
 
     function updateProgressIndicator() {
@@ -313,7 +321,9 @@ import ExtendedDetailsForm from '../components/ExtendedDetailsForm.astro';
           pageData.resourceUrl = currentPageElement.querySelector('#resourceUrl')?.value || '';
           pageData.category = currentPageElement.querySelector('#category')?.value || '';
           pageData.tags = currentPageElement.querySelector('#tags')?.value || '';
-          pageData.logoImage = currentPageElement.querySelector('#logoImage')?.files[0] || null;
+          // Get the uploaded filename from the dataset (uploaded immediately when file was selected)
+          const logoInput = currentPageElement.querySelector('#logoImage');
+          pageData.logoImage = logoInput?.dataset.uploadedFilename || '';
           break;
           
         case 3:
@@ -398,30 +408,17 @@ import ExtendedDetailsForm from '../components/ExtendedDetailsForm.astro';
       setSubmitButtonLoading(true);
       
       try {
-        // Upload logo if provided
-        let logoUploadResult = null;
-        if (formData.logoImage) {
-          if (isS3Configured()) {
-            logoUploadResult = await uploadLogoToS3(formData.logoImage, formData.resourceName);
-          } else {
-            // Use mock upload for development
-            const { mockLogoUpload } = await import('../utils/s3-upload.js');
-            logoUploadResult = await mockLogoUpload(formData.logoImage, formData.resourceName);
-            console.warn('Using mock S3 upload - configure AWS credentials for actual uploads');
-          }
-          
-          if (!logoUploadResult.success) {
-            throw new Error(logoUploadResult.error);
-          }
-        }
+        // Get logo information from the already uploaded file (uploaded immediately when user selected file)
+        const logoInput = document.getElementById('logoImage');
+        const logoFilename = logoInput.dataset.uploadedFilename || '';
 
-        // Prepare submission data
+        // Prepare submission data according to RESOURCE-SUBMISSION-SPECIFICATION.md
         const submissionData = {
           submitter: {
             firstName: formData.firstName,
             lastName: formData.lastName,
-            company: formData.company || null,
-            phoneNumber: formData.phoneNumber || null,
+            company: formData.company || '',
+            phoneNumber: formData.phoneNumber || '',
             companyEmail: formData.companyEmail
           },
           resource: {
@@ -429,17 +426,13 @@ import ExtendedDetailsForm from '../components/ExtendedDetailsForm.astro';
             usagePurpose: formData.usagePurpose,
             resourceUrl: formData.resourceUrl,
             category: formData.category,
-            logoImage: logoUploadResult ? logoUploadResult.filename : null,
+            logoImage: logoFilename,
             tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()).filter(Boolean) : []
           },
           details: {
             keyFeatures: formData.keyFeatures,
             useCases: formData.useCases,
             learningResources: formData.learningResources
-          },
-          metadata: {
-            submittedAt: new Date().toISOString(),
-            status: 'pending'
           }
         };
 

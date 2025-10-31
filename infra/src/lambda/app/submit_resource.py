@@ -302,6 +302,7 @@ def create_dynamo_item(form_data, resource_slug):
         # Metadata
         'submissionId': {'S': submission_id},
         'resourceStatus': {'S': 'pending'},
+        'createdAt': {'S': submission_timestamp},
         'submittedAt': {'S': submission_timestamp},
         'approvedAt': {'S': ''},
         'rejectedAt': {'S': ''},

@@ -6,7 +6,8 @@ import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
 // S3 configuration from environment variables
 const S3_CONFIG = {
   region: import.meta.env.PUBLIC_AWS_REGION || 'us-east-1',
-  bucketName: import.meta.env.PUBLIC_S3_BUCKET_NAME || 'kelifax-resources-bucket'
+  bucketName: import.meta.env.PUBLIC_S3_BUCKET_NAME || 'kelifax-resources',
+  prefix: import.meta.env.PUBLIC_S3_BUCKET_PREFIX || 'dev'
 };
 
 /**
@@ -18,8 +19,8 @@ function createS3Client() {
   return new S3Client({
     region: S3_CONFIG.region,
     credentials: {
-      accessKeyId: import.meta.env.AWS_ACCESS_KEY_ID,
-      secretAccessKey: import.meta.env.AWS_SECRET_ACCESS_KEY
+      accessKeyId: import.meta.env.PUBLIC_AWS_ACCESS_KEY_ID,
+      secretAccessKey: import.meta.env.PUBLIC_AWS_SECRET_ACCESS_KEY
     }
   });
 }
@@ -30,9 +31,9 @@ function createS3Client() {
  * @returns {string} - S3 key path
  */
 export function generateLogoKey(resourceName) {
-  // Convert resource name to filename: "Amazing Dev Tool" → "Amazing_Dev_Tool.png"
-  const filename = resourceName.replace(/\s+/g, '_') + '.png';
-  return `uploads/temp/${filename}`;
+  // Convert resource name to filename: "Amazing Dev Tool" → "amazing_dev_tool.png"
+  const filename = resourceName.toLowerCase().replace(/\s+/g, '_') + '.png';
+  return `${S3_CONFIG.prefix}/uploads/temp/${filename}`;
 }
 
 /**
@@ -110,9 +111,24 @@ export async function uploadLogoToS3(file, resourceName) {
 
   } catch (error) {
     console.error('S3 upload error:', error);
+    
+    let errorMessage = error.message || 'Failed to upload logo to S3';
+    
+    // Handle common S3 errors
+    if (error.name === 'AccessDenied') {
+      errorMessage = 'Access denied to S3 bucket. Check AWS credentials and permissions.';
+    } else if (error.name === 'NoSuchBucket') {
+      errorMessage = 'S3 bucket not found. Check bucket name configuration.';
+    } else if (error.name === 'NetworkError' || error.message.includes('CORS')) {
+      errorMessage = 'Network error or CORS issue. Check S3 bucket CORS configuration.';
+    } else if (error.message.includes('Forbidden')) {
+      errorMessage = 'Access forbidden. Check AWS credentials and S3 bucket policies.';
+    }
+    
     return {
       success: false,
-      error: error.message || 'Failed to upload logo to S3'
+      error: errorMessage,
+      originalError: error
     };
   }
 }
@@ -123,18 +139,58 @@ export async function uploadLogoToS3(file, resourceName) {
  */
 export function isS3Configured() {
   const hasCredentials = !!(
-    import.meta.env.AWS_ACCESS_KEY_ID &&
-    import.meta.env.AWS_SECRET_ACCESS_KEY &&
+    import.meta.env.PUBLIC_AWS_ACCESS_KEY_ID &&
+    import.meta.env.PUBLIC_AWS_SECRET_ACCESS_KEY &&
     S3_CONFIG.region &&
     S3_CONFIG.bucketName
   );
   
   const hasPlaceholders = (
-    import.meta.env.AWS_ACCESS_KEY_ID === 'your_access_key_here' ||
-    import.meta.env.AWS_SECRET_ACCESS_KEY === 'your_secret_key_here'
+    import.meta.env.PUBLIC_AWS_ACCESS_KEY_ID === 'your_access_key_here' ||
+    import.meta.env.PUBLIC_AWS_SECRET_ACCESS_KEY === 'your_secret_key_here'
   );
   
   return hasCredentials && !hasPlaceholders;
+}
+
+/**
+ * Test S3 connection and permissions
+ * @returns {Promise<object>} - Test result
+ */
+export async function testS3Connection() {
+  try {
+    if (!isS3Configured()) {
+      return {
+        success: false,
+        error: 'S3 not configured - missing AWS credentials or configuration'
+      };
+    }
+
+    const s3Client = createS3Client();
+    
+    // Try to list objects in the temp folder (this tests basic connectivity)
+    const { ListObjectsV2Command } = await import('@aws-sdk/client-s3');
+    const command = new ListObjectsV2Command({
+      Bucket: S3_CONFIG.bucketName,
+      Prefix: `${S3_CONFIG.prefix}/uploads/temp/`,
+      MaxKeys: 1
+    });
+
+    await s3Client.send(command);
+    
+    return {
+      success: true,
+      message: 'S3 connection successful'
+    };
+
+  } catch (error) {
+    console.error('S3 connection test failed:', error);
+    return {
+      success: false,
+      error: `S3 connection failed: ${error.message}`,
+      originalError: error
+    };
+  }
 }
 
 /**
@@ -153,13 +209,14 @@ export async function mockLogoUpload(file, resourceName) {
   // Simulate upload delay
   await new Promise(resolve => setTimeout(resolve, 1500));
 
-  const filename = resourceName.replace(/\s+/g, '_') + '.png';
+  const filename = resourceName.toLowerCase().replace(/\s+/g, '_') + '.png';
+  const key = `${S3_CONFIG.prefix}/uploads/temp/${filename}`;
   
   return {
     success: true,
     filename: filename,
-    key: `uploads/temp/${filename}`,
-    url: `https://example.s3.amazonaws.com/uploads/temp/${filename}`,
+    key: key,
+    url: `https://example.s3.amazonaws.com/${key}`,
     mock: true
   };
 }

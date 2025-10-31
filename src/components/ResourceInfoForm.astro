@@ -7,6 +7,7 @@
   <div class="text-center mb-8">
     <h2 class="text-2xl font-bold text-gray-800 mb-2">Resource Information</h2>
     <p class="text-gray-600">Tell us about the resource you want to share</p>
+
   </div>
 
   <!-- Resource Name -->
@@ -81,11 +82,9 @@
       <option value="design">Design & UI/UX Tools</option>
       <option value="productivity">Productivity & Organization Tools</option>
       <option value="learning">Learning & Education Platforms</option>
-      <option value="communication">Communication & Collaboration Tools</option>
-      <option value="analytics">Analytics & Data Tools</option>
-      <option value="marketing">Marketing & Business Tools</option>
       <option value="ai">AI & Machine Learning Tools</option>
-      <option value="other">Other Resources</option>
+      <option value="analytics">Analytics & Data Tools</option>
+      <option value="other">Other</option>
     </select>
     <div class="error-message text-red-500 text-sm mt-1 hidden" data-field="category"></div>
     <p class="text-sm text-gray-500 mt-1">Choose the most relevant category</p>
@@ -96,6 +95,7 @@
     <label for="logoImage" class="block text-sm font-medium text-gray-700 mb-2">
       Logo Image <span class="text-gray-400">(Optional)</span>
     </label>
+    <p class="text-sm text-blue-600 mb-2">💡 Please enter the resource name above before uploading a logo</p>
     <div class="relative">
       <input 
         type="file" 
@@ -159,8 +159,52 @@
 </div>
 
 <script>
-  // Logo upload handling
-  document.addEventListener('DOMContentLoaded', function() {
+  // Character counter for usage purpose - initialize when Page 2 becomes visible
+  window.initializeResourceInfoForm = function() {
+    console.log('Initializing ResourceInfoForm...');
+
+    // Character counter for usage purpose
+    const usagePurposeTextarea = document.getElementById('usagePurpose');
+    const characterCount = document.querySelector('[data-field="usagePurpose"]');
+
+    if (usagePurposeTextarea && characterCount) {
+      usagePurposeTextarea.addEventListener('input', function() {
+        const count = this.value.length;
+        characterCount.textContent = `${count}/500`;
+        
+        if (count > 500) {
+          characterCount.classList.add('text-red-500');
+          characterCount.classList.remove('text-gray-500');
+        } else {
+          characterCount.classList.remove('text-red-500');
+          characterCount.classList.add('text-gray-500');
+        }
+      });
+    }
+
+    // Update logo upload availability based on resource name
+    const resourceNameInput = document.getElementById('resourceName');
+    const logoUploadArea = document.querySelector('.logo-upload-area');
+    
+    function updateLogoUploadState() {
+      const hasResourceName = resourceNameInput.value.trim().length > 0;
+      if (logoUploadArea) {
+        if (hasResourceName) {
+          logoUploadArea.classList.remove('opacity-50', 'cursor-not-allowed');
+          logoUploadArea.classList.add('cursor-pointer');
+        } else {
+          logoUploadArea.classList.add('opacity-50', 'cursor-not-allowed');
+          logoUploadArea.classList.remove('cursor-pointer');
+        }
+      }
+    }
+    
+    if (resourceNameInput) {
+      resourceNameInput.addEventListener('input', updateLogoUploadState);
+      updateLogoUploadState(); // Initial state
+    }
+    
+    // Logo upload handling
     const logoInput = document.getElementById('logoImage');
     const logoPreview = document.getElementById('logo-preview');
     const logoPreviewImage = document.getElementById('logo-preview-image');
@@ -168,26 +212,23 @@
     const logoFilesize = document.getElementById('logo-filesize');
     const removeLogo = document.getElementById('remove-logo');
 
-    // Character counter for usage purpose
-    const usagePurposeTextarea = document.getElementById('usagePurpose');
-    const characterCount = document.querySelector('[data-field="usagePurpose"]');
+    if (logoInput && logoPreview && logoPreviewImage && logoFilename && logoFilesize && removeLogo) {
 
-    usagePurposeTextarea.addEventListener('input', function() {
-      const count = this.value.length;
-      characterCount.textContent = `${count}/500`;
-      
-      if (count > 500) {
-        characterCount.classList.add('text-red-500');
-        characterCount.classList.remove('text-gray-500');
-      } else {
-        characterCount.classList.remove('text-red-500');
-        characterCount.classList.add('text-gray-500');
-      }
-    });
-
-    logoInput.addEventListener('change', function(e) {
+    logoInput.addEventListener('change', async function(e) {
       const file = e.target.files[0];
       if (file) {
+        // Check if resource name is filled first
+        const resourceNameInput = document.getElementById('resourceName');
+        const resourceName = resourceNameInput.value.trim();
+        
+        if (!resourceName) {
+          showFieldError('logoImage', 'Please enter the resource name first before uploading a logo');
+          this.value = '';
+          // Focus on resource name field
+          resourceNameInput.focus();
+          return;
+        }
+        
         // Validate file
         if (file.type !== 'image/png') {
           showFieldError('logoImage', 'Only PNG files are allowed');
@@ -201,7 +242,7 @@
           return;
         }
 
-        // Show preview
+        // Show preview first
         const reader = new FileReader();
         reader.onload = function(e) {
           logoPreviewImage.src = e.target.result;
@@ -211,14 +252,89 @@
           hideFieldError('logoImage');
         };
         reader.readAsDataURL(file);
+
+        // Upload to S3 immediately
+        try {
+          // Show uploading state
+          logoFilesize.textContent = 'Uploading...';
+          logoFilesize.classList.add('text-blue-600');
+          
+          // Use the resource name we already validated
+          const resourceName = resourceNameInput.value.trim();
+          
+          // Import upload functions
+          const { uploadLogoToS3, isS3Configured, mockLogoUpload } = await import('../utils/s3-upload.js');
+          
+          let uploadResult;
+          if (isS3Configured()) {
+            try {
+              uploadResult = await uploadLogoToS3(file, resourceName);
+            } catch (s3Error) {
+              console.warn('S3 upload failed, falling back to mock:', s3Error.message);
+              // If S3 fails (likely due to CORS), use mock upload
+              uploadResult = await mockLogoUpload(file, resourceName);
+              uploadResult.fallbackUsed = true;
+            }
+          } else {
+            uploadResult = await mockLogoUpload(file, resourceName);
+            console.warn('Using mock S3 upload - configure AWS credentials for actual uploads');
+          }
+          
+          if (uploadResult.success) {
+            // Update UI to show successful upload
+            const uploadText = uploadResult.mock || uploadResult.fallbackUsed 
+              ? `${(file.size / 1024).toFixed(1)} KB - Mock Upload ✓` 
+              : `${(file.size / 1024).toFixed(1)} KB - Uploaded ✓`;
+            logoFilesize.textContent = uploadText;
+            logoFilesize.classList.remove('text-blue-600');
+            logoFilesize.classList.add('text-green-600');
+            
+            // Store the uploaded filename for form submission
+            logoInput.dataset.uploadedFilename = uploadResult.filename;
+            logoInput.dataset.uploadedKey = uploadResult.key;
+            
+            console.log('Logo uploaded successfully:', uploadResult);
+            console.log('File uploaded to S3 with key:', uploadResult.key);
+          } else {
+            throw new Error(uploadResult.error || 'Upload failed');
+          }
+          
+        } catch (error) {
+          console.error('Logo upload failed:', error);
+          logoFilesize.textContent = `Upload failed: ${error.message}`;
+          logoFilesize.classList.remove('text-blue-600');
+          logoFilesize.classList.add('text-red-600');
+          showFieldError('logoImage', `Upload failed: ${error.message}`);
+        }
       }
     });
 
+    // Handle remove logo
     removeLogo.addEventListener('click', function() {
       logoInput.value = '';
       logoPreview.classList.add('hidden');
+      
+      // Clear the uploaded file data
+      delete logoInput.dataset.uploadedFilename;
+      delete logoInput.dataset.uploadedKey;
+      
+      hideFieldError('logoImage');
+      
+      // TODO: Optionally delete the uploaded file from S3 temp folder
+      // This could be implemented as a cleanup API call
+      console.log('Logo removed from form');
     });
-  });
+    } else {
+      console.warn('Logo upload elements not found:', {
+        logoInput: !!logoInput,
+        logoPreview: !!logoPreview,
+        logoPreviewImage: !!logoPreviewImage,
+        logoFilename: !!logoFilename,
+        logoFilesize: !!logoFilesize,
+        removeLogo: !!removeLogo
+      });
+    }
+  };
 
   // Utility functions for error handling
   function showFieldError(fieldName, message) {

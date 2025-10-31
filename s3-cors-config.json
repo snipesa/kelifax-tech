@@ -1,0 +1,27 @@
+{
+  "CORSRules": [
+    {
+      "AllowedHeaders": [
+        "*"
+      ],
+      "AllowedMethods": [
+        "GET",
+        "PUT",
+        "POST",
+        "DELETE",
+        "HEAD"
+      ],
+      "AllowedOrigins": [
+        "http://localhost:4321",
+        "http://localhost:3000",
+        "https://kelifax.com",
+        "https://www.kelifax.com"
+      ],
+      "ExposeHeaders": [
+        "ETag",
+        "x-amz-version-id"
+      ],
+      "MaxAgeSeconds": 3000
+    }
+  ]
+}

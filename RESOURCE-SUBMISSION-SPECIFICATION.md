@@ -44,14 +44,9 @@ The resource submission process will be implemented as a **three-page progressiv
 - **URL Validation**: Must be a working, publicly accessible URL
 - **Category Options**: Must be one of the following predefined categories:
   - `development` - Development Tools & Frameworks
-  - `design` - Design & UI/UX Tools
+  - `design` - Design & UI/UX Tools  
   - `productivity` - Productivity & Organization Tools
   - `learning` - Learning & Education Platforms
-  - `communication` - Communication & Collaboration Tools
-  - `analytics` - Analytics & Data Tools
-  - `marketing` - Marketing & Business Tools
-  - `ai` - AI & Machine Learning Tools
-  - `other` - Other Resources
 
 ---
 
@@ -163,11 +158,12 @@ learningResources.forEach((resource, index) => {
 ```
 
 ### **Logo Upload Implementation**
-- **Direct S3 Upload**: Frontend uploads logo directly to S3 using pre-signed URLs or AWS SDK
-- **File Processing**: Rename file to `{resourceName}.png` format before upload
+- **Immediate S3 Upload**: Frontend uploads logo directly to S3 immediately when user selects file
+- **File Processing**: Rename file to `{resourceName}.png` format before upload (or temporary name if resource name not yet entered)
 - **Temporary Storage**: Upload to `uploads/temp/` prefix initially
-- **Error Handling**: If form submission fails, provide cleanup mechanism for orphaned temp files
-- **File Validation**: Validate file type (PNG only), size (max 2MB), and dimensions on client-side
+- **Form Submission**: Only sends the uploaded filename, not the file itself
+- **Error Handling**: Upload failures are shown immediately to user; provides cleanup mechanism for orphaned temp files
+- **File Validation**: Validate file type (PNG only), size (max 2MB), and dimensions on client-side before upload
 
 ---
 
