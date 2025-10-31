@@ -26,13 +26,28 @@ function createS3Client() {
 }
 
 /**
+ * Generate a random 4-letter string
+ * @returns {string} - Random 4-letter string
+ */
+function generateRandomString() {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let result = '';
+  for (let i = 0; i < 4; i++) {
+    result += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return result;
+}
+
+/**
  * Generate the S3 key (file path) for a logo file
  * @param {string} resourceName - The resource name to create filename from
  * @returns {string} - S3 key path
  */
 export function generateLogoKey(resourceName) {
-  // Convert resource name to filename: "Amazing Dev Tool" → "amazing_dev_tool.png"
-  const filename = resourceName.toLowerCase().replace(/\s+/g, '_') + '.png';
+  // Convert resource name to filename: "Amazing Dev Tool" → "amazing-dev-tool-a1b2.png"
+  const cleanName = resourceName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  const randomSuffix = generateRandomString();
+  const filename = `${cleanName}-${randomSuffix}.png`;
   return `${S3_CONFIG.prefix}/uploads/temp/${filename}`;
 }
 
@@ -42,7 +57,7 @@ export function generateLogoKey(resourceName) {
  * @returns {object} - Validation result with isValid and error properties
  */
 export function validateLogoFile(file) {
-  const maxSize = 2 * 1024 * 1024; // 2MB
+  const maxSize = 600 * 1024; // 600KB
   const allowedTypes = ['image/png'];
 
   if (!file) {
@@ -54,103 +69,133 @@ export function validateLogoFile(file) {
   }
 
   if (file.size > maxSize) {
-    return { isValid: false, error: 'File size must be less than 2MB' };
+    return { isValid: false, error: 'File size must be less than 600KB' };
   }
 
   return { isValid: true, error: null };
 }
 
 /**
- * Upload logo file to S3 temp folder
+ * Upload logo file via API endpoint
  * @param {File} file - The logo file to upload
  * @param {string} resourceName - The resource name for filename generation
  * @returns {Promise<object>} - Upload result with success status and filename
  */
 export async function uploadLogoToS3(file, resourceName) {
   try {
-    // Validate file first
-    const validation = validateLogoFile(file);
-    if (!validation.isValid) {
-      throw new Error(validation.error);
+    // Validate file first - Updated to 600KB limit
+    const maxSize = 600 * 1024; // 600KB
+    const allowedTypes = ['image/png'];
+
+    if (!file) {
+      throw new Error('No file selected');
     }
 
-    // Generate S3 key
-    const key = generateLogoKey(resourceName);
-    
-    // Create S3 client
-    const s3Client = createS3Client();
+    if (!allowedTypes.includes(file.type)) {
+      throw new Error('Only PNG files are allowed');
+    }
 
-    // Convert file to buffer
-    const buffer = await file.arrayBuffer();
+    if (file.size > maxSize) {
+      throw new Error('File size must be less than 600KB');
+    }
 
-    // Create upload command
-    const command = new PutObjectCommand({
-      Bucket: S3_CONFIG.bucketName,
-      Key: key,
-      Body: new Uint8Array(buffer),
-      ContentType: file.type,
-      ContentLength: file.size,
-      // Optional: Add metadata
-      Metadata: {
-        'original-name': file.name,
-        'resource-name': resourceName,
-        'uploaded-at': new Date().toISOString()
-      }
+    // Generate filename using resource name with hyphens and random suffix
+    const cleanResourceName = resourceName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+    const randomSuffix = generateRandomString();
+    const fileExtension = file.name.split('.').pop().toLowerCase();
+    const filename = `${cleanResourceName}-${randomSuffix}.${fileExtension}`;
+
+    // Convert file to base64
+    const base64 = await fileToBase64(file);
+
+    // Get API configuration
+    const API_BASE_URL = import.meta.env.PUBLIC_API_URL;
+    const API_KEY = import.meta.env.PUBLIC_API_KEY;
+
+    if (!API_BASE_URL || !API_KEY) {
+      throw new Error('API configuration missing. Please check environment variables.');
+    }
+
+    // Prepare request payload
+    const payload = {
+      file_name: filename,
+      image: base64
+    };
+
+    // Make API request
+    const response = await fetch(`${API_BASE_URL}/upload-logo`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': API_KEY
+      },
+      body: JSON.stringify(payload)
     });
 
-    // Execute upload
-    await s3Client.send(command);
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.message || `HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const result = await response.json();
+
+    if (!result.success) {
+      throw new Error(result.message || 'Upload failed');
+    }
 
     // Return success result
     return {
       success: true,
-      filename: key.split('/').pop(), // Extract just the filename
-      key: key,
-      url: `https://${S3_CONFIG.bucketName}.s3.${S3_CONFIG.region}.amazonaws.com/${key}`
+      filename: result.data.original_filename,
+      key: result.data.s3_key,
+      url: result.data.file_url
     };
 
   } catch (error) {
-    console.error('S3 upload error:', error);
-    
-    let errorMessage = error.message || 'Failed to upload logo to S3';
-    
-    // Handle common S3 errors
-    if (error.name === 'AccessDenied') {
-      errorMessage = 'Access denied to S3 bucket. Check AWS credentials and permissions.';
-    } else if (error.name === 'NoSuchBucket') {
-      errorMessage = 'S3 bucket not found. Check bucket name configuration.';
-    } else if (error.name === 'NetworkError' || error.message.includes('CORS')) {
-      errorMessage = 'Network error or CORS issue. Check S3 bucket CORS configuration.';
-    } else if (error.message.includes('Forbidden')) {
-      errorMessage = 'Access forbidden. Check AWS credentials and S3 bucket policies.';
-    }
+    console.error('Logo upload error:', error);
     
     return {
       success: false,
-      error: errorMessage,
+      error: error.message || 'Failed to upload logo',
       originalError: error
     };
   }
 }
 
 /**
- * Check if S3 is properly configured
- * @returns {boolean} - True if S3 configuration is available
+ * Convert file to base64 string
+ * @param {File} file - The file to convert
+ * @returns {Promise<string>} - Base64 encoded string
+ */
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      // Remove the data:image/...;base64, prefix
+      const base64 = reader.result.split(',')[1];
+      resolve(base64);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+/**
+ * Check if API is properly configured for logo upload
+ * @returns {boolean} - True if API configuration is available
  */
 export function isS3Configured() {
-  const hasCredentials = !!(
-    import.meta.env.PUBLIC_AWS_ACCESS_KEY_ID &&
-    import.meta.env.PUBLIC_AWS_SECRET_ACCESS_KEY &&
-    S3_CONFIG.region &&
-    S3_CONFIG.bucketName
+  const hasApiConfig = !!(
+    import.meta.env.PUBLIC_API_URL &&
+    import.meta.env.PUBLIC_API_KEY
   );
   
   const hasPlaceholders = (
-    import.meta.env.PUBLIC_AWS_ACCESS_KEY_ID === 'your_access_key_here' ||
-    import.meta.env.PUBLIC_AWS_SECRET_ACCESS_KEY === 'your_secret_key_here'
+    import.meta.env.PUBLIC_API_URL === 'your_api_url_here' ||
+    import.meta.env.PUBLIC_API_KEY === 'your_api_key_here'
   );
   
-  return hasCredentials && !hasPlaceholders;
+  return hasApiConfig && !hasPlaceholders;
 }
 
 /**
@@ -194,7 +239,7 @@ export async function testS3Connection() {
 }
 
 /**
- * Mock S3 upload for development/testing without AWS credentials
+ * Mock S3 upload for development/testing without API configuration
  * @param {File} file - The logo file to validate
  * @param {string} resourceName - The resource name for filename generation
  * @returns {Promise<object>} - Mock upload result
@@ -209,7 +254,11 @@ export async function mockLogoUpload(file, resourceName) {
   // Simulate upload delay
   await new Promise(resolve => setTimeout(resolve, 1500));
 
-  const filename = resourceName.toLowerCase().replace(/\s+/g, '_') + '.png';
+  // Generate filename using resource name with hyphens and random suffix
+  const cleanResourceName = resourceName.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+  const randomSuffix = generateRandomString();
+  const fileExtension = file.name.split('.').pop().toLowerCase();
+  const filename = `${cleanResourceName}-${randomSuffix}.${fileExtension}`;
   const key = `${S3_CONFIG.prefix}/uploads/temp/${filename}`;
   
   return {

@@ -7,6 +7,7 @@ from app.update_resource import handle_update_resource
 from app.delete_resource import handle_delete_resource
 from app.get_resource import handle_get_resource
 from app.get_approved_resources import handle_get_approved_resources
+from app.upload_logo import handle_upload_logo
 from app.utils import get_parameter
 
 def lambda_handler(event, context):
@@ -67,6 +68,10 @@ def lambda_handler(event, context):
         # Route: POST /get-resource (Get Resource by Slug)
         elif method == 'POST' and path.endswith('/get-resource'):
             return handle_get_resource(event, headers, table_name)
+        
+        # Route: POST /upload-logo (Upload Logo)
+        elif method == 'POST' and path.endswith('/upload-logo'):
+            return handle_upload_logo(event, headers)
       
         else:
             return {

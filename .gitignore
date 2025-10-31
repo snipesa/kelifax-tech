@@ -22,6 +22,7 @@ pnpm-debug.log*
 
 # test files and debugging
 *test*.html
+test*.sh
 *debug*.html
 api-test.*
 cors-test.*

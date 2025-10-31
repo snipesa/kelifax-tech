@@ -42,6 +42,8 @@ Mappings:
     dev:
       TableName: kelifax-SubmittedResources-Dev
 
+
+
 Resources:
   # Lambda Function
   KelilaxFunction:
@@ -123,7 +125,26 @@ Resources:
                   - 'ssm:GetParameters'
                   - 'ssm:GetParametersByPath'
                 Resource:
-                  - Fn::Sub: 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${FunctionPrefix}/*'
+                  - Fn::Sub: 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${FunctionPrefix}/${Environment}/*'
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                  - 's3:DeleteObject'
+                Resource:
+                  - !Sub 'arn:aws:s3:::kelifax-resources/${Environment}/uploads/temp/*'
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                  - 's3:DeleteObject'
+                Resource:
+                  - !Sub 'arn:aws:s3:::kelifax-resources/${Environment}/logos/approved/*'
+                  - !Sub 'arn:aws:s3:::kelifax-resources/${Environment}/logos/pending/*'
 
   # API Gateway Resources
   ApiGatewayRestApi:
@@ -161,6 +182,13 @@ Resources:
       RestApiId: !Ref ApiGatewayRestApi
       ParentId: !GetAtt [ApiGatewayRestApi, RootResourceId]
       PathPart: "submit-resource"
+
+  ApiGatewayResourceUploadLogo:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !GetAtt [ApiGatewayRestApi, RootResourceId]
+      PathPart: "upload-logo"
 
   # OPTIONS Methods for CORS
   ApiGatewayMethodAdminAuthOptions:
@@ -246,6 +274,32 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
       ResourceId: !Ref ApiGatewayResourceSubmitResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  ApiGatewayMethodUploadLogoOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceUploadLogo
       HttpMethod: OPTIONS
       AuthorizationType: NONE
       Integration:
@@ -373,6 +427,21 @@ Resources:
       MethodResponses:
         - StatusCode: 200
 
+  ApiGatewayMethodUploadLogoPost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceUploadLogo
+      HttpMethod: POST
+      AuthorizationType: NONE
+      ApiKeyRequired: true
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
   # Lambda Permissions for API Gateway
   LambdaInvokePermission:
     Type: AWS::Lambda::Permission
@@ -400,6 +469,8 @@ Resources:
       - ApiGatewayMethodGetResourceOptions
       - ApiGatewayMethodSubmitResourcePost
       - ApiGatewayMethodSubmitResourceOptions
+      - ApiGatewayMethodUploadLogoPost
+      - ApiGatewayMethodUploadLogoOptions
 
   # Usage Plan
   ApiGatewayUsagePlan:
