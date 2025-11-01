@@ -5,6 +5,7 @@ def handle_delete_resource(event, headers, table_name):
     path_params = event.get('pathParameters') or {}
     resource_slug = path_params.get('slug') or event.get('path', '').split('/')[-1]
     
+    print(f"Received delete request for resource slug: {resource_slug}")
     return {
         'statusCode': 200,
         'headers': headers,

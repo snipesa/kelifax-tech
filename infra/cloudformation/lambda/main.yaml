@@ -34,6 +34,11 @@ Parameters:
     Type: String
     Description: API Key ID for Gateway (reference an existing API Key ID from the console)
     Default: h5tbv3v5g0
+    
+  AllowedIPRanges:
+    Type: CommaDelimitedList
+    Default: "10.0.2.0/32,35.145.211.139/32"
+    Description: "Comma-delimited list of IP ranges allowed to access admin-auth endpoints"
 
 Mappings:
   EnvironmentToTableName:
@@ -154,6 +159,22 @@ Resources:
       EndpointConfiguration:
         Types:
           - REGIONAL
+      Policy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action: execute-api:Invoke
+            Resource: "execute-api:/*"
+          - Effect: Deny
+            Principal: "*"
+            Action: execute-api:Invoke
+            Resource:
+              - !Sub "execute-api:/${Environment}/*/admin-auth"
+              - !Sub "execute-api:/${Environment}/*/admin-auth/*"
+            Condition:
+              NotIpAddress:
+                aws:SourceIp: !Ref AllowedIPRanges
 
   ApiGatewayResourceAdminAuth:
     Type: AWS::ApiGateway::Resource

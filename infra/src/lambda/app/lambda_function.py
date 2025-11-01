@@ -17,10 +17,68 @@ def lambda_handler(event, context):
     Routes: POST /resources, POST /admin-auth, GET /resources, PATCH /resources/{slug}, DELETE /resources/{slug}
     """
     
+    # Define allowed origins based on environment
+    env = os.environ.get('ENVIRONMENT')
+    
+    # Verify environment variable exists
+    if not env:
+        return {
+            'statusCode': 500,
+            'headers': {
+                'Content-Type': 'application/json'
+            },
+            'body': json.dumps({
+                'success': False,
+                'message': 'Configuration error: ENVIRONMENT variable not set',
+                'error': 'Missing required environment variable: ENVIRONMENT'
+            })
+        }
+    
+    ALLOWED_ORIGINS = {
+        'prod': [
+            'https://kelifax.com',
+            'https://www.kelifax.com'
+        ],
+        'dev': [
+            'http://localhost:4321',
+            'http://localhost:4322', 
+            'http://localhost:4323',
+            'https://www.d2zqbcv5saw2i9.cloudfront.net',
+            'https://d2zqbcv5saw2i9.cloudfront.net'
+        ]
+    }
+    
+    allowed_origins = ALLOWED_ORIGINS.get(env, ALLOWED_ORIGINS['dev'])
+    
+    # Check origin header
+    origin = event.get('headers', {}).get('origin', '')
+    origin_lower = origin.lower()
+    
+    # Validate origin (case-insensitive comparison)
+    valid_origin = None
+    for allowed in allowed_origins:
+        if origin_lower == allowed.lower():
+            valid_origin = origin
+            break
+    
+    # If origin is not allowed, return 403
+    if origin and not valid_origin:
+        return {
+            'statusCode': 403,
+            'headers': {
+                'Content-Type': 'application/json'
+            },
+            'body': json.dumps({
+                'success': False,
+                'message': 'Forbidden: Invalid origin',
+                'origin': origin
+            })
+        }
+    
     # CORS headers for all responses
     headers = {
         'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Origin': valid_origin or allowed_origins[0],  # Default to first allowed origin
         'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization, X-Amz-Date, X-Amz-Security-Token',
         'Access-Control-Max-Age': '86400'
@@ -61,13 +119,13 @@ def lambda_handler(event, context):
         elif method == 'PATCH' and '/resources/' in path:
             return handle_update_resource(event, headers, table_name)
         
-        # Route: DELETE /resources/{slug} (Delete Resource)
-        elif method == 'DELETE' and '/resources/' in path:
-            return handle_delete_resource(event, headers, table_name)
-        
         # Route: POST /get-resource (Get Resource by Slug)
         elif method == 'POST' and path.endswith('/get-resource'):
             return handle_get_resource(event, headers, table_name)
+        
+        # Route: DELETE /delete-resource (Delete Resource by Slug)
+        elif method == 'POST' and path.endswith('/delete-resource'):
+            return handle_delete_resource(event, headers, table_name)
         
         # Route: POST /upload-logo (Upload Logo)
         elif method == 'POST' and path.endswith('/upload-logo'):
