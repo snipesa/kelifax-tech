@@ -183,6 +183,13 @@ Resources:
       ParentId: !GetAtt [ApiGatewayRestApi, RootResourceId]
       PathPart: "admin-auth"
 
+  ApiGatewayResourceDeleteResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !Ref ApiGatewayResourceAdminAuth
+      PathPart: "delete-resource"
+
   ApiGatewayResourceResources:
     Type: AWS::ApiGateway::Resource
     Properties:
@@ -342,6 +349,32 @@ Resources:
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
 
+  ApiGatewayMethodDeleteResourceOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceDeleteResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
   # API Methods
   ApiGatewayMethodAdminAuthPost:
     Type: AWS::ApiGateway::Method
@@ -463,6 +496,21 @@ Resources:
       MethodResponses:
         - StatusCode: 200
 
+  ApiGatewayMethodDeleteResourcePost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceDeleteResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      ApiKeyRequired: true
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
   # Lambda Permissions for API Gateway
   LambdaInvokePermission:
     Type: AWS::Lambda::Permission
@@ -492,6 +540,8 @@ Resources:
       - ApiGatewayMethodSubmitResourceOptions
       - ApiGatewayMethodUploadLogoPost
       - ApiGatewayMethodUploadLogoOptions
+      - ApiGatewayMethodDeleteResourcePost
+      - ApiGatewayMethodDeleteResourceOptions
 
   # Usage Plan
   ApiGatewayUsagePlan:

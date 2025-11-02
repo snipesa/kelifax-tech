@@ -100,7 +100,7 @@ def lambda_handler(event, context):
     
     try:
         # Route: POST /admin-auth
-        if method == 'POST' and 'admin-auth' in path:
+        if method == 'POST' and path.endswith('/admin-auth'):
             return handle_admin_auth(event, headers, table_name)
         
         # Route: POST /submit-resource (Submit Resource)
