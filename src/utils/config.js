@@ -70,12 +70,23 @@ export const CATEGORIES = [
   'design', 
   'learning',
   'productivity',
-  'marketing',
-  'business',
-  'tools',
-  'frameworks',
-  'databases'
+  'ai',
+  'analytics',
+  'other'
 ];
+
+/**
+ * Category Display Names (for UI)
+ */
+export const CATEGORY_LABELS = {
+  'development': 'Development Tools & Frameworks',
+  'design': 'Design & UI/UX Tools',
+  'learning': 'Learning & Education Platforms',
+  'productivity': 'Productivity & Organization Tools',
+  'ai': 'AI & Machine Learning Tools',
+  'analytics': 'Analytics & Data Tools',
+  'other': 'Other'
+};
 
 /**
  * Resource Status Types (for admin)

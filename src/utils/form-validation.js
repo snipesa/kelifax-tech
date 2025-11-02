@@ -1,6 +1,8 @@
 // Form validation utilities for resource submission
 // Handles client-side validation with specific rules for each field
 
+import { CATEGORIES } from './config.js';
+
 /**
  * Validate that a field does not contain pipe characters
  * Critical for backend database storage
@@ -134,10 +136,7 @@ export const validateResourceInfo = {
   },
 
   category: (value) => {
-    const validCategories = [
-      'development', 'design', 'productivity', 'learning'
-    ];
-    if (!value || !validCategories.includes(value)) {
+    if (!value || !CATEGORIES.includes(value)) {
       return 'Please select a valid category';
     }
     return null;

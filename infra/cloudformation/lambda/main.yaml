@@ -40,6 +40,11 @@ Parameters:
     Default: "10.0.2.0/32,35.145.211.139/32"
     Description: "Comma-delimited list of IP ranges allowed to access admin-auth endpoints"
 
+  SnsTopicArn:
+    Type: String
+    Default: "arn:aws:sns:us-east-1:905418207079:snipes-sns-aws"
+    Description: "SNS Topic ARN for CloudWatch alarm notifications"
+
 Mappings:
   EnvironmentToTableName:
     prod:
@@ -47,7 +52,8 @@ Mappings:
     dev:
       TableName: kelifax-SubmittedResources-Dev
 
-
+Conditions:
+  IsProd: !Equals [!Ref Environment, "prod"]
 
 Resources:
   # Lambda Function
@@ -391,21 +397,6 @@ Resources:
       MethodResponses:
         - StatusCode: 200
 
-  ApiGatewayMethodResourcesDelete:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      RestApiId: !Ref ApiGatewayRestApi
-      ResourceId: !Ref ApiGatewayResourceResources
-      HttpMethod: DELETE
-      AuthorizationType: NONE
-      ApiKeyRequired: true
-      Integration:
-        Type: AWS_PROXY
-        IntegrationHttpMethod: POST
-        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
-      MethodResponses:
-        - StatusCode: 200
-
   ApiGatewayMethodResourcesGet:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -532,7 +523,6 @@ Resources:
       - ApiGatewayMethodResourcesGet
       - ApiGatewayMethodResourcesPost
       - ApiGatewayMethodResourcesPatch
-      - ApiGatewayMethodResourcesDelete
       - ApiGatewayMethodResourcesOptions
       - ApiGatewayMethodGetResourcePost
       - ApiGatewayMethodGetResourceOptions
@@ -552,6 +542,12 @@ Resources:
         - ApiId: !Ref ApiGatewayRestApi
           Stage: !Ref Environment
       Description: !Sub "Usage plan for ${FunctionPrefix}-${Environment}"
+      Throttle:
+        RateLimit: 200
+        BurstLimit: 400
+      Quota:
+        Limit: 25000
+        Period: DAY
     DependsOn:
       - ApiGatewayDeployment
 
@@ -562,6 +558,30 @@ Resources:
       KeyId: !Ref ApiKey
       KeyType: "API_KEY"
       UsagePlanId: !Ref ApiGatewayUsagePlan
+
+  # CloudWatch Alarms for API Gateway Monitoring
+  ApiGatewayHighTrafficAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${FunctionPrefix}-${Environment}-high-traffic-alarm"
+      AlarmDescription: "Alert when Kelifax API traffic is unusually high"
+      MetricName: "Count"
+      Namespace: "AWS/ApiGateway"
+      Statistic: Sum
+      Period: 300  # 5 minutes
+      EvaluationPeriods: 2
+      Threshold: !If [IsProd, 500, 25]  # Prod: 500 requests, Dev: 25 requests in 5 minutes
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Sub "${FunctionPrefix}-${Environment}-api"
+        - Name: Stage
+          Value: !Ref Environment
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref SnsTopicArn
+      OKActions:
+        - !Ref SnsTopicArn
 
 Outputs:
   FunctionArn:

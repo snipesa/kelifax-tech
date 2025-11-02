@@ -2,6 +2,7 @@
 import MainLayout from '../layouts/MainLayout.astro';
 import ResourceCard from '../components/ResourceCard.astro';
 import LoadingSpinner from '../components/LoadingSpinner.astro';
+import { CATEGORIES } from '../utils/config.js';
 
 // Initial batch will be loaded via JavaScript on the client
 // This page will use the API to fetch resources in batches of 10
@@ -49,12 +50,15 @@ import LoadingSpinner from '../components/LoadingSpinner.astro';
           <button id="filter-all" class="category-filter px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors" data-category="all">
             All Resources
           </button>
-          <button id="filter-development" class="category-filter px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors capitalize" data-category="development">
-            Development
-          </button>
-          <button id="filter-other" class="category-filter px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors capitalize" data-category="other">
-            Other
-          </button>
+          {CATEGORIES.map(category => (
+            <button 
+              id={`filter-${category}`}
+              class="category-filter px-4 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200 transition-colors capitalize" 
+              data-category={category}
+            >
+              {category === 'ai' ? 'AI' : category.charAt(0).toUpperCase() + category.slice(1)}
+            </button>
+          ))}
         </div>
       </div>
 

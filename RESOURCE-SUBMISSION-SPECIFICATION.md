@@ -47,6 +47,9 @@ The resource submission process will be implemented as a **three-page progressiv
   - `design` - Design & UI/UX Tools  
   - `productivity` - Productivity & Organization Tools
   - `learning` - Learning & Education Platforms
+  - `ai` - AI & Machine Learning Tools
+  - `analytics` - Analytics & Data Tools
+  - `other` - Other
 
 ---
 

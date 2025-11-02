@@ -91,7 +91,7 @@ SORT_KEY: "createdAt"          # String (ISO 8601) - Consistent chronological or
 ```python
 # For public category-specific resource listing
 GSI_NAME: "CategoryIndex"
-PARTITION_KEY: "category"      # String (development|design|productivity, etc.)
+PARTITION_KEY: "category"      # String (development|design|learning|productivity|ai|analytics|other)
 SORT_KEY: "createdAt"          # String (ISO 8601) - Consistent chronological ordering
 
 # Query Examples:

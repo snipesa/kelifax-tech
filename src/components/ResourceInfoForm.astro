@@ -1,6 +1,7 @@
 ---
 // Page 2: Basic Resource Information Component
 // Collects core information about the resource being submitted
+import { CATEGORIES, CATEGORY_LABELS } from '../utils/config.js';
 ---
 
 <div class="space-y-6">
@@ -78,13 +79,9 @@
       class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
     >
       <option value="">Select a category</option>
-      <option value="development">Development Tools & Frameworks</option>
-      <option value="design">Design & UI/UX Tools</option>
-      <option value="productivity">Productivity & Organization Tools</option>
-      <option value="learning">Learning & Education Platforms</option>
-      <option value="ai">AI & Machine Learning Tools</option>
-      <option value="analytics">Analytics & Data Tools</option>
-      <option value="other">Other</option>
+      {CATEGORIES.map(category => (
+        <option value={category}>{CATEGORY_LABELS[category]}</option>
+      ))}
     </select>
     <div class="error-message text-red-500 text-sm mt-1 hidden" data-field="category"></div>
     <p class="text-sm text-gray-500 mt-1">Choose the most relevant category</p>
