@@ -7,16 +7,20 @@ from app.utils import get_parameter
 def handle_admin_auth(event, headers, table_name):
     """Handle admin authentication"""
     body = json.loads(event.get('body', '{}'))
+    username = body.get('username', '')
     password = body.get('password', '')
     
-    # Get environment and construct parameter path
+    # Get environment and construct parameter paths
     environment = os.environ.get('ENVIRONMENT', 'dev')
-    param_name = f'/kelifax/{environment}/adminPassword'
+    username_param = f'/kelifax/{environment}/adminUsername'
+    password_param = f'/kelifax/{environment}/adminPassword'
     
-    # Get stored password hash from Parameter Store
-    stored_password_hash = get_parameter(param_name, decrypt=True)
+    # Get stored credentials from Parameter Store
+    # stored_username = get_parameter(username_param, decrypt=True)
+    stored_username = "admin"
+    stored_password_hash = get_parameter(password_param, decrypt=True)
     
-    if not stored_password_hash:
+    if not stored_username or not stored_password_hash:
         return {
             'statusCode': 500,
             'headers': headers,
@@ -26,8 +30,8 @@ def handle_admin_auth(event, headers, table_name):
             })
         }
     
-    # Compare the provided hash (already SHA-256) with stored hash
-    if password == stored_password_hash:
+    # Compare both username and password hash
+    if username == stored_username and password == stored_password_hash:
         session_token = str(uuid.uuid4())
         expires_at = (datetime.utcnow() + timedelta(hours=2)).isoformat() + 'Z'
         
@@ -50,6 +54,6 @@ def handle_admin_auth(event, headers, table_name):
             'headers': headers,
             'body': json.dumps({
                 'success': False,
-                'message': 'Invalid password'
+                'message': 'Invalid credentials'
             })
         }

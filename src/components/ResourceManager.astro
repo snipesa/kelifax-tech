@@ -1,0 +1,215 @@
+---
+// filepath: /Users/ashimeetunyi/Desktop/code/kelifax/src/components/ResourceManager.astro
+// Component for managing existing resources (search and delete)
+---
+
+<div class="bg-white shadow rounded-lg">
+  <div class="px-4 py-5 sm:p-6">
+    <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4">
+      Manage Resources
+    </h3>
+    
+    <!-- Search Form -->
+    <div class="mb-6">
+      <form id="resource-search-form" class="flex gap-3">
+        <div class="flex-1">
+          <label for="resource-search" class="sr-only">Search for resource</label>
+          <input
+            type="text"
+            id="resource-search"
+            name="resource-search"
+            class="block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+            placeholder="Enter resource name to search..."
+            required
+          />
+        </div>
+        <button
+          type="submit"
+          id="search-button"
+          class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+        >
+          <span id="search-text">Search</span>
+          <div id="search-spinner" class="hidden ml-2">
+            <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          </div>
+        </button>
+      </form>
+    </div>
+
+    <!-- Search Results -->
+    <div id="search-results-section" class="hidden">
+      <h4 class="text-md font-medium text-gray-900 mb-3">Search Results:</h4>
+      
+      <div id="search-error" class="hidden text-center py-4">
+        <div class="text-red-600 bg-red-50 border border-red-200 rounded-md p-4">
+          <p id="search-error-message">Resource not found</p>
+        </div>
+      </div>
+
+      <div id="search-results" class="hidden">
+        <!-- Search results will be populated here -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { getResourceByName, deleteResource } from '../utils/admin-api.js';
+  import { requireAdminAuth } from '../utils/admin-auth.js';
+
+  // Check authentication
+  if (!requireAdminAuth()) {
+    return;
+  }
+
+  const searchForm = document.getElementById('resource-search-form');
+  const searchInput = document.getElementById('resource-search');
+  const searchButton = document.getElementById('search-button');
+  const searchText = document.getElementById('search-text');
+  const searchSpinner = document.getElementById('search-spinner');
+  const resultsSection = document.getElementById('search-results-section');
+  const searchError = document.getElementById('search-error');
+  const searchErrorMessage = document.getElementById('search-error-message');
+  const searchResults = document.getElementById('search-results');
+
+  function setSearchLoading(loading) {
+    searchButton.disabled = loading;
+    if (loading) {
+      searchText.textContent = 'Searching...';
+      searchSpinner.classList.remove('hidden');
+    } else {
+      searchText.textContent = 'Search';
+      searchSpinner.classList.add('hidden');
+    }
+  }
+
+  function showSearchError(message) {
+    resultsSection.classList.remove('hidden');
+    searchError.classList.remove('hidden');
+    searchResults.classList.add('hidden');
+    searchErrorMessage.textContent = message;
+  }
+
+  function showSearchResults() {
+    resultsSection.classList.remove('hidden');
+    searchError.classList.add('hidden');
+    searchResults.classList.remove('hidden');
+  }
+
+  function createResourceResult(resource) {
+    const resultDiv = document.createElement('div');
+    resultDiv.className = 'border border-gray-200 rounded-lg p-4';
+    
+    const statusBadge = getStatusBadge(resource.status);
+    
+    resultDiv.innerHTML = `
+      <div class="flex justify-between items-start">
+        <div class="flex-1">
+          <div class="flex items-center gap-3 mb-2">
+            <h4 class="text-lg font-medium text-gray-900">${resource.name || 'Unnamed Resource'}</h4>
+            ${statusBadge}
+          </div>
+          <p class="text-sm text-gray-600 mb-2">${resource.description || 'No description available'}</p>
+          <div class="flex flex-wrap gap-2 mb-2">
+            ${resource.category ? `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">${resource.category}</span>` : ''}
+            ${resource.url ? `<a href="${resource.url}" target="_blank" class="text-blue-600 hover:text-blue-500 text-sm">View Resource</a>` : ''}
+          </div>
+          <div class="text-xs text-gray-500">
+            ${resource.submittedBy ? `<p>Submitted by: ${resource.submittedBy}</p>` : ''}
+            ${resource.createdAt ? `<p>Created: ${new Date(resource.createdAt).toLocaleDateString()}</p>` : ''}
+          </div>
+        </div>
+        <div class="ml-4">
+          <button 
+            class="delete-btn bg-red-600 text-white px-4 py-2 rounded text-sm hover:bg-red-700 disabled:opacity-50"
+            data-resource-name="${resource.name}"
+          >
+            Delete Resource
+          </button>
+        </div>
+      </div>
+    `;
+
+    return resultDiv;
+  }
+
+  function getStatusBadge(status) {
+    if (!status) return '';
+    
+    const statusLower = status.toLowerCase();
+    let badgeClass = 'bg-gray-100 text-gray-800';
+    
+    if (statusLower === 'approved') {
+      badgeClass = 'bg-green-100 text-green-800';
+    } else if (statusLower === 'rejected' || statusLower === 'declined') {
+      badgeClass = 'bg-red-100 text-red-800';
+    } else if (statusLower === 'pending') {
+      badgeClass = 'bg-yellow-100 text-yellow-800';
+    }
+    
+    return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass}">${status}</span>`;
+  }
+
+  async function handleDelete(resourceName, button) {
+    if (!confirm(`Are you sure you want to delete "${resourceName}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    const originalText = button.textContent;
+    button.disabled = true;
+    button.textContent = 'Deleting...';
+
+    try {
+      await deleteResource(resourceName);
+      button.parentElement.parentElement.parentElement.remove();
+      
+      // Hide results section if no more results
+      if (searchResults.children.length === 0) {
+        resultsSection.classList.add('hidden');
+      }
+      
+      alert('Resource deleted successfully');
+    } catch (error) {
+      alert(`Failed to delete resource: ${error.message}`);
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  }
+
+  searchForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    const resourceName = searchInput.value.trim();
+    if (!resourceName) {
+      return;
+    }
+
+    setSearchLoading(true);
+
+    try {
+      const resource = await getResourceByName(resourceName);
+      
+      showSearchResults();
+      searchResults.innerHTML = '';
+      
+      const resultCard = createResourceResult(resource);
+      searchResults.appendChild(resultCard);
+
+    } catch (error) {
+      showSearchError(error.message || 'Resource not found');
+    } finally {
+      setSearchLoading(false);
+    }
+  });
+
+  // Event delegation for delete buttons
+  searchResults.addEventListener('click', (e) => {
+    if (e.target.classList.contains('delete-btn')) {
+      const resourceName = e.target.dataset.resourceName;
+      handleDelete(resourceName, e.target);
+    }
+  });
+</script>

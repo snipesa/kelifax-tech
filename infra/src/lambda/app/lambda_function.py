@@ -7,6 +7,9 @@ from app.update_resource import handle_update_resource
 from app.delete_resource import handle_delete_resource
 from app.get_resource import handle_get_resource
 from app.get_approved_resources import handle_get_approved_resources
+from app.approve_resource import handle_approve_resource
+from app.decline_resource import handle_decline_resource
+
 from app.upload_logo import handle_upload_logo
 from app.utils import get_parameter
 
@@ -60,22 +63,7 @@ def lambda_handler(event, context):
         if origin_lower == allowed.lower():
             valid_origin = origin
             break
-    
-    # If origin is not allowed, return 403
-    if origin and not valid_origin:
-        return {
-            'statusCode': 403,
-            'headers': {
-                'Content-Type': 'application/json'
-            },
-            'body': json.dumps({
-                'success': False,
-                'message': 'Forbidden: Invalid origin',
-                'origin': origin
-            })
-        }
-    
-    # CORS headers for all responses
+     # CORS headers for all responses (set early to ensure they're always included)
     headers = {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': valid_origin or allowed_origins[0],  # Default to first allowed origin
@@ -83,6 +71,18 @@ def lambda_handler(event, context):
         'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization, X-Amz-Date, X-Amz-Security-Token',
         'Access-Control-Max-Age': '86400'
     }
+
+    # If origin is not allowed, return 403 WITH CORS headers
+    if origin and not valid_origin:
+        return {
+            'statusCode': 403,
+            'headers': headers,
+            'body': json.dumps({
+                'success': False,
+                'message': 'Forbidden: Invalid origin',
+                'origin': origin
+            })
+        }
     
     # Get DynamoDB table name from environment
     table_name = os.environ.get('DYNAMODB_TABLE', 'kelifax-resources')
@@ -112,20 +112,24 @@ def lambda_handler(event, context):
             return handle_get_approved_resources(event, headers, table_name)
 
         # Route: GET /resources (Get Submitted Resources for Admin)
-        elif method == 'GET' and path.endswith('/resources'):
+        elif method == 'POST' and path.endswith('admin-auth/submitted-resources'):
             return handle_get_submitted_resources(event, headers, table_name)
-        
-        # Route: PATCH /resources/{slug} (Approve/Reject Resource)
-        elif method == 'PATCH' and '/resources/' in path:
-            return handle_update_resource(event, headers, table_name)
         
         # Route: POST /get-resource (Get Resource by Slug)
         elif method == 'POST' and path.endswith('/get-resource'):
             return handle_get_resource(event, headers, table_name)
         
         # Route: DELETE /delete-resource (Delete Resource by Slug)
-        elif method == 'POST' and path.endswith('/delete-resource'):
+        elif method == 'POST' and path.endswith('admin-auth/delete-resource'):
             return handle_delete_resource(event, headers, table_name)
+        
+        # Route: POST /approve-resource (Approve Resource)
+        elif method == 'POST' and path.endswith('admin-auth/approve-resource'):
+            return handle_approve_resource(event, headers, table_name)
+        
+        # Route: POST /decline-resource (Decline Resource)
+        elif method == 'POST' and path.endswith('admin-auth/decline-resource'):
+            return handle_decline_resource(event, headers, table_name)
         
         # Route: POST /upload-logo (Upload Logo)
         elif method == 'POST' and path.endswith('/upload-logo'):
