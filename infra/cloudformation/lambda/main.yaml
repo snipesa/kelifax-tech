@@ -732,7 +732,7 @@ Resources:
       Statistic: Sum
       Period: 300  # 5 minutes
       EvaluationPeriods: 2
-      Threshold: !If [IsProd, 500, 25]  # Prod: 500 requests, Dev: 25 requests in 5 minutes
+      Threshold: !If [IsProd, 500, 50]  # Prod: 500 requests, Dev: 25 requests in 5 minutes
       ComparisonOperator: GreaterThanThreshold
       Dimensions:
         - Name: ApiName
