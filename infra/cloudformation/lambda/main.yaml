@@ -79,6 +79,8 @@ Resources:
       MemorySize: 256
       Environment:
         Variables:
+          ENV: 
+            Ref: Environment        
           ENVIRONMENT: 
             Ref: Environment
           DYNAMODB_TABLE: 

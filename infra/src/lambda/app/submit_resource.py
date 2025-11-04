@@ -190,7 +190,7 @@ def get_bucket_config():
     """
     try:
         # Get environment from OS environment variable
-        environment = os.environ.get('ENV', 'dev').lower()
+        environment = os.environ.get('ENVIRONMENT', 'dev').lower()
         
         # Determine parameter name based on environment
         if environment == 'prod':
