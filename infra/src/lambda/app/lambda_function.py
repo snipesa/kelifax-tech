@@ -1,15 +1,15 @@
 import json
 import os
 from app.admin_auth import handle_admin_auth
-from app.submit_resource import handle_submit_resource
 from app.admin_get_submitted_resources import handle_get_submitted_resources
-from app.update_resource import handle_update_resource
+from app.admin_update_resource import handle_update_resource
 from app.admin_delete_resource import handle_delete_resource
-from app.get_resource import handle_get_resource
-from app.get_approved_resources import handle_get_approved_resources
 from app.admin_approve_resource import handle_approve_resource
 from app.admin_decline_resource import handle_decline_resource
 from app.admin_get_resource import handle_admin_get_resource
+from app.get_approved_resources import handle_get_approved_resources
+from app.submit_resource import handle_submit_resource
+from app.get_resource import handle_get_resource
 from app.upload_logo import handle_upload_logo
 from app.utils import get_parameter
 
@@ -102,22 +102,10 @@ def lambda_handler(event, context):
         # Route: POST /admin
         if method == 'POST' and path.endswith('/admin'):
             return handle_admin_auth(event, headers, table_name)
-        
-        # Route: POST /submit-resource (Submit Resource)
-        elif method == 'POST' and path.endswith('/submit-resource'):
-            return handle_submit_resource(event, headers, table_name)
-        
-        # Route: POST /resources existing resources in batches
-        elif method == 'POST' and path.endswith('/resources'):
-            return handle_get_approved_resources(event, headers, table_name)
 
         # Route: GET /admin/submitted-resources (Get Submitted Resources for Admin)
         elif method == 'POST' and path.endswith('/admin/submitted-resources'):
             return handle_get_submitted_resources(event, headers, table_name)
-        
-        # Route: POST /get-resource (Get Resource by Slug)
-        elif method == 'POST' and path.endswith('/get-resource'):
-            return handle_get_resource(event, headers, table_name)
 
         # Route: POST /admin/get-resource (Get Resource by Slug for admin)
         elif method == 'POST' and path.endswith('/admin/get-resource'):
@@ -135,6 +123,22 @@ def lambda_handler(event, context):
         elif method == 'POST' and path.endswith('/admin/decline-resource'):
             return handle_decline_resource(event, headers, table_name)
         
+        # Route: POST /admin/update-resource (Update Resource)
+        elif method == 'POST' and path.endswith('/admin/update-resource'):
+            return handle_update_resource(event, headers, table_name)
+
+        # Route: POST /submit-resource (Submit Resource)
+        elif method == 'POST' and path.endswith('/submit-resource'):
+            return handle_submit_resource(event, headers, table_name)
+
+        # Route: POST /get-resource (Get Resource by Slug)
+        elif method == 'POST' and path.endswith('/get-resource'):
+            return handle_get_resource(event, headers, table_name)
+        
+        # Route: POST /resources existing resources in batches
+        elif method == 'POST' and path.endswith('/resources'):
+            return handle_get_approved_resources(event, headers, table_name)
+
         # Route: POST /upload-logo (Upload Logo)
         elif method == 'POST' and path.endswith('/upload-logo'):
             return handle_upload_logo(event, headers)

@@ -535,35 +535,6 @@ Resources:
             method.response.header.Access-Control-Allow-Origin: true
 
   # API Methods
-  ApiGatewayMethodResourcesGet:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      RestApiId: !Ref ApiGatewayRestApi
-      ResourceId: !Ref ApiGatewayResourceResources
-      HttpMethod: GET
-      AuthorizationType: NONE
-      ApiKeyRequired: true
-      Integration:
-        Type: AWS_PROXY
-        IntegrationHttpMethod: POST
-        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
-      MethodResponses:
-        - StatusCode: 200
-
-  ApiGatewayMethodResourcesPatch:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      RestApiId: !Ref ApiGatewayRestApi
-      ResourceId: !Ref ApiGatewayResourceResources
-      HttpMethod: PATCH
-      AuthorizationType: NONE
-      ApiKeyRequired: true
-      Integration:
-        Type: AWS_PROXY
-        IntegrationHttpMethod: POST
-        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
-      MethodResponses:
-        - StatusCode: 200
 
   ApiGatewayMethodResourcesPost:
     Type: AWS::ApiGateway::Method
@@ -728,7 +699,6 @@ Resources:
     DependsOn:
       - ApiGatewayMethodResourcesGet
       - ApiGatewayMethodResourcesPost
-      - ApiGatewayMethodResourcesPatch
       - ApiGatewayMethodResourcesOptions
       - ApiGatewayMethodGetResourcePost
       - ApiGatewayMethodGetResourceOptions
