@@ -265,7 +265,7 @@ export async function submitResourceSubmission(resourceSubmission) {
  */
 export async function authenticateAdmin(password) {
   try {
-    const response = await apiRequest('/admin-auth', {
+    const response = await apiRequest('/admin', {
       method: 'POST',
       body: JSON.stringify({ password }),
     });

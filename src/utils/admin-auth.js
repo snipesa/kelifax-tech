@@ -26,7 +26,7 @@ export async function authenticateAdmin(username, password) {
   try {
     const hashedPassword = await hashPassword(password);
     
-    const response = await fetch(`${API_CONFIG.BASE_URL}/admin-auth`, {
+    const response = await fetch(`${API_CONFIG.BASE_URL}/admin`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -17,7 +17,7 @@ def lambda_handler(event, context):
     # print(event)
     """
     Single Lambda function to handle all Kelifax API endpoints
-    Routes: POST /resources, POST /admin-auth, GET /resources, PATCH /resources/{slug}, DELETE /resources/{slug}
+    Routes: POST /resources, POST /admin, GET /resources, PATCH /resources/{slug}, DELETE /resources/{slug}
     """
     
     # Define allowed origins based on environment
@@ -99,8 +99,8 @@ def lambda_handler(event, context):
     path = event.get('path', '')
     
     try:
-        # Route: POST /admin-auth
-        if method == 'POST' and path.endswith('/admin-auth'):
+        # Route: POST /admin
+        if method == 'POST' and path.endswith('/admin'):
             return handle_admin_auth(event, headers, table_name)
         
         # Route: POST /submit-resource (Submit Resource)
@@ -112,7 +112,7 @@ def lambda_handler(event, context):
             return handle_get_approved_resources(event, headers, table_name)
 
         # Route: GET /resources (Get Submitted Resources for Admin)
-        elif method == 'POST' and path.endswith('admin-auth/submitted-resources'):
+        elif method == 'POST' and path.endswith('admin/submitted-resources'):
             return handle_get_submitted_resources(event, headers, table_name)
         
         # Route: POST /get-resource (Get Resource by Slug)
@@ -120,15 +120,15 @@ def lambda_handler(event, context):
             return handle_get_resource(event, headers, table_name)
         
         # Route: DELETE /delete-resource (Delete Resource by Slug)
-        elif method == 'POST' and path.endswith('admin-auth/delete-resource'):
+        elif method == 'POST' and path.endswith('admin/delete-resource'):
             return handle_delete_resource(event, headers, table_name)
         
         # Route: POST /approve-resource (Approve Resource)
-        elif method == 'POST' and path.endswith('admin-auth/approve-resource'):
+        elif method == 'POST' and path.endswith('admin/approve-resource'):
             return handle_approve_resource(event, headers, table_name)
         
         # Route: POST /decline-resource (Decline Resource)
-        elif method == 'POST' and path.endswith('admin-auth/decline-resource'):
+        elif method == 'POST' and path.endswith('admin/decline-resource'):
             return handle_decline_resource(event, headers, table_name)
         
         # Route: POST /upload-logo (Upload Logo)

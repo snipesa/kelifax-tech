@@ -38,7 +38,7 @@ Parameters:
   AllowedIPRanges:
     Type: CommaDelimitedList
     Default: "10.0.2.0/32,35.145.211.139/32"
-    Description: "Comma-delimited list of IP ranges allowed to access admin-auth endpoints"
+    Description: "Comma-delimited list of IP ranges allowed to access admin endpoints"
 
   SnsTopicArn:
     Type: String
@@ -51,6 +51,12 @@ Mappings:
       TableName: kelifax-resources-prod
     dev:
       TableName: kelifax-SubmittedResources-Dev
+      
+  EnvironmentToCognitoUserPool:
+    prod:
+      UserPoolArn: "arn:aws:cognito-idp:us-east-1:905418207079:userpool/us-east-1_nPle6bTfq"
+    dev:
+      UserPoolArn: "arn:aws:cognito-idp:us-east-1:905418207079:userpool/us-east-1_aizTek5E9"
 
 Conditions:
   IsProd: !Equals [!Ref Environment, "prod"]
@@ -176,25 +182,87 @@ Resources:
             Principal: "*"
             Action: execute-api:Invoke
             Resource:
-              - !Sub "execute-api:/${Environment}/*/admin-auth"
-              - !Sub "execute-api:/${Environment}/*/admin-auth/*"
+              - !Sub "execute-api:/${Environment}/*/admin"
+              - !Sub "execute-api:/${Environment}/*/admin/*"
             Condition:
               NotIpAddress:
                 aws:SourceIp: !Ref AllowedIPRanges
 
-  ApiGatewayResourceAdminAuth:
+  # Cognito User Pool Authorizer for Admin Endpoints
+  CognitoAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: !Sub "${FunctionPrefix}-${Environment}-cognito-authorizer"
+      RestApiId: !Ref ApiGatewayRestApi
+      Type: COGNITO_USER_POOLS
+      ProviderARNs:
+        - Fn::FindInMap:
+            - EnvironmentToCognitoUserPool
+            - Ref: Environment
+            - UserPoolArn
+      AuthorizerCredentials: !GetAtt ApiGatewayAuthorizerRole.Arn
+      IdentitySource: method.request.header.Authorization
+
+  # IAM Role for API Gateway to validate Cognito tokens
+  ApiGatewayAuthorizerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: CognitoUserPoolAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'cognito-idp:GetUser'
+                  - 'cognito-idp:ListUsers'
+                Resource:
+                  Fn::FindInMap:
+                    - EnvironmentToCognitoUserPool
+                    - Ref: Environment
+                    - UserPoolArn
+
+  ApiGatewayResourceAdmin:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
       ParentId: !GetAtt [ApiGatewayRestApi, RootResourceId]
-      PathPart: "admin-auth"
+      PathPart: "admin"
 
   ApiGatewayResourceDeleteResource:
     Type: AWS::ApiGateway::Resource
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
-      ParentId: !Ref ApiGatewayResourceAdminAuth
+      ParentId: !Ref ApiGatewayResourceAdmin
       PathPart: "delete-resource"
+
+  ApiGatewayResourceSubmittedResources:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !Ref ApiGatewayResourceAdmin
+      PathPart: "submitted-resources"
+
+  ApiGatewayResourceApproveResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !Ref ApiGatewayResourceAdmin
+      PathPart: "approve-resource"
+
+  ApiGatewayResourceDeclineResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !Ref ApiGatewayResourceAdmin
+      PathPart: "decline-resource"
 
   ApiGatewayResourceResources:
     Type: AWS::ApiGateway::Resource
@@ -225,32 +293,6 @@ Resources:
       PathPart: "upload-logo"
 
   # OPTIONS Methods for CORS
-  ApiGatewayMethodAdminAuthOptions:
-    Type: AWS::ApiGateway::Method
-    Properties:
-      RestApiId: !Ref ApiGatewayRestApi
-      ResourceId: !Ref ApiGatewayResourceAdminAuth
-      HttpMethod: OPTIONS
-      AuthorizationType: NONE
-      Integration:
-        Type: MOCK
-        IntegrationResponses:
-          - StatusCode: 200
-            ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
-            ResponseTemplates:
-              application/json: "{}"
-        RequestTemplates:
-          application/json: "{ \"statusCode\": 200 }"
-      MethodResponses:
-        - StatusCode: 200
-          ResponseParameters:
-            method.response.header.Access-Control-Allow-Headers: true
-            method.response.header.Access-Control-Allow-Methods: true
-            method.response.header.Access-Control-Allow-Origin: true
-
   ApiGatewayMethodResourcesOptions:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -381,22 +423,85 @@ Resources:
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
 
-  # API Methods
-  ApiGatewayMethodAdminAuthPost:
+  ApiGatewayMethodSubmittedResourcesOptions:
     Type: AWS::ApiGateway::Method
     Properties:
       RestApiId: !Ref ApiGatewayRestApi
-      ResourceId: !Ref ApiGatewayResourceAdminAuth
-      HttpMethod: POST
+      ResourceId: !Ref ApiGatewayResourceSubmittedResources
+      HttpMethod: OPTIONS
       AuthorizationType: NONE
-      ApiKeyRequired: true
       Integration:
-        Type: AWS_PROXY
-        IntegrationHttpMethod: POST
-        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
       MethodResponses:
         - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
 
+  ApiGatewayMethodApproveResourceOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceApproveResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  ApiGatewayMethodDeclineResourceOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceDeclineResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  # API Methods
   ApiGatewayMethodResourcesGet:
     Type: AWS::ApiGateway::Method
     Properties:
@@ -502,6 +607,51 @@ Resources:
       MethodResponses:
         - StatusCode: 200
 
+  ApiGatewayMethodSubmittedResourcesPost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceSubmittedResources
+      HttpMethod: POST
+      AuthorizationType: NONE
+      ApiKeyRequired: true
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
+  ApiGatewayMethodApproveResourcePost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceApproveResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      ApiKeyRequired: true
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
+  ApiGatewayMethodDeclineResourcePost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceDeclineResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      ApiKeyRequired: true
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
   # Lambda Permissions for API Gateway
   LambdaInvokePermission:
     Type: AWS::Lambda::Permission
@@ -518,8 +668,6 @@ Resources:
       RestApiId: !Ref ApiGatewayRestApi
       StageName: !Ref Environment
     DependsOn:
-      - ApiGatewayMethodAdminAuthPost
-      - ApiGatewayMethodAdminAuthOptions
       - ApiGatewayMethodResourcesGet
       - ApiGatewayMethodResourcesPost
       - ApiGatewayMethodResourcesPatch
@@ -532,6 +680,12 @@ Resources:
       - ApiGatewayMethodUploadLogoOptions
       - ApiGatewayMethodDeleteResourcePost
       - ApiGatewayMethodDeleteResourceOptions
+      - ApiGatewayMethodSubmittedResourcesPost
+      - ApiGatewayMethodSubmittedResourcesOptions
+      - ApiGatewayMethodApproveResourcePost
+      - ApiGatewayMethodApproveResourceOptions
+      - ApiGatewayMethodDeclineResourcePost
+      - ApiGatewayMethodDeclineResourceOptions
 
   # Usage Plan
   ApiGatewayUsagePlan:

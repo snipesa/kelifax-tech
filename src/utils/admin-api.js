@@ -39,7 +39,7 @@ async function adminApiRequest(endpoint, data = {}) {
  */
 export async function getSubmittedResources() {
   try {
-    return await adminApiRequest('/admin-auth/submitted-resources');
+    return await adminApiRequest('/admin/submitted-resources');
   } catch (error) {
     console.error('Error fetching submitted resources:', error);
     throw error;
@@ -53,7 +53,7 @@ export async function getSubmittedResources() {
  */
 export async function approveResource(resourceName) {
   try {
-    return await adminApiRequest('/admin-auth/approve-resource', {
+    return await adminApiRequest('/admin/approve-resource', {
       resourceName
     });
   } catch (error) {
@@ -69,7 +69,7 @@ export async function approveResource(resourceName) {
  */
 export async function declineResource(resourceName) {
   try {
-    return await adminApiRequest('/admin-auth/decline-resource', {
+    return await adminApiRequest('/admin/decline-resource', {
       resourceName
     });
   } catch (error) {
@@ -114,7 +114,7 @@ export async function getResourceByName(resourceName) {
  */
 export async function deleteResource(resourceName) {
   try {
-    return await adminApiRequest('/admin-auth/delete-resource', {
+    return await adminApiRequest('/admin/delete-resource', {
       resourceName
     });
   } catch (error) {
