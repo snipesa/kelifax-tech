@@ -91,6 +91,9 @@ import { CATEGORIES } from '../utils/config.js';
   <script>
     // Resources page functionality with API integration
     // This handles the batched loading of resources with infinite scroll
+    
+    // Import S3 utilities
+    import { getApprovedLogoUrl } from '../utils/s3-utils.js';
 
     // API Configuration - using Astro environment variables
     const API_CONFIG = {
@@ -370,7 +373,7 @@ import { CATEGORIES } from '../utils/config.js';
     }
 
     function createResourceCardHTML(resource) {
-      const imageUrl = resource.image ? `/logos/${resource.image}` : '/logos/kelifax.png';
+      const imageUrl = resource.image ? getApprovedLogoUrl(resource.image) : getApprovedLogoUrl('kelifax.png');
       const tagsHTML = resource.tags?.slice(0, 3).map(tag => 
         `<span class="inline-block bg-gray-100 text-gray-700 px-2 py-1 text-xs rounded-full">${tag}</span>`
       ).join('') || '';
@@ -380,7 +383,7 @@ import { CATEGORIES } from '../utils/config.js';
           <div class="p-6">
             <div class="flex items-start justify-between mb-4">
               <div class="flex items-center space-x-3">
-                <img src="${imageUrl}" alt="${resource.title}" class="w-12 h-12 rounded-lg object-cover bg-gray-100" onerror="this.src='/logos/kelifax.png'">
+                <img src="${imageUrl}" alt="${resource.title}" class="w-12 h-12 rounded-lg object-cover bg-gray-100" onerror="this.src='${getApprovedLogoUrl('kelifax.png')}'">
                 <div>
                   <h3 class="font-semibold text-gray-900 text-lg">${resource.title}</h3>
                   <span class="inline-block bg-blue-100 text-blue-800 px-2 py-1 text-xs rounded-full capitalize">${resource.category}</span>

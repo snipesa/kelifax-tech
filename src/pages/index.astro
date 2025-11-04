@@ -2,6 +2,7 @@
 import MainLayout from '../layouts/MainLayout.astro';
 import ResourceCard from '../components/ResourceCard.astro';
 import { CATEGORIES, CATEGORY_LABELS } from '../utils/config.js';
+import { getApprovedLogoUrl } from '../utils/s3-utils.js';
 
 // Since we're using API-only approach, we'll load resources client-side
 // Set default values for server-side rendering
@@ -16,7 +17,7 @@ const totalResources = '50'; // Will be updated client-side
       <div class="text-center">
         <div class="flex justify-center mb-6">
           <img 
-            src="/logos/kelifax.png" 
+            src={getApprovedLogoUrl('kelifax.png')} 
             alt="Kelifax" 
             class="w-20 h-20 object-contain"
           />
@@ -147,6 +148,9 @@ const totalResources = '50'; // Will be updated client-side
   </section>
 
   <script>
+    // Import S3 utilities
+    import { getApprovedLogoUrl } from '../utils/s3-utils.js';
+    
     // API Configuration - using Astro environment variables
     const API_CONFIG = {
       USE_API: import.meta.env.PUBLIC_USE_API === 'true',
@@ -218,7 +222,7 @@ const totalResources = '50'; // Will be updated client-side
 
     // Create resource card HTML
     function createResourceCardHTML(resource) {
-      const imageUrl = resource.image ? `/logos/${resource.image}` : '/logos/kelifax.png';
+      const imageUrl = resource.image ? getApprovedLogoUrl(resource.image) : getApprovedLogoUrl('kelifax.png');
       const tagsHTML = resource.tags?.slice(0, 3).map(tag => 
         `<span class="bg-gray-100 text-gray-700 text-xs px-2 py-1 rounded-md">${tag}</span>`
       ).join('') || '';

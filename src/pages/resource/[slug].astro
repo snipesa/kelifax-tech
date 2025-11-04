@@ -1,5 +1,6 @@
 ---
 import MainLayout from '../../layouts/MainLayout.astro';
+import { getApprovedLogoUrl } from '../../utils/s3-utils.js';
 
 // Static generation with basic resource info from local data
 export async function getStaticPaths() {
@@ -92,7 +93,7 @@ if (!basicResource) {
               {basicResource.image && (
                 <div class="flex-shrink-0">
                   <img 
-                    src={`/logos/${basicResource.image}`}
+                    src={getApprovedLogoUrl(basicResource.image)}
                     alt={basicResource.title}
                     class="w-16 h-16 rounded-lg object-contain bg-gray-100 p-2"
                   />
@@ -186,6 +187,9 @@ if (!basicResource) {
 
   <!-- Dynamic loading script -->
   <script type="module" define:vars={{ resourceSlug: basicResource.slug }}>
+    // Import S3 utilities
+    import { getApprovedLogoUrl } from '../../utils/s3-utils.js';
+    
     // Since we can't easily import ES modules in Astro inline scripts,
     // let's define the required functions inline with proper configuration
     
@@ -375,7 +379,7 @@ if (!basicResource) {
               div.className = 'block p-4 bg-white rounded-lg hover:shadow-md transition-shadow';
               
               const imageHtml = related.image ? 
-                `<img src="/logos/${related.image}" alt="${related.title || related.name}" class="w-10 h-10 rounded object-contain bg-gray-100 p-1" />` : '';
+                `<img src="${getApprovedLogoUrl(related.image)}" alt="${related.title || related.name}" class="w-10 h-10 rounded object-contain bg-gray-100 p-1" />` : '';
               
               div.innerHTML = `
                 <div class="flex items-center gap-3">

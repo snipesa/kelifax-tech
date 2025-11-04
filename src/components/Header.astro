@@ -1,5 +1,7 @@
 ---
 // Header component for Kelifax
+import { getApprovedLogoUrl } from '../utils/s3-utils.js';
+
 export interface Props {
   currentPage?: string;
 }
@@ -46,7 +48,7 @@ const getMobileLinkClasses = (page: string) => {
       <div class="flex items-center">
         <a href="/" class="flex items-center" style="margin-right:2.5rem;">
           <img 
-            src="/logos/kelifax.png" 
+            src={getApprovedLogoUrl('kelifax.png')} 
             alt="Kelifax" 
             class="w-16 h-16 object-contain hover:opacity-80 transition-opacity"
           />

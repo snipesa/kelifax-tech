@@ -37,7 +37,7 @@ Parameters:
     
   AllowedIPRanges:
     Type: CommaDelimitedList
-    Default: "10.0.2.0/32,35.145.211.139/32"
+    Default: "10.0.2.0/32,35.145.211.139/32,0.0.0.0/0"
     Description: "Comma-delimited list of IP ranges allowed to access admin endpoints"
 
   SnsTopicArn:
@@ -598,8 +598,10 @@ Resources:
       RestApiId: !Ref ApiGatewayRestApi
       ResourceId: !Ref ApiGatewayResourceDeleteResource
       HttpMethod: POST
-      AuthorizationType: NONE
-      ApiKeyRequired: true
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      AuthorizationScopes:
+        - email
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
@@ -613,8 +615,10 @@ Resources:
       RestApiId: !Ref ApiGatewayRestApi
       ResourceId: !Ref ApiGatewayResourceSubmittedResources
       HttpMethod: POST
-      AuthorizationType: NONE
-      ApiKeyRequired: true
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      AuthorizationScopes:
+        - email
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
@@ -628,8 +632,10 @@ Resources:
       RestApiId: !Ref ApiGatewayRestApi
       ResourceId: !Ref ApiGatewayResourceApproveResource
       HttpMethod: POST
-      AuthorizationType: NONE
-      ApiKeyRequired: true
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      AuthorizationScopes:
+        - email
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
@@ -643,8 +649,10 @@ Resources:
       RestApiId: !Ref ApiGatewayRestApi
       ResourceId: !Ref ApiGatewayResourceDeclineResource
       HttpMethod: POST
-      AuthorizationType: NONE
-      ApiKeyRequired: true
+      AuthorizationType: COGNITO_USER_POOLS
+      AuthorizerId: !Ref CognitoAuthorizer
+      AuthorizationScopes:
+        - email
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST

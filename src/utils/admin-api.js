@@ -45,7 +45,17 @@ async function adminApiRequest(endpoint, data = {}) {
  */
 export async function getSubmittedResources() {
   try {
-    return await adminApiRequest('/admin/submitted-resources');
+    const response = await adminApiRequest('/admin/submitted-resources', {
+      resourceStatus: 'pending'
+    });
+    
+    // Extract the data array from the API response
+    if (response && response.success && Array.isArray(response.data)) {
+      return response.data;
+    }
+    
+    // If response structure is unexpected, return empty array
+    return [];
   } catch (error) {
     console.error('Error fetching submitted resources:', error);
     throw error;
@@ -91,13 +101,17 @@ export async function declineResource(resourceName) {
  */
 export async function getResourceByName(resourceName) {
   try {
+    // Convert resource name to slug (lowercase, spaces to hyphens)
+    const resourceSlug = resourceName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+    
     const response = await fetch(`${API_CONFIG.BASE_URL}/get-resource`, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'X-API-Key': API_CONFIG.API_KEY
       },
       body: JSON.stringify({
-        name: resourceName
+        slug: resourceSlug
       })
     });
 
@@ -106,7 +120,14 @@ export async function getResourceByName(resourceName) {
       throw new Error(`Failed to get resource: ${errorText}`);
     }
 
-    return await response.json();
+    const result = await response.json();
+    
+    // Extract resource data from API response
+    if (result && result.success && result.data) {
+      return result.data;
+    }
+    
+    throw new Error('Resource not found');
   } catch (error) {
     console.error('Error getting resource:', error);
     throw error;

@@ -22,6 +22,26 @@ export const API_CONFIG = {
 };
 
 /**
+ * S3 Configuration for Assets
+ */
+export const S3_CONFIG = {
+  // S3 bucket for resource assets
+  BUCKET_NAME: import.meta.env.PUBLIC_S3_BUCKET_NAME || 'kelifax-resources',
+  REGION: import.meta.env.PUBLIC_S3_REGION || 'us-east-1',
+  
+  // Environment prefix (dev/prod)
+  ENVIRONMENT_PREFIX: import.meta.env.PUBLIC_S3_ENVIRONMENT_PREFIX || 'dev',
+  
+  // S3 prefixes for different asset types
+  LOGOS_PREFIX: 'logos',
+  PENDING_LOGOS_PREFIX: 'logos/pending',
+  APPROVED_LOGOS_PREFIX: 'logos/approved',
+  
+  // Base URL for S3 assets (with environment prefix)
+  BASE_URL: import.meta.env.PUBLIC_S3_BASE_URL || null, // If using CloudFront or custom domain
+};
+
+/**
  * Application Constants
  */
 export const APP_CONFIG = {

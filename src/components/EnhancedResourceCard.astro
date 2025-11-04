@@ -1,4 +1,6 @@
 ---
+import { getApprovedLogoUrl } from '../utils/s3-utils.js';
+
 export interface Props {
   slug: string;
   title: string;
@@ -55,7 +57,7 @@ const isEnhanced = keyFeatures || useCases || learningResources;
   <div class="aspect-video bg-gradient-to-br from-gray-100 to-gray-200 relative overflow-hidden">
     {image ? (
       <img 
-        src={`/logos/${image}`} 
+        src={getApprovedLogoUrl(image)} 
         alt={`${title} logo`}
         class="w-full h-full object-contain p-4"
       />
