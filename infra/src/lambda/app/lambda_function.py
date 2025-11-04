@@ -2,14 +2,14 @@ import json
 import os
 from app.admin_auth import handle_admin_auth
 from app.submit_resource import handle_submit_resource
-from app.get_submitted_resources import handle_get_submitted_resources
+from app.admin_get_submitted_resources import handle_get_submitted_resources
 from app.update_resource import handle_update_resource
-from app.delete_resource import handle_delete_resource
+from app.admin_delete_resource import handle_delete_resource
 from app.get_resource import handle_get_resource
 from app.get_approved_resources import handle_get_approved_resources
-from app.approve_resource import handle_approve_resource
-from app.decline_resource import handle_decline_resource
-
+from app.admin_approve_resource import handle_approve_resource
+from app.admin_decline_resource import handle_decline_resource
+from app.admin_get_resource import handle_admin_get_resource
 from app.upload_logo import handle_upload_logo
 from app.utils import get_parameter
 
@@ -111,24 +111,28 @@ def lambda_handler(event, context):
         elif method == 'POST' and path.endswith('/resources'):
             return handle_get_approved_resources(event, headers, table_name)
 
-        # Route: GET /resources (Get Submitted Resources for Admin)
-        elif method == 'POST' and path.endswith('admin/submitted-resources'):
+        # Route: GET /admin/submitted-resources (Get Submitted Resources for Admin)
+        elif method == 'POST' and path.endswith('/admin/submitted-resources'):
             return handle_get_submitted_resources(event, headers, table_name)
         
         # Route: POST /get-resource (Get Resource by Slug)
         elif method == 'POST' and path.endswith('/get-resource'):
             return handle_get_resource(event, headers, table_name)
-        
-        # Route: DELETE /delete-resource (Delete Resource by Slug)
-        elif method == 'POST' and path.endswith('admin/delete-resource'):
+
+        # Route: POST /admin/get-resource (Get Resource by Slug for admin)
+        elif method == 'POST' and path.endswith('/admin/get-resource'):
+            return handle_admin_get_resource(event, headers, table_name)
+
+        # Route: DELETE /admin/delete-resource (Delete Resource by Slug)
+        elif method == 'POST' and path.endswith('/admin/delete-resource'):
             return handle_delete_resource(event, headers, table_name)
         
-        # Route: POST /approve-resource (Approve Resource)
-        elif method == 'POST' and path.endswith('admin/approve-resource'):
+        # Route: POST /admin/approve-resource (Approve Resource)
+        elif method == 'POST' and path.endswith('/admin/approve-resource'):
             return handle_approve_resource(event, headers, table_name)
         
-        # Route: POST /decline-resource (Decline Resource)
-        elif method == 'POST' and path.endswith('admin/decline-resource'):
+        # Route: POST /admin/decline-resource (Decline Resource)
+        elif method == 'POST' and path.endswith('/admin/decline-resource'):
             return handle_decline_resource(event, headers, table_name)
         
         # Route: POST /upload-logo (Upload Logo)

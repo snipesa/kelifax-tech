@@ -104,27 +104,13 @@ export async function getResourceByName(resourceName) {
     // Convert resource name to slug (lowercase, spaces to hyphens)
     const resourceSlug = resourceName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
     
-    const response = await fetch(`${API_CONFIG.BASE_URL}/get-resource`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': API_CONFIG.API_KEY
-      },
-      body: JSON.stringify({
-        slug: resourceSlug
-      })
+    const response = await adminApiRequest('/admin/get-resource', {
+      slug: resourceSlug
     });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Failed to get resource: ${errorText}`);
-    }
-
-    const result = await response.json();
     
     // Extract resource data from API response
-    if (result && result.success && result.data) {
-      return result.data;
+    if (response && response.success && response.data) {
+      return response.data;
     }
     
     throw new Error('Resource not found');
