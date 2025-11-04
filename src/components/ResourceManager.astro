@@ -58,50 +58,53 @@
 
 <script>
   import { getResourceByName, deleteResource } from '../utils/admin-api.js';
-  import { requireAdminAuth } from '../utils/admin-auth.js';
+  import { isAdminAuthenticated } from '../utils/admin-auth.js';
 
-  // Check authentication
-  if (!requireAdminAuth()) {
-    return;
-  }
-
-  const searchForm = document.getElementById('resource-search-form');
-  const searchInput = document.getElementById('resource-search');
-  const searchButton = document.getElementById('search-button');
-  const searchText = document.getElementById('search-text');
-  const searchSpinner = document.getElementById('search-spinner');
-  const resultsSection = document.getElementById('search-results-section');
-  const searchError = document.getElementById('search-error');
-  const searchErrorMessage = document.getElementById('search-error-message');
-  const searchResults = document.getElementById('search-results');
-
-  function setSearchLoading(loading) {
-    searchButton.disabled = loading;
-    if (loading) {
-      searchText.textContent = 'Searching...';
-      searchSpinner.classList.remove('hidden');
-    } else {
-      searchText.textContent = 'Search';
-      searchSpinner.classList.add('hidden');
+  // Wrap in async IIFE to handle authentication check
+  (async () => {
+    // Check authentication
+    if (!isAdminAuthenticated()) {
+      window.location.href = '/admin';
+      return;
     }
-  }
 
-  function showSearchError(message) {
-    resultsSection.classList.remove('hidden');
-    searchError.classList.remove('hidden');
-    searchResults.classList.add('hidden');
-    searchErrorMessage.textContent = message;
-  }
+    const searchForm = document.getElementById('resource-search-form');
+    const searchInput = document.getElementById('resource-search');
+    const searchButton = document.getElementById('search-button');
+    const searchText = document.getElementById('search-text');
+    const searchSpinner = document.getElementById('search-spinner');
+    const resultsSection = document.getElementById('search-results-section');
+    const searchError = document.getElementById('search-error');
+    const searchErrorMessage = document.getElementById('search-error-message');
+    const searchResults = document.getElementById('search-results');
 
-  function showSearchResults() {
-    resultsSection.classList.remove('hidden');
-    searchError.classList.add('hidden');
-    searchResults.classList.remove('hidden');
-  }
+    function setSearchLoading(loading) {
+      searchButton.disabled = loading;
+      if (loading) {
+        searchText.textContent = 'Searching...';
+        searchSpinner.classList.remove('hidden');
+      } else {
+        searchText.textContent = 'Search';
+        searchSpinner.classList.add('hidden');
+      }
+    }
 
-  function createResourceResult(resource) {
-    const resultDiv = document.createElement('div');
-    resultDiv.className = 'border border-gray-200 rounded-lg p-4';
+    function showSearchError(message) {
+      resultsSection.classList.remove('hidden');
+      searchError.classList.remove('hidden');
+      searchResults.classList.add('hidden');
+      searchErrorMessage.textContent = message;
+    }
+
+    function showSearchResults() {
+      resultsSection.classList.remove('hidden');
+      searchError.classList.add('hidden');
+      searchResults.classList.remove('hidden');
+    }
+
+    function createResourceResult(resource) {
+      const resultDiv = document.createElement('div');
+      resultDiv.className = 'border border-gray-200 rounded-lg p-4';
     
     const statusBadge = getStatusBadge(resource.status);
     
@@ -133,14 +136,14 @@
       </div>
     `;
 
-    return resultDiv;
-  }
+      return resultDiv;
+    }
 
-  function getStatusBadge(status) {
-    if (!status) return '';
-    
-    const statusLower = status.toLowerCase();
-    let badgeClass = 'bg-gray-100 text-gray-800';
+    function getStatusBadge(status) {
+      if (!status) return '';
+      
+      const statusLower = status.toLowerCase();
+      let badgeClass = 'bg-gray-100 text-gray-800';
     
     if (statusLower === 'approved') {
       badgeClass = 'bg-green-100 text-green-800';
@@ -150,66 +153,67 @@
       badgeClass = 'bg-yellow-100 text-yellow-800';
     }
     
-    return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass}">${status}</span>`;
-  }
-
-  async function handleDelete(resourceName, button) {
-    if (!confirm(`Are you sure you want to delete "${resourceName}"? This action cannot be undone.`)) {
-      return;
+      return `<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badgeClass}">${status}</span>`;
     }
 
-    const originalText = button.textContent;
-    button.disabled = true;
-    button.textContent = 'Deleting...';
-
-    try {
-      await deleteResource(resourceName);
-      button.parentElement.parentElement.parentElement.remove();
-      
-      // Hide results section if no more results
-      if (searchResults.children.length === 0) {
-        resultsSection.classList.add('hidden');
+    async function handleDelete(resourceName, button) {
+      if (!confirm(`Are you sure you want to delete "${resourceName}"? This action cannot be undone.`)) {
+        return;
       }
-      
-      alert('Resource deleted successfully');
-    } catch (error) {
-      alert(`Failed to delete resource: ${error.message}`);
-      button.disabled = false;
-      button.textContent = originalText;
-    }
-  }
 
-  searchForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+      const originalText = button.textContent;
+      button.disabled = true;
+      button.textContent = 'Deleting...';
+
+      try {
+        await deleteResource(resourceName);
+        button.parentElement.parentElement.parentElement.remove();
+        
+        // Hide results section if no more results
+        if (searchResults.children.length === 0) {
+          resultsSection.classList.add('hidden');
+        }
+        
+        alert('Resource deleted successfully');
+      } catch (error) {
+        alert(`Failed to delete resource: ${error.message}`);
+        button.disabled = false;
+        button.textContent = originalText;
+      }
+    }
+
+    searchForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
     
-    const resourceName = searchInput.value.trim();
-    if (!resourceName) {
-      return;
-    }
+      const resourceName = searchInput.value.trim();
+      if (!resourceName) {
+        return;
+      }
 
-    setSearchLoading(true);
+      setSearchLoading(true);
 
-    try {
-      const resource = await getResourceByName(resourceName);
-      
-      showSearchResults();
-      searchResults.innerHTML = '';
-      
-      const resultCard = createResourceResult(resource);
-      searchResults.appendChild(resultCard);
+      try {
+        const resource = await getResourceByName(resourceName);
+        
+        showSearchResults();
+        searchResults.innerHTML = '';
+        
+        const resultCard = createResourceResult(resource);
+        searchResults.appendChild(resultCard);
 
-    } catch (error) {
-      showSearchError(error.message || 'Resource not found');
-    } finally {
-      setSearchLoading(false);
-    }
-  });
+      } catch (error) {
+        showSearchError(error.message || 'Resource not found');
+      } finally {
+        setSearchLoading(false);
+      }
+    });
 
-  // Event delegation for delete buttons
-  searchResults.addEventListener('click', (e) => {
-    if (e.target.classList.contains('delete-btn')) {
-      const resourceName = e.target.dataset.resourceName;
-      handleDelete(resourceName, e.target);
-    }
-  });
+    // Event delegation for delete buttons
+    searchResults.addEventListener('click', (e) => {
+      if (e.target.classList.contains('delete-btn')) {
+        const resourceName = e.target.dataset.resourceName;
+        handleDelete(resourceName, e.target);
+      }
+    });
+  })();
 </script>

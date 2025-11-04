@@ -43,17 +43,25 @@ import ResourceManager from '../../components/ResourceManager.astro';
   </div>
 
   <script>
-    import { requireAdminAuth, getAdminUsername, logoutAdmin } from '../../utils/admin-auth.js';
+    import { requireAdminAuth, logoutAdmin, isAdminAuthenticated } from '../../utils/admin-auth.js';
 
     // Check authentication on page load
-    if (!requireAdminAuth()) {
-      // Will redirect to login if not authenticated
+    if (!isAdminAuthenticated()) {
+      // Redirect to admin login
+      window.location.href = '/admin';
     } else {
-      // Display username if authenticated
+      // Display user info if authenticated
       const usernameElement = document.getElementById('admin-username');
-      const username = getAdminUsername();
-      if (username && usernameElement) {
-        usernameElement.textContent = `Logged in as: ${username}`;
+      const idToken = localStorage.getItem('kelifax_cognito_id_token');
+      if (idToken && usernameElement) {
+        try {
+          // Decode JWT to get user info (simple base64 decode for display)
+          const payload = JSON.parse(atob(idToken.split('.')[1]));
+          const email = payload.email || 'Admin User';
+          usernameElement.textContent = `Logged in as: ${email}`;
+        } catch (error) {
+          usernameElement.textContent = 'Logged in as: Admin User';
+        }
       }
     }
 

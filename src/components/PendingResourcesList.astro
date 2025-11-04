@@ -42,15 +42,17 @@
 
 <script>
   import { getSubmittedResources, approveResource, declineResource } from '../utils/admin-api.js';
-  import { requireAdminAuth } from '../utils/admin-auth.js';
+  import { isAdminAuthenticated } from '../utils/admin-auth.js';
 
-  // Check authentication
-  if (!requireAdminAuth()) {
-    // Will redirect to login if not authenticated
-    return;
-  }
+  // Wrap in async IIFE to handle authentication check
+  (async () => {
+    // Check authentication
+    if (!isAdminAuthenticated()) {
+      window.location.href = '/admin';
+      return;
+    }
 
-  const loadingElement = document.getElementById('pending-resources-loading');
+    const loadingElement = document.getElementById('pending-resources-loading');
   const errorElement = document.getElementById('pending-resources-error');
   const errorMessage = document.getElementById('pending-error-message');
   const retryButton = document.getElementById('retry-pending');
@@ -189,9 +191,10 @@
     }
   }
 
-  // Event listeners
-  retryButton.addEventListener('click', loadPendingResources);
+    // Event listeners
+    retryButton.addEventListener('click', loadPendingResources);
 
-  // Load resources on component mount
-  loadPendingResources();
+    // Load resources on component mount
+    loadPendingResources();
+  })();
 </script>

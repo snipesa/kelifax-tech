@@ -1,7 +1,7 @@
-// Admin API utilities for Kelifax admin section
+// Admin API utilities for Kelifax admin section with Cognito authentication
 
 import { API_CONFIG } from './config.js';
-import { getAdminToken } from './admin-auth.js';
+import { getAdminToken, logoutAdmin } from './admin-auth.js';
 
 /**
  * Make authenticated admin API request
@@ -24,6 +24,12 @@ async function adminApiRequest(endpoint, data = {}) {
     },
     body: JSON.stringify(data)
   });
+
+  // Handle 401 unauthorized - token expired or invalid
+  if (response.status === 401) {
+    logoutAdmin();
+    return;
+  }
 
   if (!response.ok) {
     const errorText = await response.text();

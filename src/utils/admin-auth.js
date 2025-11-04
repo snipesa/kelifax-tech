@@ -1,76 +1,90 @@
-// Admin authentication utilities for Kelifax admin section
+// Admin authentication utilities for Kelifax admin section using AWS Cognito
 
-import { API_CONFIG } from './config.js';
+import { UserManager } from "oidc-client-ts";
+
+const cognitoAuthConfig = {
+    authority: `https://cognito-idp.us-east-1.amazonaws.com/${import.meta.env.PUBLIC_COGNITO_USER_POOL_ID}`,
+    client_id: import.meta.env.PUBLIC_COGNITO_CLIENT_ID,
+    redirect_uri: import.meta.env.DEV ? 
+        import.meta.env.PUBLIC_COGNITO_CALLBACK_URL : 
+        `${window.location.origin}/admin/callback`,
+    response_type: "code",
+    scope: "email openid"
+};
+
+// Create a UserManager instance
+export const userManager = new UserManager({
+    ...cognitoAuthConfig,
+});
 
 /**
- * Hash password using SHA-256
- * @param {string} password - Plain text password
- * @returns {Promise<string>} - SHA-256 hashed password
+ * Start Cognito authentication process
  */
-export async function hashPassword(password) {
-  const encoder = new TextEncoder();
-  const data = encoder.encode(password);
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-  return hashHex;
+export async function initiateAdminLogin() {
+    try {
+        await userManager.signinRedirect();
+    } catch (error) {
+        console.error('Login initiation error:', error);
+        throw error;
+    }
 }
 
 /**
- * Authenticate admin user
- * @param {string} username - Admin username
- * @param {string} password - Plain text password
- * @returns {Promise<object>} - Authentication result with token
+ * Handle Cognito callback after authentication
  */
-export async function authenticateAdmin(username, password) {
-  try {
-    const hashedPassword = await hashPassword(password);
-    
-    const response = await fetch(`${API_CONFIG.BASE_URL}/admin`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        username,
-        password: hashedPassword
-      })
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Authentication failed: ${errorText}`);
+export async function handleAuthCallback() {
+    try {
+        const user = await userManager.signinRedirectCallback();
+        
+        // Store Cognito tokens in localStorage with kelifax-specific naming
+        localStorage.setItem('kelifax_cognito_access_token', user.access_token);
+        localStorage.setItem('kelifax_cognito_id_token', user.id_token);
+        localStorage.setItem('kelifax_cognito_refresh_token', user.refresh_token);
+        localStorage.setItem('kelifax_cognito_expires_at', user.expires_at);
+        
+        return user;
+    } catch (error) {
+        console.error('Auth callback error:', error);
+        throw error;
     }
-
-    const data = await response.json();
-    
-    // Store session token in localStorage
-    if (data.data && data.data.sessionToken) {
-      localStorage.setItem('admin_token', data.data.sessionToken);
-      localStorage.setItem('admin_username', username);
-    }
-    
-    return data;
-  } catch (error) {
-    console.error('Authentication error:', error);
-    throw error;
-  }
 }
 
 /**
- * Get stored admin session token
- * @returns {string|null} - Session token or null if not found
+ * Get stored Cognito access token
+ * @returns {string|null} - Access token or null if not found
  */
 export function getAdminToken() {
-  return localStorage.getItem('admin_token');
+    const expiresAt = localStorage.getItem('kelifax_cognito_expires_at');
+    if (expiresAt && Date.now() / 1000 > parseInt(expiresAt)) {
+        // Token expired, try to refresh
+        refreshTokenIfNeeded();
+        return null;
+    }
+    return localStorage.getItem('kelifax_cognito_access_token');
 }
 
 /**
- * Get stored admin username
- * @returns {string|null} - Username or null if not found
+ * Refresh access token if needed
  */
-export function getAdminUsername() {
-  return localStorage.getItem('admin_username');
+export async function refreshTokenIfNeeded() {
+    try {
+        const refreshToken = localStorage.getItem('kelifax_cognito_refresh_token');
+        if (!refreshToken) {
+            throw new Error('No refresh token available');
+        }
+
+        const user = await userManager.signinSilent();
+        if (user) {
+            localStorage.setItem('kelifax_cognito_access_token', user.access_token);
+            localStorage.setItem('kelifax_cognito_id_token', user.id_token);
+            localStorage.setItem('kelifax_cognito_expires_at', user.expires_at);
+            return user.access_token;
+        }
+    } catch (error) {
+        console.error('Token refresh error:', error);
+        logoutAdmin();
+    }
+    return null;
 }
 
 /**
@@ -78,25 +92,45 @@ export function getAdminUsername() {
  * @returns {boolean} - True if authenticated
  */
 export function isAdminAuthenticated() {
-  return !!getAdminToken();
+    const accessToken = localStorage.getItem('kelifax_cognito_access_token');
+    const expiresAt = localStorage.getItem('kelifax_cognito_expires_at');
+    
+    if (!accessToken || !expiresAt) {
+        return false;
+    }
+    
+    // Check if token is expired
+    if (Date.now() / 1000 > parseInt(expiresAt)) {
+        return false;
+    }
+    
+    return true;
 }
 
 /**
- * Logout admin user
+ * Logout admin user and clear all session data
  */
-export function logoutAdmin() {
-  localStorage.removeItem('admin_token');
-  localStorage.removeItem('admin_username');
-  window.location.href = '/admin';
+export async function logoutAdmin() {
+    // Clear all Cognito tokens from localStorage
+    localStorage.removeItem('kelifax_cognito_access_token');
+    localStorage.removeItem('kelifax_cognito_id_token');
+    localStorage.removeItem('kelifax_cognito_refresh_token');
+    localStorage.removeItem('kelifax_cognito_expires_at');
+    
+    // Redirect to Cognito logout
+    const clientId = import.meta.env.PUBLIC_COGNITO_CLIENT_ID;
+    const logoutUri = `${window.location.origin}/admin`;
+    const cognitoDomain = import.meta.env.PUBLIC_COGNITO_DOMAIN;
+    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
 }
 
 /**
  * Redirect to login if not authenticated
  */
 export function requireAdminAuth() {
-  if (!isAdminAuthenticated()) {
-    window.location.href = '/admin';
-    return false;
-  }
-  return true;
+    if (!isAdminAuthenticated()) {
+        initiateAdminLogin();
+        return false;
+    }
+    return true;
 }

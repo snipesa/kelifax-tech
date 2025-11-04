@@ -1,0 +1,38 @@
+---
+// filepath: /Users/ashimeetunyi/Desktop/code/kelifax/src/pages/admin/callback.astro
+import MainLayout from '../../layouts/MainLayout.astro';
+---
+
+<MainLayout title="Admin Authentication - Kelifax">
+  <div class="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div class="sm:mx-auto sm:w-full sm:max-w-md">
+      <div class="text-center">
+        <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+          Processing Authentication...
+        </h2>
+        <div class="mt-4">
+          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</MainLayout>
+
+<script>
+  import { handleAuthCallback } from '../../utils/admin-auth.js';
+
+  async function processCallback() {
+    try {
+      await handleAuthCallback();
+      // Redirect to admin dashboard on successful authentication
+      window.location.href = '/admin/dashboard';
+    } catch (error) {
+      console.error('Authentication callback error:', error);
+      // Redirect back to admin login on error
+      window.location.href = '/admin?error=auth_failed';
+    }
+  }
+
+  // Process the callback when page loads
+  processCallback();
+</script>

@@ -258,39 +258,7 @@ export async function submitResourceSubmission(resourceSubmission) {
   }
 }
 
-/**
- * Authenticate admin user
- * @param {string} password - Admin password
- * @returns {Promise<object>} - Authentication response with token
- */
-export async function authenticateAdmin(password) {
-  try {
-    const response = await apiRequest('/admin', {
-      method: 'POST',
-      body: JSON.stringify({ password }),
-    });
-    
-    // Handle the response format from your Lambda function
-    if (response.success && response.data) {
-      return {
-        success: true,
-        token: response.data.sessionToken,
-        expiresAt: response.data.expiresAt
-      };
-    } else {
-      return {
-        success: false,
-        message: response.message || 'Authentication failed'
-      };
-    }
-  } catch (error) {
-    console.error('Failed to authenticate admin:', error);
-    return { 
-      success: false, 
-      message: 'Authentication failed. Please try again.' 
-    };
-  }
-}
+// Old authenticateAdmin function removed - now using AWS Cognito authentication
 
 /**
  * Update resource status (admin only)
