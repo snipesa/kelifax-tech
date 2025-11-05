@@ -699,7 +699,6 @@ Resources:
       RestApiId: !Ref ApiGatewayRestApi
       StageName: !Ref Environment
     DependsOn:
-      - ApiGatewayMethodResourcesGet
       - ApiGatewayMethodResourcesPost
       - ApiGatewayMethodResourcesOptions
       - ApiGatewayMethodGetResourcePost

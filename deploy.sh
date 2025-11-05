@@ -57,41 +57,23 @@ check_aws_cli() {
     print_status "AWS CLI found. Authentication will be handled by your configured credentials/SSO."
 }
 
-# Function to check and create environment files if needed
+# Function to check if required environment files exist
 check_env_files() {
     # Check for .env.development
     if [ ! -f ".env.development" ]; then
-        print_warning ".env.development not found. Creating template..."
-        cat > .env.development << EOF
-# Development Environment Configuration
-PUBLIC_USE_API=true
-PUBLIC_API_URL=https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev
-PUBLIC_API_KEY=your-dev-api-key
-PUBLIC_CONTACT_EMAIL=dev@kelifax.com
-
-# Public environment variables
-PUBLIC_AWS_REGION=us-east-1
-PUBLIC_S3_BUCKET_NAME=kelifax-dev-resources-bucket
-EOF
-        print_warning "Please update .env.development with your actual values before deploying!"
+        print_error ".env.development file not found!"
+        print_error "Please create .env.development with your development configuration"
+        exit 1
     fi
     
     # Check for .env.production
     if [ ! -f ".env.production" ]; then
-        print_warning ".env.production not found. Creating template..."
-        cat > .env.production << EOF
-# Production Environment Configuration
-PUBLIC_USE_API=true
-PUBLIC_API_URL=https://your-prod-api-gateway-url.amazonaws.com/prod
-PUBLIC_API_KEY=your-prod-api-key
-PUBLIC_CONTACT_EMAIL=contact@kelifax.com
-
-# Public environment variables
-PUBLIC_AWS_REGION=us-east-1
-PUBLIC_S3_BUCKET_NAME=kelifax-prod-resources-bucket
-EOF
-        print_warning "Please update .env.production with your actual values before deploying!"
+        print_error ".env.production file not found!"
+        print_error "Please create .env.production with your production configuration"
+        exit 1
     fi
+    
+    print_status "Environment files found"
 }
 
 # Function to backup current .env file
