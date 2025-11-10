@@ -19,6 +19,8 @@ pnpm-debug.log*
 .env.development
 .env.production
 .env.backup
+env.dev.config
+env.prod.config
 
 # test files and debugging
 *test*.html
