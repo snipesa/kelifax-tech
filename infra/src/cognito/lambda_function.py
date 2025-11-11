@@ -8,8 +8,11 @@ from urllib.parse import parse_qs
 region = 'us-east-1'
 cognito_domain = 'us-east-1xaf6zbond.auth.us-east-1.amazoncognito.com'
 client_id = '44i4psi37nv58m1i96rb3me7sm'
-redirect_uri = 'https://d3qbwqe1p23xd1.cloudfront.net/callback'
-cookie_name = 'vNUThRYioKtl9OEvXnuwL5jrNA8Zxg8YINJdQIhHBQvyVYDdTS'
+redirect_uri = 'https://d3qbwqe1p23xd1.cloudfront.net/admin/callback'
+cookie_name = 'kelifax-rNA8Zxg8YINdQIhHBQvyVYDdTS'
+
+# Add API domain configuration for cross-subdomain cookie sharing
+api_domain = '.kelifax.com'
 
 # ============================================
 
@@ -31,6 +34,11 @@ def lambda_handler(event, context):
         # print(f'Query string: {query}')  # Debug: Query parameters
         # print(f'Headers: {json.dumps(headers, default=str)}')  # Debug: All headers
         
+        # --- Check if this is an admin route that needs authentication ---
+        if not uri.startswith('/admin'):
+            print('Non-admin route - allowing without authentication')
+            return request
+        
         cookies = ''
         if 'cookie' in headers:
             cookies = ';'.join([c['value'] for c in headers['cookie']])
@@ -38,7 +46,7 @@ def lambda_handler(event, context):
 
         # --- Already logged in? Then allow ---
         if f'{cookie_name}=' in cookies:
-            print('User has valid cookie - allowing request')
+            print('User has valid cookie - allowing admin request')
             return request
 
         # --- Coming back from Cognito with ?code=... ---
@@ -66,16 +74,36 @@ def lambda_handler(event, context):
                 token_response = exchange_code_for_tokens(post_data, hostname)
 
                 if token_response and 'id_token' in token_response:
-                    print('Token exchange successful - setting cookie and redirecting')
-                    # Set auth cookie and redirect home
+                    print('Token exchange successful - setting cookies and redirecting')
+                    
+                    # Create multiple cookies for different domains
+                    cookies_to_set = []
+                    
+                    # Cookie for CloudFront domain (existing)
+                    cookies_to_set.append({
+                        'key': 'Set-Cookie',
+                        'value': f'{cookie_name}={token_response["id_token"]}; Secure; HttpOnly; Path=/; Max-Age=3600'
+                    })
+                    
+                    # Cookie for API Gateway domains (shared across subdomains)
+                    cookies_to_set.append({
+                        'key': 'Set-Cookie', 
+                        'value': f'cognito_id_token={token_response["id_token"]}; Domain={api_domain}; Secure; HttpOnly; Path=/; Max-Age=3600'
+                    })
+                    
+                    # Also set access token if available (API Gateway might need this)
+                    if 'access_token' in token_response:
+                        cookies_to_set.append({
+                            'key': 'Set-Cookie',
+                            'value': f'cognito_access_token={token_response["access_token"]}; Domain={api_domain}; Secure; HttpOnly; Path=/; Max-Age=3600'
+                        })
+                    
+                    # Set auth cookies and redirect home
                     return {
                         'status': '302',
                         'statusDescription': 'Found',
                         'headers': {
-                            'set-cookie': [{
-                                'key': 'Set-Cookie',
-                                'value': f'{cookie_name}={token_response["id_token"]}; Secure; HttpOnly; Path=/; Max-Age=3600'
-                            }],
+                            'set-cookie': cookies_to_set,
                             'location': [{'key': 'Location', 'value': '/'}]
                         }
                     }
