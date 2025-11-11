@@ -19,16 +19,7 @@ Parameters:
     Type: String
     Default: cf-kelifax-deployment-bucket
     Description: S3 bucket containing the Lambda function code zip files
-    
-  S3KeyPrefix:
-    Type: String
-    Default: lambda-zip-dev
-    Description: S3 key prefix for Lambda function code zip files
   
-  S3ZipFile:
-    Type: String
-    Default: lambda-function.zip
-    Description: Name of the Lambda zip file in S3
   
   ApiKey:
     Type: String
@@ -62,6 +53,30 @@ Conditions:
   IsProd: !Equals [!Ref Environment, "prod"]
 
 Resources:
+  # Lambda Authorizer Function
+  KelilaxAuthorizerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: 
+        Fn::Sub: "${FunctionPrefix}-${Environment}-authorizer"
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Code:
+        S3Bucket: 
+          Ref: DeploymentBucket
+        S3Key: 
+          Fn::Sub: "api-lambda-auth-${Environment}/lambda_function_auth.zip"
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          ENVIRONMENT: 
+            Ref: Environment
+      Role: 
+        Fn::GetAtt: 
+          - LambdaExecutionRole
+          - Arn
+
   # Lambda Function
   KelilaxFunction:
     Type: AWS::Lambda::Function
@@ -73,8 +88,9 @@ Resources:
       Code:
         S3Bucket: 
           Ref: DeploymentBucket
-        S3Key: 
-          Fn::Sub: "${S3KeyPrefix}/${S3ZipFile}"
+        S3Key:
+          Fn::Sub: "lambda-zip-${Environment}/lambda_function.zip"
+
       Timeout: 30
       MemorySize: 256
       Environment:
@@ -204,6 +220,18 @@ Resources:
             - UserPoolArn
       AuthorizerCredentials: !GetAtt ApiGatewayAuthorizerRole.Arn
       IdentitySource: method.request.header.Authorization
+
+  # Lambda Authorizer for Cookie-based Authentication
+  LambdaAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: !Sub "${FunctionPrefix}-${Environment}-lambda-authorizer"
+      RestApiId: !Ref ApiGatewayRestApi
+      Type: REQUEST
+      AuthorizerUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxAuthorizerFunction.Arn}/invocations"
+      AuthorizerCredentials: !GetAtt ApiGatewayAuthorizerRole.Arn
+      IdentitySource: method.request.header.Cookie
+      AuthorizerResultTtlInSeconds: 300
 
   # IAM Role for API Gateway to validate Cognito tokens
   ApiGatewayAuthorizerRole:
@@ -692,6 +720,15 @@ Resources:
       Principal: apigateway.amazonaws.com
       SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/*"
 
+  # Lambda Authorizer Invoke Permission
+  LambdaAuthorizerInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref KelilaxAuthorizerFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/authorizers/*"
+
   # API Gateway Deployment
   ApiGatewayDeployment:
     Type: AWS::ApiGateway::Deployment
@@ -786,6 +823,17 @@ Outputs:
     Export:
       Name:
         Fn::Sub: "${AWS::StackName}-FunctionName"
+
+  AuthorizerFunctionArn:
+    Description: "ARN of the Kelifax Lambda Authorizer function"
+    Value:
+      Fn::GetAtt:
+        - KelilaxAuthorizerFunction
+        - Arn
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-AuthorizerFunctionArn"
+  
       
   DynamoDBTableName:
     Description: "Name of the DynamoDB table used by this function"
@@ -808,14 +856,4 @@ Outputs:
       Name:
         Fn::Sub: "${AWS::StackName}-RoleArn"
 
-  ApiGatewayUrl:
-    Description: "URL of the API Gateway"
-    Value: !Sub "https://${ApiGatewayRestApi}.execute-api.${AWS::Region}.amazonaws.com/${Environment}"
-    Export:
-      Name: !Sub "${AWS::StackName}-ApiGatewayUrl"
-      
-  ApiGatewayStage:
-    Description: "Name of the API Gateway stage"
-    Value: !Ref Environment
-    Export:
-      Name: !Sub "${AWS::StackName}-ApiGatewayStage"
+
