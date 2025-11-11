@@ -57,8 +57,23 @@
   // Check for error parameter in URL
   const urlParams = new URLSearchParams(window.location.search);
   const error = urlParams.get('error');
-  if (error === 'auth_failed') {
-    showError('Authentication failed. Please try again.');
+  if (error) {
+    let errorMessage = 'Authentication failed. Please try again.';
+    switch (error) {
+      case 'auth_failed':
+        errorMessage = 'Authentication failed. Please try again.';
+        break;
+      case 'invalid_state':
+        errorMessage = 'Invalid authentication state. Please try again.';
+        break;
+      case 'invalid_code':
+        errorMessage = 'Invalid authorization code. Please try again.';
+        break;
+      default:
+        errorMessage = 'An error occurred during authentication. Please try again.';
+        break;
+    }
+    showError(errorMessage);
   }
 
   function showError(message) {

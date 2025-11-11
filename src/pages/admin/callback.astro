@@ -23,16 +23,35 @@ import MainLayout from '../../layouts/MainLayout.astro';
 
   async function processCallback() {
     try {
-      await handleAuthCallback();
-      // Redirect to admin dashboard on successful authentication
-      window.location.href = '/admin/dashboard';
+      console.log('Processing authentication callback...');
+      console.log('Current URL:', window.location.href);
+      
+      const user = await handleAuthCallback();
+      console.log('Authentication successful:', user);
+      
+      // Add a small delay to ensure tokens are stored
+      setTimeout(() => {
+        console.log('Redirecting to admin dashboard...');
+        window.location.href = '/admin/dashboard';
+      }, 100);
+      
     } catch (error) {
       console.error('Authentication callback error:', error);
+      console.error('Error details:', error.message);
+      
+      // Show more specific error information
+      let errorParam = 'auth_failed';
+      if (error.message.includes('No state in response')) {
+        errorParam = 'invalid_state';
+      } else if (error.message.includes('code')) {
+        errorParam = 'invalid_code';
+      }
+      
       // Redirect back to admin login on error
-      window.location.href = '/admin?error=auth_failed';
+      window.location.href = `/admin?error=${errorParam}`;
     }
   }
 
   // Process the callback when page loads
-  processCallback();
+  document.addEventListener('DOMContentLoaded', processCallback);
 </script>

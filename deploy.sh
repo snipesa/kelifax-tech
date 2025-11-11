@@ -59,21 +59,21 @@ check_aws_cli() {
 
 # Function to check if required environment files exist
 check_env_files() {
-    # Check for .env.development
-    if [ ! -f ".env.development" ]; then
-        print_error ".env.development file not found!"
-        print_error "Please create .env.development with your development configuration"
+    # Check for env.dev.config
+    if [ ! -f "env.dev.config" ]; then
+        print_error "env.dev.config file not found!"
+        print_error "Please create env.dev.config with your development configuration"
         exit 1
     fi
     
-    # Check for .env.production
-    if [ ! -f ".env.production" ]; then
-        print_error ".env.production file not found!"
-        print_error "Please create .env.production with your production configuration"
+    # Check for env.prod.config
+    if [ ! -f "env.prod.config" ]; then
+        print_error "env.prod.config file not found!"
+        print_error "Please create env.prod.config with your production configuration"
         exit 1
     fi
     
-    print_status "Environment files found"
+    print_status "Environment config files found"
 }
 
 # Function to backup current .env file
@@ -100,17 +100,16 @@ deploy_to_env() {
     local dry_run=${4:-false}
     
     print_status "Starting deployment to $env environment..."
-    
-    # Check if environment file exists
+     # Check if environment config file exists
     if [ ! -f "$env_file" ]; then
-        print_error "Environment file $env_file not found!"
+        print_error "Environment config file $env_file not found!"
         exit 1
     fi
-    
-    # Backup current .env and switch to target environment
+
+    # Backup current .env and copy from config file
     backup_env
     cp "$env_file" .env
-    print_success "Switched to $env environment configuration"
+    print_success "Copied $env_file to .env for $env environment"
     
     # Clean previous build and cache
     print_status "Cleaning previous build and cache..."
@@ -262,7 +261,7 @@ main() {
             else
                 print_status "🔧 Deploying to DEVELOPMENT environment"
             fi
-            deploy_to_env "development" ".env.development" "kelifax-dev-project" "$dry_run"
+            deploy_to_env "development" "env.dev.config" "kelifax-dev-project" "$dry_run"
             ;;
         prod)
             if [ "$dry_run" = true ]; then
@@ -280,7 +279,7 @@ main() {
                     exit 0
                 fi
             fi
-            deploy_to_env "production" ".env.production" "kelifax.com-website" "$dry_run"
+            deploy_to_env "production" "env.prod.config" "kelifax.com-website" "$dry_run"
             ;;
     esac
 }
