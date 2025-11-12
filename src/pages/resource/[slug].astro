@@ -6,8 +6,8 @@ import { getApprovedLogoUrl } from '../../utils/s3-utils.js';
 export async function getStaticPaths() {
   try {
     // Fetch resources directly from API for static generation
-    const API_BASE_URL = 'https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev';
-    const API_KEY = 'C50mHXZdBz2JCCArzXIYu6XkapO08G56UhoU9kN0';
+    const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev';
+    const API_KEY = import.meta.env.PUBLIC_API_KEY;
     
     const response = await fetch(`${API_BASE_URL}/resources`, {
       method: 'POST',
@@ -186,37 +186,68 @@ if (!basicResource) {
   </section>
 
   <!-- Dynamic loading script -->
-  <script type="module" define:vars={{ resourceSlug: basicResource.slug }}>
-    // Import S3 utilities
-    import { getApprovedLogoUrl } from '../../utils/s3-utils.js';
-    
-    // Since we can't easily import ES modules in Astro inline scripts,
-    // let's define the required functions inline with proper configuration
-    
-    // API Configuration - using environment variables passed to the client
+  <script type="module" define:vars={{ 
+    resourceSlug: basicResource.slug,
+    apiUrl: import.meta.env.PUBLIC_API_URL || 'https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev',
+    apiKey: import.meta.env.PUBLIC_API_KEY
+  }}>
+    // API Configuration - using environment variables passed from server
     const API_CONFIG = {
       USE_API: true, // Force enable API for this implementation
-      BASE_URL: 'https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev',
-      API_KEY: 'C50mHXZdBz2JCCArzXIYu6XkapO08G56UhoU9kN0',
+      BASE_URL: apiUrl,
+      API_KEY: apiKey,
     };
+
+    // S3 Configuration (inline for client-side use)
+    const S3_CONFIG = {
+      BUCKET_NAME: 'kelifax-resources',
+      REGION: 'us-east-1',
+      ENVIRONMENT_PREFIX: 'dev',
+      APPROVED_LOGOS_PREFIX: 'logos/approved',
+      BASE_URL: null, // Using standard S3 URL format
+    };
+
+    // S3 utility function (inline)
+    function getApprovedLogoUrl(logoFilename) {
+      if (!logoFilename) return '';
+      
+      const environmentPath = S3_CONFIG.ENVIRONMENT_PREFIX;
+      const fullPath = `${environmentPath}/${S3_CONFIG.APPROVED_LOGOS_PREFIX}/${logoFilename}`;
+      
+      if (S3_CONFIG.BASE_URL) {
+        return `${S3_CONFIG.BASE_URL}/${fullPath}`;
+      }
+      
+      return `https://${S3_CONFIG.BUCKET_NAME}.s3.${S3_CONFIG.REGION}.amazonaws.com/${fullPath}`;
+    }
 
     // Get detailed resource data from API
     async function getResourceDetails(slug) {
       try {
+        console.log('Fetching resource details for slug:', slug);
+        console.log('API URL:', `${API_CONFIG.BASE_URL}/get-resource`);
+        
         const response = await fetch(`${API_CONFIG.BASE_URL}/get-resource`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
             'X-Api-Key': API_CONFIG.API_KEY,
+            'Origin': window.location.origin
           },
           body: JSON.stringify({ slug: slug })
         });
         
+        console.log('API Response status:', response.status);
+        
         if (!response.ok) {
-          throw new Error(`API request failed: ${response.status}`);
+          const errorText = await response.text();
+          console.error('API Error Response:', errorText);
+          throw new Error(`API request failed: ${response.status} - ${errorText}`);
         }
 
         const data = await response.json();
+        console.log('API Response data:', data);
+        
         if (data.success && data.data) {
           return data.data;
         } else {
@@ -263,6 +294,8 @@ if (!basicResource) {
 
     // Dynamic resource loading
     async function loadDetailedResource() {
+      console.log('Starting to load detailed resource for:', resourceSlug);
+      
       try {
         // Fetch detailed resource data from API
         const detailedResource = await getResourceDetails(resourceSlug);
@@ -270,6 +303,8 @@ if (!basicResource) {
         if (!detailedResource) {
           throw new Error('Resource not found');
         }
+
+        console.log('Successfully loaded detailed resource:', detailedResource);
 
         // Hide loading indicator
         const loadingIndicator = document.getElementById('dynamic-loading');

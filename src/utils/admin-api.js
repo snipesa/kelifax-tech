@@ -1,35 +1,23 @@
-// Admin API utilities for Kelifax admin section with Cognito authentication
+// Admin API utilities for Kelifax admin section with cookie-based JWT authentication
 
 import { API_CONFIG } from './config.js';
-import { getAdminToken, logoutAdmin } from './admin-auth.js';
 
 /**
  * Make authenticated admin API request
+ * JWT token automatically included via HTTP-only cookies by CloudFront Lambda@Edge
  * @param {string} endpoint - API endpoint (relative to base URL)
  * @param {object} data - Request data
  * @returns {Promise<any>} - API response
  */
 async function adminApiRequest(endpoint, data = {}) {
-  const token = getAdminToken();
-  
-  if (!token) {
-    throw new Error('No admin token found');
-  }
-
   const response = await fetch(`${API_CONFIG.BASE_URL}${endpoint}`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Content-Type': 'application/json'
     },
+    credentials: 'include', // Include cookies in the request
     body: JSON.stringify(data)
   });
-
-  // Handle 401 unauthorized - token expired or invalid
-  if (response.status === 401) {
-    logoutAdmin();
-    return;
-  }
 
   if (!response.ok) {
     const errorText = await response.text();
@@ -104,13 +92,26 @@ export async function getResourceByName(resourceName) {
     // Convert resource name to slug (lowercase, spaces to hyphens)
     const resourceSlug = resourceName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
     
-    const response = await adminApiRequest('/admin/get-resource', {
-      slug: resourceSlug
+    // Use public endpoint for resource lookup (no auth required)
+    const response = await fetch(`${API_CONFIG.BASE_URL}/get-resource`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: resourceName // Use original name, backend will process it
+      })
     });
+
+    if (!response.ok) {
+      throw new Error('Resource not found');
+    }
+
+    const data = await response.json();
     
     // Extract resource data from API response
-    if (response && response.success && response.data) {
-      return response.data;
+    if (data && data.success && data.data) {
+      return data.data;
     }
     
     throw new Error('Resource not found');

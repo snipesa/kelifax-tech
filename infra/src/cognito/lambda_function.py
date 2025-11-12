@@ -5,11 +5,12 @@ import urllib.error
 from urllib.parse import parse_qs
 
 # ==== CONFIGURATION (from environment variables) ====
+env = 'dev'
 region = 'us-east-1'
-cognito_domain = 'us-east-1xaf6zbond.auth.us-east-1.amazoncognito.com'
-client_id = '44i4psi37nv58m1i96rb3me7sm'
-redirect_uri = 'https://d3qbwqe1p23xd1.cloudfront.net/admin/callback'
-cookie_name = 'kelifax-rNA8Zxg8YINdQIhHBQvyVYDdTS'
+cognito_domain = 'us-east-1aiztek5e9.auth.us-east-1.amazoncognito.com'
+client_id = '26h22if569cb10ivp9n9kgt5hb'
+redirect_uri = 'https://dev.kelifax.com/callback'
+cookie_name = f'kelifax-{env}-rNA8Zxg8YINdQIhHBQvyVYDdTS'
 
 # Add API domain configuration for cross-subdomain cookie sharing
 api_domain = '.kelifax.com'
@@ -34,8 +35,13 @@ def lambda_handler(event, context):
         # print(f'Query string: {query}')  # Debug: Query parameters
         # print(f'Headers: {json.dumps(headers, default=str)}')  # Debug: All headers
         
+        # --- Handle callback route (from Cognito redirect) ---
+        if uri == '/callback':
+            print('Processing Cognito callback')
+            # Continue to callback processing logic below
+        
         # --- Check if this is an admin route that needs authentication ---
-        if not uri.startswith('/admin'):
+        elif not uri.startswith('/admin'):
             print('Non-admin route - allowing without authentication')
             return request
         
@@ -56,7 +62,16 @@ def lambda_handler(event, context):
             
             if 'code' not in params:
                 print('No authorization code found in callback')
-                return redirect_to_login()
+                return redirect_to_login(uri)
+
+            # Get the original path from state parameter if available
+            original_path = '/admin'  # Default fallback
+            if 'state' in params:
+                try:
+                    original_path = urllib.parse.unquote(params['state'][0])
+                    print(f'Redirecting back to original path: {original_path}')
+                except:
+                    print('Failed to decode state parameter, using default /admin')
 
             print('Exchanging authorization code for tokens')
             post_data = urllib.parse.urlencode({
@@ -76,48 +91,45 @@ def lambda_handler(event, context):
                 if token_response and 'id_token' in token_response:
                     print('Token exchange successful - setting cookies and redirecting')
                     
-                    # Create multiple cookies for different domains
-                    cookies_to_set = []
-                    
-                    # Cookie for CloudFront domain (existing)
-                    cookies_to_set.append({
-                        'key': 'Set-Cookie',
-                        'value': f'{cookie_name}={token_response["id_token"]}; Secure; HttpOnly; Path=/; Max-Age=3600'
-                    })
-                    
-                    # Cookie for API Gateway domains (shared across subdomains)
-                    cookies_to_set.append({
-                        'key': 'Set-Cookie', 
-                        'value': f'cognito_id_token={token_response["id_token"]}; Domain={api_domain}; Secure; HttpOnly; Path=/; Max-Age=3600'
-                    })
+                    # Create cookies for different domains
+                    cookies_to_set = [
+                        {
+                            'key': 'Set-Cookie',
+                            'value': f'{cookie_name}={token_response["id_token"]}; Secure; HttpOnly; Path=/; Max-Age=3600'
+                        },
+                        {
+                            'key': 'Set-Cookie', 
+                            'value': f'cognito_{env}_id_token={token_response["id_token"]}; Domain={api_domain}; Secure; HttpOnly; Path=/; Max-Age=3600'
+                        }
+                    ]
                     
                     # Also set access token if available (API Gateway might need this)
                     if 'access_token' in token_response:
                         cookies_to_set.append({
                             'key': 'Set-Cookie',
-                            'value': f'cognito_access_token={token_response["access_token"]}; Domain={api_domain}; Secure; HttpOnly; Path=/; Max-Age=3600'
+                            'value': f'cognito_{env}_access_token={token_response["access_token"]}; Domain={api_domain}; Secure; HttpOnly; Path=/; Max-Age=3600'
                         })
                     
-                    # Set auth cookies and redirect home
+                    # Set auth cookies and redirect to original path
                     return {
                         'status': '302',
                         'statusDescription': 'Found',
                         'headers': {
                             'set-cookie': cookies_to_set,
-                            'location': [{'key': 'Location', 'value': '/'}]
+                            'location': [{'key': 'Location', 'value': original_path}]
                         }
                     }
                 else:
                     print('No id_token in response or invalid response')
-                    return redirect_to_login()
+                    return redirect_to_login(uri)
                     
             except Exception as err:
                 print(f'Token exchange failed: {err}')
-                return redirect_to_login()
+                return redirect_to_login(uri)
 
         # --- Not logged in → redirect to Cognito Hosted UI ---
         print('User not authenticated - redirecting to login')
-        return redirect_to_login()
+        return redirect_to_login(uri)
         
     except Exception as error:
         print(f'Lambda@Edge error: {error}')
@@ -172,12 +184,15 @@ def exchange_code_for_tokens(post_data, hostname):
         return None
 
 # --- Helper: redirect user to Cognito login ---
-def redirect_to_login():
+def redirect_to_login(original_uri='/admin'):
     """
     Helper function to redirect user to Cognito login
     """
-    print('Redirecting to Cognito login page')
-    login_url = f'https://{cognito_domain}/login?client_id={client_id}&response_type=code&scope=openid+email&redirect_uri={urllib.parse.quote(redirect_uri)}'
+    print(f'Redirecting to Cognito login page, original URI: {original_uri}')
+    
+    # Encode the original URI as state parameter to redirect back after login
+    state = urllib.parse.quote(original_uri)
+    login_url = f'https://{cognito_domain}/login?client_id={client_id}&response_type=code&scope=openid+email&redirect_uri={urllib.parse.quote(redirect_uri)}&state={state}'
     # print(f'Login URL: {login_url}')  # Debug: Full login URL
     
     return {
@@ -187,5 +202,3 @@ def redirect_to_login():
             'location': [{'key': 'Location', 'value': login_url}]
         }
     }
-
-

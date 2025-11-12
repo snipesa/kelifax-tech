@@ -13,8 +13,8 @@ const staticPages = [
 // Fetch resource pages from API
 let resourcePages = [];
 try {
-  const API_BASE_URL = 'https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev';
-  const API_KEY = 'C50mHXZdBz2JCCArzXIYu6XkapO08G56UhoU9kN0';
+  const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev';
+  const API_KEY = import.meta.env.PUBLIC_API_KEY;
   
   const response = await fetch(`${API_BASE_URL}/resources`, {
     method: 'POST',

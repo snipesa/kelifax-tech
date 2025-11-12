@@ -8,7 +8,7 @@ BUCKET_NAME="cf-kelifax-deployment-bucket"
 TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 LAMBDA_PREFIX="lambda-zip-${ENVIRONMENT}"  # For Lambda code
 CF_PREFIX="cloudformation-${ENVIRONMENT}"   # For CloudFormation templates
-ZIP_NAME="lambda-function.zip"
+ZIP_NAME="lambda-function-${TIMESTAMP}.zip"
 SOURCE_DIR="../../src/lambda"
 STACK_NAME="kelifax-lambda-stack-${ENVIRONMENT}"
 echo "📦 Packaging Lambda function for $ENVIRONMENT environment..."
@@ -84,7 +84,6 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
       Environment=$ENVIRONMENT \
       FunctionPrefix=$FUNCTION_PREFIX \
       DeploymentBucket=$BUCKET_NAME \
-      S3KeyPrefix=$LAMBDA_PREFIX \
       S3ZipFile=$ZIP_NAME \
     --capabilities CAPABILITY_IAM
   
@@ -115,9 +114,8 @@ else
   echo "  --parameter-overrides \\"
   echo "    Environment=$ENVIRONMENT \\"
   echo "    FunctionPrefix=$FUNCTION_PREFIX \\"
-  echo "    DeploymentBucket=$BUCKET_NAME \\"
-  echo "    S3KeyPrefix=$LAMBDA_PREFIX \\"
   echo "    S3ZipFile=$ZIP_NAME \\"
+  echo "    DeploymentBucket=$BUCKET_NAME \\"
   echo "  --capabilities CAPABILITY_IAM"
   
   # Even if skipped deployment, packaging was successful

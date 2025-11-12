@@ -6,6 +6,7 @@ def parse_learning_resources(learning_resources_str):
     Parse pipe-separated JSON learning resources string
     Returns list of dictionaries
     """
+    # print("event", event)
     if not learning_resources_str:
         return []
     

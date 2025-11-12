@@ -58,15 +58,9 @@
 
 <script>
   import { getResourceByName, deleteResource } from '../utils/admin-api.js';
-  import { isAdminAuthenticated } from '../utils/admin-auth.js';
 
-  // Wrap in async IIFE to handle authentication check
+  // Initialize resource manager - authentication handled by CloudFront Lambda@Edge
   (async () => {
-    // Check authentication
-    if (!isAdminAuthenticated()) {
-      window.location.href = '/admin';
-      return;
-    }
 
     const searchForm = document.getElementById('resource-search-form');
     const searchInput = document.getElementById('resource-search');

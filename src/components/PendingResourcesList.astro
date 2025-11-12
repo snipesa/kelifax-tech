@@ -42,16 +42,10 @@
 
 <script>
   import { getSubmittedResources, approveResource, declineResource } from '../utils/admin-api.js';
-  import { isAdminAuthenticated } from '../utils/admin-auth.js';
   import { getPendingLogoUrl } from '../utils/s3-utils.js';
 
-  // Wrap in async IIFE to handle authentication check
+  // Load pending resources immediately - authentication handled by CloudFront Lambda@Edge
   (async () => {
-    // Check authentication
-    if (!isAdminAuthenticated()) {
-      window.location.href = '/admin';
-      return;
-    }
 
     const loadingElement = document.getElementById('pending-resources-loading');
   const errorElement = document.getElementById('pending-resources-error');

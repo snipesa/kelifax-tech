@@ -20,7 +20,16 @@ Parameters:
     Default: cf-kelifax-deployment-bucket
     Description: S3 bucket containing the Lambda function code zip files
   
-  
+  S3ZipFile:
+    Type: String
+    Default: lambda-function.zip
+    Description: Name of the Lambda zip file in S3
+
+  AuthSZipFile:
+    Type: String
+    Default: lambda_function_auth.zip
+    Description: Name of the Lambda zip file in S3
+
   ApiKey:
     Type: String
     Description: API Key ID for Gateway (reference an existing API Key ID from the console)
@@ -65,7 +74,7 @@ Resources:
         S3Bucket: 
           Ref: DeploymentBucket
         S3Key: 
-          Fn::Sub: "api-lambda-auth-${Environment}/lambda_function_auth.zip"
+          Fn::Sub: "api-lambda-auth-${Environment}/${AuthSZipFile}"
       Timeout: 30
       MemorySize: 256
       Environment:
@@ -88,8 +97,8 @@ Resources:
       Code:
         S3Bucket: 
           Ref: DeploymentBucket
-        S3Key:
-          Fn::Sub: "lambda-zip-${Environment}/lambda_function.zip"
+        S3Key: 
+          Fn::Sub: "lambda-zip-${Environment}/${S3ZipFile}"
 
       Timeout: 30
       MemorySize: 256
@@ -446,9 +455,10 @@ Resources:
         IntegrationResponses:
           - StatusCode: 200
             ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Cookie'"
               method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Origin: !If [IsProd, "'https://kelifax.com'", "'https://dev.kelifax.com'"]
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
             ResponseTemplates:
               application/json: "{}"
         RequestTemplates:
@@ -459,6 +469,7 @@ Resources:
             method.response.header.Access-Control-Allow-Headers: true
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Credentials: true
 
   ApiGatewayMethodSubmittedResourcesOptions:
     Type: AWS::ApiGateway::Method
@@ -472,9 +483,10 @@ Resources:
         IntegrationResponses:
           - StatusCode: 200
             ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Cookie'"
               method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Origin: !If [IsProd, "'https://kelifax.com'", "'https://dev.kelifax.com'"]
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
             ResponseTemplates:
               application/json: "{}"
         RequestTemplates:
@@ -485,6 +497,7 @@ Resources:
             method.response.header.Access-Control-Allow-Headers: true
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Credentials: true
 
   ApiGatewayMethodApproveResourceOptions:
     Type: AWS::ApiGateway::Method
@@ -498,9 +511,10 @@ Resources:
         IntegrationResponses:
           - StatusCode: 200
             ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Cookie'"
               method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Origin: !If [IsProd, "'https://kelifax.com'", "'https://dev.kelifax.com'"]
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
             ResponseTemplates:
               application/json: "{}"
         RequestTemplates:
@@ -511,6 +525,7 @@ Resources:
             method.response.header.Access-Control-Allow-Headers: true
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Credentials: true
 
   ApiGatewayMethodDeclineResourceOptions:
     Type: AWS::ApiGateway::Method
@@ -524,9 +539,10 @@ Resources:
         IntegrationResponses:
           - StatusCode: 200
             ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Cookie'"
               method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Origin: !If [IsProd, "'https://kelifax.com'", "'https://dev.kelifax.com'"]
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
             ResponseTemplates:
               application/json: "{}"
         RequestTemplates:
@@ -537,6 +553,7 @@ Resources:
             method.response.header.Access-Control-Allow-Headers: true
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Credentials: true
 
   ApiGatewayMethodAdminGetResourceOptions:
     Type: AWS::ApiGateway::Method
@@ -550,9 +567,10 @@ Resources:
         IntegrationResponses:
           - StatusCode: 200
             ResponseParameters:
-              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Cookie'"
               method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
-              method.response.header.Access-Control-Allow-Origin: "'*'"
+              method.response.header.Access-Control-Allow-Origin: !If [IsProd, "'https://kelifax.com'", "'https://dev.kelifax.com'"]
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
             ResponseTemplates:
               application/json: "{}"
         RequestTemplates:
@@ -563,6 +581,7 @@ Resources:
             method.response.header.Access-Control-Allow-Headers: true
             method.response.header.Access-Control-Allow-Methods: true
             method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Credentials: true
 
   # API Methods
 
@@ -649,10 +668,8 @@ Resources:
       RestApiId: !Ref ApiGatewayRestApi
       ResourceId: !Ref ApiGatewayResourceSubmittedResources
       HttpMethod: POST
-      AuthorizationType: COGNITO_USER_POOLS
-      AuthorizerId: !Ref CognitoAuthorizer
-      AuthorizationScopes:
-        - email
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref LambdaAuthorizer
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
@@ -666,10 +683,8 @@ Resources:
       RestApiId: !Ref ApiGatewayRestApi
       ResourceId: !Ref ApiGatewayResourceApproveResource
       HttpMethod: POST
-      AuthorizationType: COGNITO_USER_POOLS
-      AuthorizerId: !Ref CognitoAuthorizer
-      AuthorizationScopes:
-        - email
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref LambdaAuthorizer
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST

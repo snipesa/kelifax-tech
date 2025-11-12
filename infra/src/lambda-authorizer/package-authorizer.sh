@@ -46,7 +46,7 @@ if [ "$ENVIRONMENT" != "dev" ] && [ "$ENVIRONMENT" != "prod" ]; then
 fi
 
 # Set S3 prefix based on environment
-S3_PREFIX="lambda-zip-${ENVIRONMENT}"
+S3_PREFIX="api-lambda-auth-${ENVIRONMENT}"
 S3_PATH="s3://${BUCKET_NAME}/${S3_PREFIX}/"
 
 print_status "Packaging Lambda function for ${ENVIRONMENT} environment"
@@ -72,8 +72,24 @@ print_status "Copied lambda function to package directory"
 # Install dependencies if requirements.txt exists and is not empty
 if [ -f "${REQUIREMENTS_FILE}" ] && [ -s "${REQUIREMENTS_FILE}" ]; then
     print_status "Installing dependencies from ${REQUIREMENTS_FILE}"
-    pip install -r "${REQUIREMENTS_FILE}" -t "${PACKAGE_DIR}/" --quiet
+    
+    # Try different pip commands in order of preference
+    if command -v pip3 &> /dev/null; then
+        pip3 install -r "${REQUIREMENTS_FILE}" -t "${PACKAGE_DIR}/" --quiet
+    elif command -v python3 &> /dev/null; then
+        python3 -m pip install -r "${REQUIREMENTS_FILE}" -t "${PACKAGE_DIR}/" --quiet
+    elif command -v pip &> /dev/null; then
+        pip install -r "${REQUIREMENTS_FILE}" -t "${PACKAGE_DIR}/" --quiet
+    else
+        print_error "No pip command found. Please install pip or python3-pip"
+        exit 1
+    fi
+    
     print_status "Dependencies installed successfully"
+    
+    # Show what was installed
+    print_status "Installed packages:"
+    ls -la "${PACKAGE_DIR}" | grep -E "(PyJWT|jwt)" || echo "  PyJWT library and dependencies"
 else
     print_warning "No requirements.txt found or file is empty. Skipping dependency installation."
 fi

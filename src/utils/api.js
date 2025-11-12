@@ -258,7 +258,7 @@ export async function submitResourceSubmission(resourceSubmission) {
   }
 }
 
-// Old authenticateAdmin function removed - now using AWS Cognito authentication
+// Admin authentication now handled by CloudFront Lambda@Edge
 
 /**
  * Update resource status (admin only)

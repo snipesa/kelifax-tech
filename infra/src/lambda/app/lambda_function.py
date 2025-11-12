@@ -46,6 +46,7 @@ def lambda_handler(event, context):
             'http://localhost:4321',
             'http://localhost:4322', 
             'http://localhost:4323',
+            'https://dev.kelifax.com',
             'https://www.d2zqbcv5saw2i9.cloudfront.net',
             'https://d2zqbcv5saw2i9.cloudfront.net'
         ]
@@ -69,6 +70,7 @@ def lambda_handler(event, context):
         'Access-Control-Allow-Origin': valid_origin or allowed_origins[0],  # Default to first allowed origin
         'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
         'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization, X-Amz-Date, X-Amz-Security-Token',
+        'Access-Control-Allow-Credentials': 'true',  # Allow credentials for cookie-based auth
         'Access-Control-Max-Age': '86400'
     }
 
