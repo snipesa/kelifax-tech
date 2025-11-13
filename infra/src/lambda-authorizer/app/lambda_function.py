@@ -51,17 +51,37 @@ def get_cognito_config():
 def lambda_handler(event, context):
     """
     API Gateway Lambda Authorizer that validates Cognito tokens from cookies
-    Simple validation - if user has valid Cognito token from /admin login, allow access
+    ALWAYS ALLOWS requests to reach the main Lambda function for proper CORS handling
+    Authorization logic is handled in the main Lambda function
     """
     try:
         print('API Gateway authorizer started')
         print(f'Event method ARN: {event.get("methodArn", "N/A")}')
         
+        # Default context for unauthenticated requests
+        default_context = {
+            'authenticated': 'false',
+            'userId': '',
+            'email': '',
+            'username': '',
+            'tokenUse': '',
+            'groups': '[]',
+            'authError': ''
+        }
+        
         # Get Cognito configuration from Parameter Store
-        cognito_config = get_cognito_config()
+        try:
+            cognito_config = get_cognito_config()
+        except Exception as e:
+            print(f'Failed to get Cognito config: {e}')
+            # ALWAYS ALLOW - let main Lambda handle the error with proper CORS
+            policy = generate_policy('unauthenticated', 'Allow', event['methodArn'])
+            policy['context'] = {**default_context, 'authError': 'Configuration error'}
+            return policy
         cognito_user_pool_id = cognito_config['cognito_user_pool_id']
         client_id = cognito_config['client_id']
         cognito_domain = cognito_config['cognito_domain']
+        environment = cognito_config['environment']
         
         # Extract cookies from the request
         headers = event.get('headers', {})
@@ -77,12 +97,16 @@ def lambda_handler(event, context):
                     key, value = cookie.strip().split('=', 1)
                     cookie_dict[key] = value
         
-        # Look for ID token only
-        id_token = cookie_dict.get('cognito_id_token')
+        # Look for environment-specific ID token
+        id_token_cookie_name = f'cognito_{environment}_id_token'
+        id_token = cookie_dict.get(id_token_cookie_name)
         
         if not id_token:
-            print('No cognito_id_token found in cookies')
-            return generate_policy('user', 'Deny', event['methodArn'])
+            print(f'No {id_token_cookie_name} found in cookies')
+            # ALWAYS ALLOW - let main Lambda handle unauthenticated requests with proper CORS
+            policy = generate_policy('unauthenticated', 'Allow', event['methodArn'])
+            policy['context'] = {**default_context, 'authError': 'No token found'}
+            return policy
         
         # Validate the ID token
         try:
@@ -101,12 +125,18 @@ def lambda_handler(event, context):
             # Validate token properties
             if aud != client_id:
                 print(f'Invalid audience: expected {client_id}, got {aud}')
-                return generate_policy('user', 'Deny', event['methodArn'])
+                # ALWAYS ALLOW - let main Lambda handle invalid tokens with proper CORS
+                policy = generate_policy('unauthenticated', 'Allow', event['methodArn'])
+                policy['context'] = {**default_context, 'authError': 'Invalid token audience'}
+                return policy
             
             expected_iss = f'https://cognito-idp.{region}.amazonaws.com/{cognito_user_pool_id}'
             if iss != expected_iss:
                 print(f'Invalid issuer: expected {expected_iss}, got {iss}')
-                return generate_policy('user', 'Deny', event['methodArn'])
+                # ALWAYS ALLOW - let main Lambda handle invalid tokens with proper CORS
+                policy = generate_policy('unauthenticated', 'Allow', event['methodArn'])
+                policy['context'] = {**default_context, 'authError': 'Invalid token issuer'}
+                return policy
             
             # Get user information
             user_id = decoded_token.get('sub')
@@ -125,11 +155,13 @@ def lambda_handler(event, context):
             
             # Add user context that can be accessed in your API functions
             policy['context'] = {
+                'authenticated': 'true',
                 'userId': user_id,
                 'email': email,
                 'username': username,
                 'tokenUse': token_use,
-                'groups': json.dumps(cognito_groups) if cognito_groups else '[]'
+                'groups': json.dumps(cognito_groups) if cognito_groups else '[]',
+                'authError': ''
             }
             
             print('Authorization successful - allowing access')
@@ -137,14 +169,33 @@ def lambda_handler(event, context):
             
         except jwt.InvalidTokenError as e:
             print(f'Invalid token: {e}')
-            return generate_policy('user', 'Deny', event['methodArn'])
+            # ALWAYS ALLOW - let main Lambda handle invalid tokens with proper CORS
+            policy = generate_policy('unauthenticated', 'Allow', event['methodArn'])
+            policy['context'] = {**default_context, 'authError': 'Invalid token format'}
+            return policy
         except Exception as e:
             print(f'Token validation error: {e}')
-            return generate_policy('user', 'Deny', event['methodArn'])
+            # ALWAYS ALLOW - let main Lambda handle token errors with proper CORS
+            policy = generate_policy('unauthenticated', 'Allow', event['methodArn'])
+            policy['context'] = {**default_context, 'authError': 'Token validation failed'}
+            return policy
             
     except Exception as e:
         print(f'Authorization failed: {e}')
-        return generate_policy('user', 'Deny', event['methodArn'])
+        import traceback
+        print(f'Full stack trace: {traceback.format_exc()}')
+        # ALWAYS ALLOW - let main Lambda handle all errors with proper CORS
+        policy = generate_policy('unauthenticated', 'Allow', event['methodArn'])
+        policy['context'] = {
+            'authenticated': 'false',
+            'userId': '',
+            'email': '',
+            'username': '',
+            'tokenUse': '',
+            'groups': '[]',
+            'authError': 'Authorizer exception'
+        }
+        return policy
 
 def generate_policy(principal_id, effect, resource):
     """

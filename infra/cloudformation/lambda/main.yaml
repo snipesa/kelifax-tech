@@ -25,7 +25,7 @@ Parameters:
     Default: lambda-function.zip
     Description: Name of the Lambda zip file in S3
 
-  AuthSZipFile:
+  AuthZipFile:
     Type: String
     Default: lambda_function_auth.zip
     Description: Name of the Lambda zip file in S3
@@ -52,12 +52,6 @@ Mappings:
     dev:
       TableName: kelifax-SubmittedResources-Dev
       
-  EnvironmentToCognitoUserPool:
-    prod:
-      UserPoolArn: "arn:aws:cognito-idp:us-east-1:905418207079:userpool/us-east-1_nPle6bTfq"
-    dev:
-      UserPoolArn: "arn:aws:cognito-idp:us-east-1:905418207079:userpool/us-east-1_aizTek5E9"
-
 Conditions:
   IsProd: !Equals [!Ref Environment, "prod"]
 
@@ -74,7 +68,7 @@ Resources:
         S3Bucket: 
           Ref: DeploymentBucket
         S3Key: 
-          Fn::Sub: "api-lambda-auth-${Environment}/${AuthSZipFile}"
+          Fn::Sub: "api-lambda-auth-${Environment}/${AuthZipFile}"
       Timeout: 30
       MemorySize: 256
       Environment:
@@ -83,7 +77,7 @@ Resources:
             Ref: Environment
       Role: 
         Fn::GetAtt: 
-          - LambdaExecutionRole
+          - LambdaAuthorizerExecutionRole
           - Arn
 
   # Lambda Function
@@ -170,6 +164,7 @@ Resources:
                   - 'ssm:GetParametersByPath'
                 Resource:
                   - Fn::Sub: 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${FunctionPrefix}/${Environment}/*'
+
         - PolicyName: S3Access
           PolicyDocument:
             Version: '2012-10-17'
@@ -189,6 +184,35 @@ Resources:
                 Resource:
                   - !Sub 'arn:aws:s3:::kelifax-resources/${Environment}/logos/approved/*'
                   - !Sub 'arn:aws:s3:::kelifax-resources/${Environment}/logos/pending/*'
+
+
+  # IAM Role for Lambda Authorizer Execution
+  LambdaAuthorizerExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      Policies:
+        - PolicyName: SSMParameterAccessForAuth
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ssm:GetParameter'
+                  - 'ssm:GetParameters'
+                Resource:
+                  - Fn::Sub: 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${FunctionPrefix}/${Environment}/cognito-user-pool-id'
+                  - Fn::Sub: 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${FunctionPrefix}/${Environment}/client_id'
+                  - Fn::Sub: 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${FunctionPrefix}/${Environment}/cognito_domain'
+
 
   # API Gateway Resources
   ApiGatewayRestApi:
@@ -215,21 +239,6 @@ Resources:
               NotIpAddress:
                 aws:SourceIp: !Ref AllowedIPRanges
 
-  # Cognito User Pool Authorizer for Admin Endpoints
-  CognitoAuthorizer:
-    Type: AWS::ApiGateway::Authorizer
-    Properties:
-      Name: !Sub "${FunctionPrefix}-${Environment}-cognito-authorizer"
-      RestApiId: !Ref ApiGatewayRestApi
-      Type: COGNITO_USER_POOLS
-      ProviderARNs:
-        - Fn::FindInMap:
-            - EnvironmentToCognitoUserPool
-            - Ref: Environment
-            - UserPoolArn
-      AuthorizerCredentials: !GetAtt ApiGatewayAuthorizerRole.Arn
-      IdentitySource: method.request.header.Authorization
-
   # Lambda Authorizer for Cookie-based Authentication
   LambdaAuthorizer:
     Type: AWS::ApiGateway::Authorizer
@@ -242,7 +251,7 @@ Resources:
       IdentitySource: method.request.header.Cookie
       AuthorizerResultTtlInSeconds: 300
 
-  # IAM Role for API Gateway to validate Cognito tokens
+  # IAM Role for API Gateway Lambda Authorizer
   ApiGatewayAuthorizerRole:
     Type: AWS::IAM::Role
     Properties:
@@ -254,19 +263,14 @@ Resources:
               Service: apigateway.amazonaws.com
             Action: 'sts:AssumeRole'
       Policies:
-        - PolicyName: CognitoUserPoolAccess
+        - PolicyName: LambdaAuthorizerInvokePolicy
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
                 Action:
-                  - 'cognito-idp:GetUser'
-                  - 'cognito-idp:ListUsers'
-                Resource:
-                  Fn::FindInMap:
-                    - EnvironmentToCognitoUserPool
-                    - Ref: Environment
-                    - UserPoolArn
+                  - 'lambda:InvokeFunction'
+                Resource: !GetAtt KelilaxAuthorizerFunction.Arn
 
   ApiGatewayResourceAdmin:
     Type: AWS::ApiGateway::Resource
@@ -651,10 +655,8 @@ Resources:
       RestApiId: !Ref ApiGatewayRestApi
       ResourceId: !Ref ApiGatewayResourceDeleteResource
       HttpMethod: POST
-      AuthorizationType: COGNITO_USER_POOLS
-      AuthorizerId: !Ref CognitoAuthorizer
-      AuthorizationScopes:
-        - email
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref LambdaAuthorizer
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
@@ -698,10 +700,8 @@ Resources:
       RestApiId: !Ref ApiGatewayRestApi
       ResourceId: !Ref ApiGatewayResourceDeclineResource
       HttpMethod: POST
-      AuthorizationType: COGNITO_USER_POOLS
-      AuthorizerId: !Ref CognitoAuthorizer
-      AuthorizationScopes:
-        - email
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref LambdaAuthorizer
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST
@@ -715,10 +715,8 @@ Resources:
       RestApiId: !Ref ApiGatewayRestApi
       ResourceId: !Ref ApiGatewayResourceAdminGetResource
       HttpMethod: POST
-      AuthorizationType: COGNITO_USER_POOLS
-      AuthorizerId: !Ref CognitoAuthorizer
-      AuthorizationScopes:
-        - email
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref LambdaAuthorizer
       Integration:
         Type: AWS_PROXY
         IntegrationHttpMethod: POST

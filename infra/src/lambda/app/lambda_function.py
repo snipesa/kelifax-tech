@@ -12,6 +12,7 @@ from app.submit_resource import handle_submit_resource
 from app.get_resource import handle_get_resource
 from app.upload_logo import handle_upload_logo
 from app.utils import get_parameter
+from app.auth_handler import check_admin_authorization
 
 def lambda_handler(event, context):
     # print(event)
@@ -69,7 +70,7 @@ def lambda_handler(event, context):
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': valid_origin or allowed_origins[0],  # Default to first allowed origin
         'Access-Control-Allow-Methods': 'GET, POST, PATCH, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization, X-Amz-Date, X-Amz-Security-Token',
+        'Access-Control-Allow-Headers': 'Content-Type, X-API-Key, Authorization, X-Amz-Date, X-Amz-Security-Token, Cookie',
         'Access-Control-Allow-Credentials': 'true',  # Allow credentials for cookie-based auth
         'Access-Control-Max-Age': '86400'
     }
@@ -107,26 +108,44 @@ def lambda_handler(event, context):
 
         # Route: GET /admin/submitted-resources (Get Submitted Resources for Admin)
         elif method == 'POST' and path.endswith('/admin/submitted-resources'):
+            is_authorized, error_response = check_admin_authorization(event, headers)
+            if not is_authorized:
+                return error_response
             return handle_get_submitted_resources(event, headers, table_name)
 
         # Route: POST /admin/get-resource (Get Resource by Slug for admin)
-        elif method == 'POST' and path.endswith('/admin/get-resource'):
+        elif method == 'POST' and path.endswith('admin/get-resource/'):
+            is_authorized, error_response = check_admin_authorization(event, headers)
+            if not is_authorized:
+                return error_response
             return handle_admin_get_resource(event, headers, table_name)
 
         # Route: DELETE /admin/delete-resource (Delete Resource by Slug)
         elif method == 'POST' and path.endswith('/admin/delete-resource'):
+            is_authorized, error_response = check_admin_authorization(event, headers)
+            if not is_authorized:
+                return error_response
             return handle_delete_resource(event, headers, table_name)
         
         # Route: POST /admin/approve-resource (Approve Resource)
         elif method == 'POST' and path.endswith('/admin/approve-resource'):
+            is_authorized, error_response = check_admin_authorization(event, headers)
+            if not is_authorized:
+                return error_response
             return handle_approve_resource(event, headers, table_name)
         
         # Route: POST /admin/decline-resource (Decline Resource)
         elif method == 'POST' and path.endswith('/admin/decline-resource'):
+            is_authorized, error_response = check_admin_authorization(event, headers)
+            if not is_authorized:
+                return error_response
             return handle_decline_resource(event, headers, table_name)
         
         # Route: POST /admin/update-resource (Update Resource)
         elif method == 'POST' and path.endswith('/admin/update-resource'):
+            is_authorized, error_response = check_admin_authorization(event, headers)
+            if not is_authorized:
+                return error_response
             return handle_update_resource(event, headers, table_name)
 
         # Route: POST /submit-resource (Submit Resource)

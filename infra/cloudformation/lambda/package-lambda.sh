@@ -74,6 +74,21 @@ echo ""
 if [[ $REPLY =~ ^[Yy]$ ]]; then
   echo "📝 Deploying CloudFormation stack..."
   
+  # Get the authorizer zip file name from SSM Parameter Store
+  echo "🔍 Retrieving authorizer zip file name from SSM Parameter Store..."
+  AUTH_ZIP_FILE=$(aws ssm get-parameter \
+    --region us-east-1 \
+    --name "/kelifax/lambda-authorizer" \
+    --query "Parameter.Value" \
+    --output text 2>/dev/null)
+  
+  if [ $? -eq 0 ] && [ -n "$AUTH_ZIP_FILE" ]; then
+    echo "✅ Retrieved authorizer zip file: $AUTH_ZIP_FILE"
+  else
+    echo "❌ Failed to retrieve authorizer zip file from SSM Parameter Store"
+    exit 1
+  fi
+  
   # Deploy CloudFormation stack
   aws cloudformation deploy \
     --template-file main.yaml \
@@ -85,6 +100,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
       FunctionPrefix=$FUNCTION_PREFIX \
       DeploymentBucket=$BUCKET_NAME \
       S3ZipFile=$ZIP_NAME \
+      AuthZipFile=$AUTH_ZIP_FILE \
     --capabilities CAPABILITY_IAM
   
   # Check the status of the deployment
@@ -116,8 +132,10 @@ else
   echo "    FunctionPrefix=$FUNCTION_PREFIX \\"
   echo "    S3ZipFile=$ZIP_NAME \\"
   echo "    DeploymentBucket=$BUCKET_NAME \\"
+  echo "    AuthZipFile=\$AUTH_ZIP_FILE \\"
   echo "  --capabilities CAPABILITY_IAM"
   
+  echo " get the authorizer zip file name from SSM Parameter Store"
   # Even if skipped deployment, packaging was successful
   echo "✨ Lambda packaging process completed successfully."
   exit 0

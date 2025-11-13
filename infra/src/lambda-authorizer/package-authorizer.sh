@@ -6,7 +6,8 @@
 set -e
 
 # Configuration
-FUNCTION_NAME="lambda_function_auth"
+TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+ZIP_FILE="lambda_function_auth_${TIMESTAMP}.zip"
 BUCKET_NAME="cf-kelifax-deployment-bucket"
 LAMBDA_DIR="./app"
 REQUIREMENTS_FILE="./requirements.txt"
@@ -95,7 +96,6 @@ else
 fi
 
 # Create zip file
-ZIP_FILE="${FUNCTION_NAME}.zip"
 print_status "Creating zip file: ${ZIP_FILE}"
 
 cd "${PACKAGE_DIR}"
@@ -109,11 +109,17 @@ mv "${TEMP_DIR}/${ZIP_FILE}" "./"
 FILE_SIZE=$(ls -lh "${ZIP_FILE}" | awk '{print $5}')
 print_status "Package created successfully (Size: ${FILE_SIZE})"
 
-# Upload to S3
-print_status "Uploading to S3: ${S3_PATH}${ZIP_FILE}"
+# Create temporary directory for S3 sync
+SYNC_TEMP_DIR=$(mktemp -d)
+cp "${ZIP_FILE}" "${SYNC_TEMP_DIR}/"
+print_status "Created sync temp directory: ${SYNC_TEMP_DIR}"
 
-if aws s3 cp "${ZIP_FILE}" "${S3_PATH}${ZIP_FILE}" --no-progress; then
-    print_status "Upload completed successfully"
+# Upload to S3 using sync with delete to ensure only the latest file exists
+print_status "Syncing to S3: ${S3_PATH}"
+print_status "This will replace any existing files in the S3 prefix"
+
+if aws s3 sync "${SYNC_TEMP_DIR}/" "${S3_PATH}" --delete --no-progress; then
+    print_status "Sync completed successfully"
     
     # Get S3 object information
     S3_URI="${S3_PATH}${ZIP_FILE}"
@@ -126,17 +132,37 @@ if aws s3 cp "${ZIP_FILE}" "${S3_PATH}${ZIP_FILE}" --no-progress; then
         print_warning "Could not verify upload"
     fi
 else
-    print_error "Upload failed"
+    print_error "S3 sync failed"
+    rm -rf "${SYNC_TEMP_DIR}"
     exit 1
+fi
+
+# Save zip file name to AWS SSM Parameter Store
+SSM_PARAMETER_NAME="/kelifax/lambda-authorizer"
+print_status "Saving zip file name to SSM parameter: ${SSM_PARAMETER_NAME}"
+
+if aws ssm put-parameter \
+    --region us-east-1 \
+    --name "${SSM_PARAMETER_NAME}" \
+    --value "${ZIP_FILE}" \
+    --type "String" \
+    --overwrite > /dev/null 2>&1; then
+    print_status "SSM parameter updated successfully"
+    print_status "Parameter value: ${ZIP_FILE}"
+else
+    print_error "Failed to update SSM parameter"
+    print_warning "Deployment package uploaded successfully, but SSM parameter update failed"
 fi
 
 # Cleanup
 rm -rf "${TEMP_DIR}"
+rm -rf "${SYNC_TEMP_DIR}"
 rm -f "${ZIP_FILE}"
 print_status "Cleanup completed"
 
 print_status "Lambda function packaging and upload completed successfully!"
 print_status "CloudFormation can reference: ${S3_URI}"
+print_status "SSM Parameter '${SSM_PARAMETER_NAME}' contains the current zip file name"
 
 # Display CloudFormation reference example
 echo ""
@@ -144,3 +170,6 @@ echo "CloudFormation Code Property Example:"
 echo "Code:"
 echo "  S3Bucket: ${BUCKET_NAME}"
 echo "  S3Key: ${S3_PREFIX}/${ZIP_FILE}"
+echo ""
+echo "Or retrieve dynamically from SSM:"
+echo "aws ssm get-parameter --region us-east-1 --name '${SSM_PARAMETER_NAME}' --query 'Parameter.Value' --output text"

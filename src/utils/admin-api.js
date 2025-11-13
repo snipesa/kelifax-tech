@@ -110,8 +110,8 @@ export async function getResourceByName(resourceName) {
     const data = await response.json();
     
     // Extract resource data from API response
-    if (data && data.success && data.data) {
-      return data.data;
+    if (response && response.success && response.data) {
+      return response.data;
     }
     
     throw new Error('Resource not found');
