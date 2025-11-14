@@ -7,6 +7,7 @@ def handle_delete_resource(event, headers, table_name):
     """Handle resource deletion"""
     try:
         body = json.loads(event.get('body', '{}'))
+        # print(f"Request body for delete is: {body}")
     except json.JSONDecodeError:
         return {
             'statusCode': 400,
@@ -118,9 +119,9 @@ def get_bucket_config():
         
         # Determine parameter name based on environment
         if environment == 'prod':
-            parameter_name = '/kelifax/prod/s3-bucket-url'
+            parameter_name = '/kelifax/prod/bucketResources'
         else:
-            parameter_name = '/kelifax/dev/s3-bucket-url'
+            parameter_name = '/kelifax/dev/bucketResources'
         
         # Get bucket URL from parameter store
         bucket_url = get_parameter(parameter_name)

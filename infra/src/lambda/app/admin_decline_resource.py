@@ -19,22 +19,22 @@ def handle_decline_resource(event, headers, table_name):
         }
     
     # Validate required fields
-    resource_name = body.get('resourceName')
-    if not resource_name:
+    resource_slug = body.get('slug')
+    if not resource_slug:
         return {
             'statusCode': 400,
             'headers': headers,
             'body': json.dumps({
                 'success': False,
-                'message': 'resourceName is required'
+                'message': 'slug is required'
             })
         }
     
     # Optional rejection reason
     rejection_reason = body.get('rejectionReason', 'No reason provided')
     
-    # Generate resource slug from name (matching submit_resource.py pattern)
-    resource_slug = generate_resource_slug(resource_name)
+    # Generate resource slug for validation (second authentication)
+    validated_resource_slug = generate_resource_slug(resource_slug)
     
     dynamodb = boto3.client('dynamodb')
     
@@ -107,7 +107,6 @@ def handle_decline_resource(event, headers, table_name):
                 'message': 'Resource declined successfully',
                 'data': {
                     'resourceSlug': resource_slug,
-                    'resourceName': resource_name,
                     'resourceStatus': 'rejected',
                     'rejectedAt': rejection_timestamp,
                     'rejectionReason': rejection_reason,
@@ -131,10 +130,10 @@ def handle_decline_resource(event, headers, table_name):
 def generate_resource_slug(resource_name):
     """Generate URL-friendly slug from resource name"""
     import re
-    # Convert to lowercase and replace spaces/special chars with hyphens
-    slug = re.sub(r'[^\w\s-]', '', resource_name.lower())
-    slug = re.sub(r'[-\s]+', '-', slug)
-    return slug.strip('-')
+    # Simple slug generation: lowercase, replace spaces and underscores with hyphens
+    slug = resource_name.lower()
+    slug = re.sub(r'[\s_]+', '-', slug)  # Replace spaces and underscores with hyphens
+    return slug
 
 
 def get_bucket_config():
@@ -154,9 +153,9 @@ def get_bucket_config():
         
         # Determine parameter name based on environment
         if environment == 'prod':
-            parameter_name = '/kelifax/prod/s3-bucket-url'
+            parameter_name = '/kelifax/prod/bucketResources'
         else:
-            parameter_name = '/kelifax/dev/s3-bucket-url'
+            parameter_name = '/kelifax/dev/bucketResources'
         
         # Get bucket URL from parameter store
         bucket_url = get_parameter(parameter_name)
