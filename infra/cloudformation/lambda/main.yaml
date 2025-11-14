@@ -35,6 +35,16 @@ Parameters:
     Default: '/kelifax/prod/lambda-authorizer-zip'
     Description: Name of the Lambda authorizer zip file for prod environment from SSM Parameter Store
 
+  DevLambdaEdgeZipFile:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+    Default: '/kelifax/dev/cognito-lambda-edge-zip'
+    Description: Name of the Cognito Lambda@Edge zip file for dev environment from SSM Parameter Store
+
+  ProdLambdaEdgeZipFile:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+    Default: '/kelifax/prod/cognito-lambda-edge-zip'
+    Description: Name of the Cognito Lambda@Edge zip file for prod environment from SSM Parameter Store
+
   ApiKey:
     Type: String
     Description: API Key ID for Gateway (reference an existing API Key ID from the console)
@@ -82,6 +92,28 @@ Resources:
         Variables:
           ENVIRONMENT: 
             Ref: Environment
+      Role: 
+        Fn::GetAtt: 
+          - LambdaAuthorizerExecutionRole
+          - Arn
+
+  # Cognito Lambda@Edge Function
+  KelilaxCognitoLambdaEdgeFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: 
+        Fn::Sub: "${FunctionPrefix}-${Environment}-cognito-lambda-edge"
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Code:
+        S3Bucket: 
+          Ref: DeploymentBucket
+        S3Key: 
+          Fn::Sub: 
+            - "cognito-lambda-edge-${Environment}/${LambdaEdgeZipFileName}"
+            - LambdaEdgeZipFileName: !If [IsProd, !Ref ProdLambdaEdgeZipFile, !Ref DevLambdaEdgeZipFile]
+      Timeout: 5
+      MemorySize: 128
       Role: 
         Fn::GetAtt: 
           - LambdaAuthorizerExecutionRole
@@ -202,7 +234,9 @@ Resources:
         Statement:
           - Effect: Allow
             Principal:
-              Service: lambda.amazonaws.com
+              Service: 
+                - lambda.amazonaws.com
+                - edgelambda.amazonaws.com
             Action: 'sts:AssumeRole'
       ManagedPolicyArns:
         - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
@@ -853,6 +887,16 @@ Outputs:
     Export:
       Name:
         Fn::Sub: "${AWS::StackName}-AuthorizerFunctionArn"
+
+  CognitoLambdaEdgeFunctionArn:
+    Description: "ARN of the Kelifax Cognito Lambda@Edge function"
+    Value:
+      Fn::GetAtt:
+        - KelilaxCognitoLambdaEdgeFunction
+        - Arn
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-CognitoLambdaEdgeFunctionArn"
   
       
   DynamoDBTableName:
