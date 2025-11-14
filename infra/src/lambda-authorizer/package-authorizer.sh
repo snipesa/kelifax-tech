@@ -138,7 +138,7 @@ else
 fi
 
 # Save zip file name to AWS SSM Parameter Store
-SSM_PARAMETER_NAME="/kelifax/lambda-authorizer"
+SSM_PARAMETER_NAME="/kelifax/${ENVIRONMENT}/lambda-authorizer-zip"
 print_status "Saving zip file name to SSM parameter: ${SSM_PARAMETER_NAME}"
 
 if aws ssm put-parameter \

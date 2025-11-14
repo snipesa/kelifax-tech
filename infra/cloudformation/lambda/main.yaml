@@ -25,10 +25,15 @@ Parameters:
     Default: lambda-function.zip
     Description: Name of the Lambda zip file in S3
 
-  AuthZipFile:
-    Type: String
-    Default: lambda_function_auth.zip
-    Description: Name of the Lambda zip file in S3
+  DevAuthZipFile:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+    Default: '/kelifax/dev/lambda-authorizer-zip'
+    Description: Name of the Lambda authorizer zip file for dev environment from SSM Parameter Store
+
+  ProdAuthZipFile:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+    Default: '/kelifax/prod/lambda-authorizer-zip'
+    Description: Name of the Lambda authorizer zip file for prod environment from SSM Parameter Store
 
   ApiKey:
     Type: String
@@ -68,7 +73,9 @@ Resources:
         S3Bucket: 
           Ref: DeploymentBucket
         S3Key: 
-          Fn::Sub: "api-lambda-auth-${Environment}/${AuthZipFile}"
+          Fn::Sub: 
+            - "api-lambda-auth-${Environment}/${AuthZipFileName}"
+            - AuthZipFileName: !If [IsProd, !Ref ProdAuthZipFile, !Ref DevAuthZipFile]
       Timeout: 30
       MemorySize: 256
       Environment:
