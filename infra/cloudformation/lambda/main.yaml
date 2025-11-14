@@ -19,11 +19,36 @@ Parameters:
     Type: String
     Default: cf-kelifax-deployment-bucket
     Description: S3 bucket containing the Lambda function code zip files
-    
-  S3KeyPrefix:
+  
+  S3ZipFile:
     Type: String
-    Default: lambda-zip-dev
-    Description: S3 key prefix for Lambda function code zip files
+    Default: lambda-function.zip
+    Description: Name of the Lambda zip file in S3
+
+  DevAuthZipFile:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+    Default: '/kelifax/dev/lambda-authorizer-zip'
+    Description: Name of the Lambda authorizer zip file for dev environment from SSM Parameter Store
+
+  ProdAuthZipFile:
+    Type: 'AWS::SSM::Parameter::Value<String>'
+    Default: '/kelifax/prod/lambda-authorizer-zip'
+    Description: Name of the Lambda authorizer zip file for prod environment from SSM Parameter Store
+
+  ApiKey:
+    Type: String
+    Description: API Key ID for Gateway (reference an existing API Key ID from the console)
+    Default: h5tbv3v5g0
+    
+  AllowedIPRanges:
+    Type: CommaDelimitedList
+    Default: "10.0.2.0/32,35.145.211.139/32,0.0.0.0/0"
+    Description: "Comma-delimited list of IP ranges allowed to access admin endpoints"
+
+  SnsTopicArn:
+    Type: String
+    Default: "arn:aws:sns:us-east-1:905418207079:snipes-sns-aws"
+    Description: "SNS Topic ARN for CloudWatch alarm notifications"
 
 Mappings:
   EnvironmentToTableName:
@@ -31,8 +56,37 @@ Mappings:
       TableName: kelifax-resources-prod
     dev:
       TableName: kelifax-SubmittedResources-Dev
+      
+Conditions:
+  IsProd: !Equals [!Ref Environment, "prod"]
 
 Resources:
+  # Lambda Authorizer Function
+  KelilaxAuthorizerFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: 
+        Fn::Sub: "${FunctionPrefix}-${Environment}-authorizer"
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.12
+      Code:
+        S3Bucket: 
+          Ref: DeploymentBucket
+        S3Key: 
+          Fn::Sub: 
+            - "api-lambda-auth-${Environment}/${AuthZipFileName}"
+            - AuthZipFileName: !If [IsProd, !Ref ProdAuthZipFile, !Ref DevAuthZipFile]
+      Timeout: 30
+      MemorySize: 256
+      Environment:
+        Variables:
+          ENVIRONMENT: 
+            Ref: Environment
+      Role: 
+        Fn::GetAtt: 
+          - LambdaAuthorizerExecutionRole
+          - Arn
+
   # Lambda Function
   KelilaxFunction:
     Type: AWS::Lambda::Function
@@ -45,11 +99,14 @@ Resources:
         S3Bucket: 
           Ref: DeploymentBucket
         S3Key: 
-          Fn::Sub: "${S3KeyPrefix}/lambda-function.zip"
+          Fn::Sub: "lambda-zip-${Environment}/${S3ZipFile}"
+
       Timeout: 30
       MemorySize: 256
       Environment:
         Variables:
+          ENV: 
+            Ref: Environment        
           ENVIRONMENT: 
             Ref: Environment
           DYNAMODB_TABLE: 
@@ -103,6 +160,670 @@ Resources:
                             - EnvironmentToTableName
                             - Ref: Environment
                             - TableName
+        - PolicyName: SSMParameterAccess
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ssm:GetParameter'
+                  - 'ssm:GetParameters'
+                  - 'ssm:GetParametersByPath'
+                Resource:
+                  - Fn::Sub: 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${FunctionPrefix}/${Environment}/*'
+
+        - PolicyName: S3Access
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                  - 's3:DeleteObject'
+                Resource:
+                  - !Sub 'arn:aws:s3:::kelifax-resources/${Environment}/uploads/temp/*'
+              - Effect: Allow
+                Action:
+                  - 's3:GetObject'
+                  - 's3:PutObject'
+                  - 's3:DeleteObject'
+                Resource:
+                  - !Sub 'arn:aws:s3:::kelifax-resources/${Environment}/logos/approved/*'
+                  - !Sub 'arn:aws:s3:::kelifax-resources/${Environment}/logos/pending/*'
+
+
+  # IAM Role for Lambda Authorizer Execution
+  LambdaAuthorizerExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      Policies:
+        - PolicyName: SSMParameterAccessForAuth
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'ssm:GetParameter'
+                  - 'ssm:GetParameters'
+                Resource:
+                  - Fn::Sub: 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${FunctionPrefix}/${Environment}/cognito-user-pool-id'
+                  - Fn::Sub: 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${FunctionPrefix}/${Environment}/client_id'
+                  - Fn::Sub: 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${FunctionPrefix}/${Environment}/cognito_domain'
+
+
+  # API Gateway Resources
+  ApiGatewayRestApi:
+    Type: AWS::ApiGateway::RestApi
+    Properties:
+      Name: !Sub "${FunctionPrefix}-${Environment}-api"
+      EndpointConfiguration:
+        Types:
+          - REGIONAL
+      Policy:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: "*"
+            Action: execute-api:Invoke
+            Resource: "execute-api:/*"
+          - Effect: Deny
+            Principal: "*"
+            Action: execute-api:Invoke
+            Resource:
+              - !Sub "execute-api:/${Environment}/*/admin"
+              - !Sub "execute-api:/${Environment}/*/admin/*"
+            Condition:
+              NotIpAddress:
+                aws:SourceIp: !Ref AllowedIPRanges
+
+  # Lambda Authorizer for Cookie-based Authentication
+  LambdaAuthorizer:
+    Type: AWS::ApiGateway::Authorizer
+    Properties:
+      Name: !Sub "${FunctionPrefix}-${Environment}-lambda-authorizer"
+      RestApiId: !Ref ApiGatewayRestApi
+      Type: REQUEST
+      AuthorizerUri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxAuthorizerFunction.Arn}/invocations"
+      AuthorizerCredentials: !GetAtt ApiGatewayAuthorizerRole.Arn
+      IdentitySource: method.request.header.Cookie
+      AuthorizerResultTtlInSeconds: 300
+
+  # IAM Role for API Gateway Lambda Authorizer
+  ApiGatewayAuthorizerRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: LambdaAuthorizerInvokePolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - 'lambda:InvokeFunction'
+                Resource: !GetAtt KelilaxAuthorizerFunction.Arn
+
+  ApiGatewayResourceAdmin:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !GetAtt [ApiGatewayRestApi, RootResourceId]
+      PathPart: "admin"
+
+  ApiGatewayResourceDeleteResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !Ref ApiGatewayResourceAdmin
+      PathPart: "delete-resource"
+
+  ApiGatewayResourceSubmittedResources:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !Ref ApiGatewayResourceAdmin
+      PathPart: "submitted-resources"
+
+  ApiGatewayResourceApproveResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !Ref ApiGatewayResourceAdmin
+      PathPart: "approve-resource"
+
+  ApiGatewayResourceDeclineResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !Ref ApiGatewayResourceAdmin
+      PathPart: "decline-resource"
+
+  ApiGatewayResourceAdminGetResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !Ref ApiGatewayResourceAdmin
+      PathPart: "get-resource"
+
+  ApiGatewayResourceResources:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !GetAtt [ApiGatewayRestApi, RootResourceId]
+      PathPart: "resources"
+
+  ApiGatewayResourceGetResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !GetAtt [ApiGatewayRestApi, RootResourceId]
+      PathPart: "get-resource"
+
+  ApiGatewayResourceSubmitResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !GetAtt [ApiGatewayRestApi, RootResourceId]
+      PathPart: "submit-resource"
+
+  ApiGatewayResourceUploadLogo:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ParentId: !GetAtt [ApiGatewayRestApi, RootResourceId]
+      PathPart: "upload-logo"
+
+  # OPTIONS Methods for CORS
+  ApiGatewayMethodResourcesOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceResources
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  ApiGatewayMethodGetResourceOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceGetResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  ApiGatewayMethodSubmitResourceOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceSubmitResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  ApiGatewayMethodUploadLogoOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceUploadLogo
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: "'*'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+
+  ApiGatewayMethodDeleteResourceOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceDeleteResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Cookie'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: !If [IsProd, "'https://kelifax.com'", "'https://dev.kelifax.com'"]
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Credentials: true
+
+  ApiGatewayMethodSubmittedResourcesOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceSubmittedResources
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Cookie'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: !If [IsProd, "'https://kelifax.com'", "'https://dev.kelifax.com'"]
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Credentials: true
+
+  ApiGatewayMethodApproveResourceOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceApproveResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Cookie'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: !If [IsProd, "'https://kelifax.com'", "'https://dev.kelifax.com'"]
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Credentials: true
+
+  ApiGatewayMethodDeclineResourceOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceDeclineResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Cookie'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: !If [IsProd, "'https://kelifax.com'", "'https://dev.kelifax.com'"]
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Credentials: true
+
+  ApiGatewayMethodAdminGetResourceOptions:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceAdminGetResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: MOCK
+        IntegrationResponses:
+          - StatusCode: 200
+            ResponseParameters:
+              method.response.header.Access-Control-Allow-Headers: "'Content-Type,Authorization,X-Amz-Date,X-Api-Key,X-Amz-Security-Token,Cookie'"
+              method.response.header.Access-Control-Allow-Methods: "'DELETE,GET,HEAD,OPTIONS,PATCH,POST,PUT'"
+              method.response.header.Access-Control-Allow-Origin: !If [IsProd, "'https://kelifax.com'", "'https://dev.kelifax.com'"]
+              method.response.header.Access-Control-Allow-Credentials: "'true'"
+            ResponseTemplates:
+              application/json: "{}"
+        RequestTemplates:
+          application/json: "{ \"statusCode\": 200 }"
+      MethodResponses:
+        - StatusCode: 200
+          ResponseParameters:
+            method.response.header.Access-Control-Allow-Headers: true
+            method.response.header.Access-Control-Allow-Methods: true
+            method.response.header.Access-Control-Allow-Origin: true
+            method.response.header.Access-Control-Allow-Credentials: true
+
+  # API Methods
+
+  ApiGatewayMethodResourcesPost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceResources
+      HttpMethod: POST
+      AuthorizationType: NONE
+      ApiKeyRequired: true
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
+  ApiGatewayMethodGetResourcePost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceGetResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      ApiKeyRequired: true
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
+  ApiGatewayMethodSubmitResourcePost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceSubmitResource
+      HttpMethod: POST
+      AuthorizationType: NONE
+      ApiKeyRequired: true
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
+  ApiGatewayMethodUploadLogoPost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceUploadLogo
+      HttpMethod: POST
+      AuthorizationType: NONE
+      ApiKeyRequired: true
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
+  ApiGatewayMethodDeleteResourcePost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceDeleteResource
+      HttpMethod: POST
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref LambdaAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
+  ApiGatewayMethodSubmittedResourcesPost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceSubmittedResources
+      HttpMethod: POST
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref LambdaAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
+  ApiGatewayMethodApproveResourcePost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceApproveResource
+      HttpMethod: POST
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref LambdaAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
+  ApiGatewayMethodDeclineResourcePost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceDeclineResource
+      HttpMethod: POST
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref LambdaAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
+  ApiGatewayMethodAdminGetResourcePost:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      ResourceId: !Ref ApiGatewayResourceAdminGetResource
+      HttpMethod: POST
+      AuthorizationType: CUSTOM
+      AuthorizerId: !Ref LambdaAuthorizer
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${KelilaxFunction.Arn}/invocations"
+      MethodResponses:
+        - StatusCode: 200
+
+  # Lambda Permissions for API Gateway
+  LambdaInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref KelilaxFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/*/*"
+
+  # Lambda Authorizer Invoke Permission
+  LambdaAuthorizerInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref KelilaxAuthorizerFunction
+      Action: lambda:InvokeFunction
+      Principal: apigateway.amazonaws.com
+      SourceArn: !Sub "arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayRestApi}/authorizers/*"
+
+  # API Gateway Deployment
+  ApiGatewayDeployment:
+    Type: AWS::ApiGateway::Deployment
+    Properties:
+      RestApiId: !Ref ApiGatewayRestApi
+      StageName: !Ref Environment
+    DependsOn:
+      - ApiGatewayMethodResourcesPost
+      - ApiGatewayMethodResourcesOptions
+      - ApiGatewayMethodGetResourcePost
+      - ApiGatewayMethodGetResourceOptions
+      - ApiGatewayMethodSubmitResourcePost
+      - ApiGatewayMethodSubmitResourceOptions
+      - ApiGatewayMethodUploadLogoPost
+      - ApiGatewayMethodUploadLogoOptions
+      - ApiGatewayMethodDeleteResourcePost
+      - ApiGatewayMethodDeleteResourceOptions
+      - ApiGatewayMethodSubmittedResourcesPost
+      - ApiGatewayMethodSubmittedResourcesOptions
+      - ApiGatewayMethodApproveResourcePost
+      - ApiGatewayMethodApproveResourceOptions
+      - ApiGatewayMethodDeclineResourcePost
+      - ApiGatewayMethodDeclineResourceOptions
+      - ApiGatewayMethodAdminGetResourcePost
+      - ApiGatewayMethodAdminGetResourceOptions
+
+  # Usage Plan
+  ApiGatewayUsagePlan:
+    Type: AWS::ApiGateway::UsagePlan
+    Properties:
+      UsagePlanName: !Sub "${FunctionPrefix}-${Environment}-usage-plan"
+      ApiStages:
+        - ApiId: !Ref ApiGatewayRestApi
+          Stage: !Ref Environment
+      Description: !Sub "Usage plan for ${FunctionPrefix}-${Environment}"
+      Throttle:
+        RateLimit: 200
+        BurstLimit: 400
+      Quota:
+        Limit: 25000
+        Period: DAY
+    DependsOn:
+      - ApiGatewayDeployment
+
+  # Usage Plan Key
+  ApiGatewayUsagePlanKey:
+    Type: AWS::ApiGateway::UsagePlanKey
+    Properties:
+      KeyId: !Ref ApiKey
+      KeyType: "API_KEY"
+      UsagePlanId: !Ref ApiGatewayUsagePlan
+
+  # CloudWatch Alarms for API Gateway Monitoring
+  ApiGatewayHighTrafficAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub "${FunctionPrefix}-${Environment}-high-traffic-alarm"
+      AlarmDescription: "Alert when Kelifax API traffic is unusually high"
+      MetricName: "Count"
+      Namespace: "AWS/ApiGateway"
+      Statistic: Sum
+      Period: 300  # 5 minutes
+      EvaluationPeriods: 2
+      Threshold: !If [IsProd, 500, 50]  # Prod: 500 requests, Dev: 25 requests in 5 minutes
+      ComparisonOperator: GreaterThanThreshold
+      Dimensions:
+        - Name: ApiName
+          Value: !Sub "${FunctionPrefix}-${Environment}-api"
+        - Name: Stage
+          Value: !Ref Environment
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref SnsTopicArn
+      OKActions:
+        - !Ref SnsTopicArn
 
 Outputs:
   FunctionArn:
@@ -122,6 +843,17 @@ Outputs:
     Export:
       Name:
         Fn::Sub: "${AWS::StackName}-FunctionName"
+
+  AuthorizerFunctionArn:
+    Description: "ARN of the Kelifax Lambda Authorizer function"
+    Value:
+      Fn::GetAtt:
+        - KelilaxAuthorizerFunction
+        - Arn
+    Export:
+      Name:
+        Fn::Sub: "${AWS::StackName}-AuthorizerFunctionArn"
+  
       
   DynamoDBTableName:
     Description: "Name of the DynamoDB table used by this function"
@@ -143,3 +875,5 @@ Outputs:
     Export:
       Name:
         Fn::Sub: "${AWS::StackName}-RoleArn"
+
+

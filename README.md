@@ -8,6 +8,7 @@
 
 ## 🚀 Quick Start
 
+### **Local Development**
 ```bash
 # Install dependencies
 npm install
@@ -18,6 +19,19 @@ npm run dev
 # Open in browser
 http://localhost:4321/
 ```
+
+### **Quick Deployment**
+```bash
+# Deploy to development
+./deploy.sh -dev
+
+# Deploy to production (with confirmation)
+./deploy.sh -prod
+```
+
+**Prerequisites for deployment:**
+- AWS CLI installed and configured
+- Access to S3 buckets: `kelifax-dev-project` (dev) and `kelifax.com-website` (prod)
 
 ## 📋 Features
 
@@ -50,7 +64,7 @@ kelifax/
 │   ├── components/     # UI components
 │   ├── layouts/        # Page layouts
 │   ├── pages/          # Site pages (auto-routed)
-│   ├── data/           # Static data (resources.json)
+│   ├── utils/          # API utilities and configuration
 │   └── styles/         # Global styles
 ├── public/             # Static assets
 └── kelifax-guide.md    # 📚 Complete documentation
@@ -66,31 +80,75 @@ kelifax/
 
 ## 🔧 Development Commands
 
+### **Local Development**
 ```bash
-npm run dev      # Start development server
+npm install      # Install dependencies
+npm run dev      # Start development server (http://localhost:4321)
 npm run build    # Build for production  
-npm run preview  # Preview production build
+npm run preview  # Preview production build locally
+```
 
-aws s3 sync ./dist s3://kelifax-dev-project --delete  #Upload to s3 dev bucket
+### **Environment Configuration**
+```bash
+# Development environment (uses .env.development)
+# - API: https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev
+# - S3: kelifax-dev-project
 
-# Example dev
-aws s3 sync ./dist s3://kelifax-dev-project --delete 
-# Prod
-aws s3 sync ./dist s3://kelifax.com-website --delete 
+# Production environment (uses .env.production)  
+# - API: https://ru8vee8krh.execute-api.us-east-1.amazonaws.com/prod
+# - S3: kelifax.com-website
+```
 
-# DynamoDB Resources Batch Upload
-# Use the provided upload script
+### **🚀 Automated Deployment**
+```bash
+# Deploy to development environment
+./deploy.sh -dev
+
+# Deploy to production environment (with confirmation)
+./deploy.sh -prod
+
+# Show deployment help
+./deploy.sh -h
+```
+
+**What the deployment script does:**
+- ✅ Switches to correct environment configuration
+- ✅ Builds project with proper API URLs
+- ✅ Deploys to appropriate S3 bucket
+- ✅ Auto-detects and invalidates CloudFront CDN
+- ✅ Restores original .env after deployment
+- ✅ Comprehensive error handling and rollback
+
+### **Manual Deployment (if needed)**
+```bash
+# Development
+cp .env.development .env
+npm run build
+aws s3 sync ./dist s3://kelifax-dev-project --delete
+
+# Production
+cp .env.production .env
+npm run build
+aws s3 sync ./dist s3://kelifax.com-website --delete
+```
+
+### **DynamoDB Resources Management**
+```bash
+# Upload enhanced resource data to DynamoDB
 
 # For Dev environment
 cd infra/src/dynamodb
-./upload-resources.sh dev
+./upload-resources.sh dev data.json
 
-# For Prod environment
+# For Prod environment  
 cd infra/src/dynamodb
-./upload-resources.sh prod
-
-Visit the s3 website URL
+./upload-resources.sh prod data.json
 ```
+
+### **Environment Files**
+- `.env` - Local development (not committed to git)
+- `.env.development` - Development deployment config
+- `.env.production` - Production deployment config
 
 ## 🌟 Recent Updates - SEO & Navigation Enhancements
 
@@ -116,7 +174,7 @@ Visit the s3 website URL
 
 ## 🌟 Phase 2a Complete - Enhanced GitHub Resource
 
-- ✅ **Dynamic JSON Integration** - GitHub resource now uses dynamic data from resources.json
+- ✅ **Dynamic API Integration** - GitHub resource now uses dynamic data from API
 - ✅ **Enhanced Resource Data** - Added keyFeatures, useCases, and learningResources
 - ✅ **Dedicated GitHub Page** - Comprehensive page showcasing Git, GitHub Actions, and GitHub Copilot
 - ✅ **Improved ResourceCard** - Enhanced to display key features and additional metadata
@@ -135,33 +193,65 @@ The codebase has been restructured to seamlessly support both **static JSON** (c
 
 ### 🔧 **How It Works**
 
-**Current Development Mode:**
-```env
-PUBLIC_USE_API=false
-PUBLIC_API_BASE_URL=
-```
-- Uses static `src/data/resources.json`
-- Fast, reliable, no network calls
-
-**Future Production Mode:**
+**Current Production Mode:**
 ```env
 PUBLIC_USE_API=true
 PUBLIC_API_BASE_URL=https://your-api-gateway-url
 ```
-- Fetches from API Gateway: `/resources/{id}`
-- Falls back to local JSON if API fails
+- All resources fetched from API Gateway
+- Static generation uses API data during build
+- Dynamic enhancement loads detailed data at runtime
 
-### 📋 **Migration Path**
+### 📋 **API-First Architecture**
 
-1. **Current**: All resources from local JSON ✅
-2. **Hybrid**: Migrate resources to API one by one
-3. **Full API**: All resources served dynamically
+1. **Static Generation**: Uses API data to generate pages at build time ✅
+2. **Runtime Enhancement**: Loads detailed resource data dynamically ✅  
+3. **Full Integration**: All data comes from DynamoDB via Lambda functions ✅
 
-**API Contract**: Lambda functions should return the same JSON structure as `resources.json`
+**API Contract**: Lambda functions return structured JSON data for all resource information
+
+## 🚀 Deployment
+
+The project includes a comprehensive deployment script that handles environment-specific builds and deployments.
+
+### Deploy Script Usage
+
+```bash
+# Development deployment
+./deploy.sh -dev                    # Build and deploy to development
+./deploy.sh -dev --dry-run         # Build for dev but don't deploy
+
+# Production deployment  
+./deploy.sh -prod                   # Build and deploy to production
+./deploy.sh -prod --dry-run        # Build for prod but don't deploy
+
+# Help
+./deploy.sh --help                 # Show usage information
+```
+
+### Key Deployment Features
+
+✅ **Environment-Specific Builds**: Automatically uses correct environment variables  
+✅ **API-First Architecture**: All data comes from DynamoDB via API Gateway  
+✅ **Pre-deployment Confirmation**: Asks for approval before S3 sync  
+✅ **Dry Run Support**: Test builds without deploying  
+✅ **Comprehensive Validation**: Checks AWS CLI, environment files, and variables  
+✅ **Build Information**: Shows file count and size after build  
+✅ **Graceful Cleanup**: Restores original environment files on exit  
+
+### Environment Files
+
+The script automatically creates template environment files if they don't exist:
+- `.env.development` - Development environment configuration
+- `.env.production` - Production environment configuration
+
+### Deployment Targets
+
+- **Development**: `kelifax-dev-project` S3 bucket
+- **Production**: `kelifax.com-website` S3 bucket
 
 ## 🌟 What's Next (Phase 3)
 
-- Backend integration with AWS Lambda and API Gateway
 - User accounts and authentication system  
 - Resource bookmarking and favorites functionality
 - Admin dashboard for resource management

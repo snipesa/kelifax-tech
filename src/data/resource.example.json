@@ -1,0 +1,33 @@
+
+{
+  "PutRequest": {
+    "Item": {
+      "resourceSlug": { "S": "figma" },
+      "submissionId": { "S": "existing-figma-2025" },
+      "status": { "S": "approved" },
+      "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+      "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+      "rejectedAt": { "S": "" },
+      "rejectionReason": { "S": "" },
+      "submitterFirstName": { "S": "System" },
+      "submitterLastName": { "S": "Admin" },
+      "submitterEmail": { "S": "admin@kelifax.com" },
+      "submitterCompany": { "S": "Kelifax" },
+      "submitterPhone": { "S": "" },
+      "submitterDomain": { "S": "kelifax.com" },
+      "resourceName": { "S": "Figma" },
+      "resourceUrl": { "S": "https://figma.com" },
+      "usagePurpose": { "S": "Collaborative interface design tool with real-time collaboration, prototyping, and design system capabilities." },
+      "category": { "S": "design" },
+      "logoImage": { "S": "figma.png" },
+      "tags": { "S": "ui design,prototyping,collaboration,vector graphics" },
+      "keyFeatures": { "S": "Real-time Collaboration - Multiple designers can work on the same file simultaneously|Vector Graphics Tools - Professional vector editing tools for creating scalable designs|Prototyping - Interactive prototypes with animations and transitions|Design Systems - Reusable components and styles for consistent design" },
+      "useCases": { "S": "UI/UX design for web and mobile applications|Design system creation and maintenance|Interactive prototyping and user testing|Collaborative design workflow with teams" },
+      "learningResources": { "S": "{\"title\":\"Figma Academy\",\"url\":\"https://help.figma.com\",\"type\":\"tutorial\"}|{\"title\":\"Figma Community\",\"url\":\"https://www.figma.com/community\",\"type\":\"documentation\"}" },
+      "searchText": { "S": "figma design ui design prototyping collaboration vector graphics interface design" },
+      "featured": { "BOOL": true },
+      "viewCount": { "N": "0" },
+      "lastViewed": { "S": "" }
+    }
+  }
+}

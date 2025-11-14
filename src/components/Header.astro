@@ -1,5 +1,7 @@
 ---
 // Header component for Kelifax
+import { getApprovedLogoUrl } from '../utils/s3-utils.js';
+
 export interface Props {
   currentPage?: string;
 }
@@ -12,7 +14,7 @@ const isActive = (page: string) => {
   if (page === 'resources' && (currentPage === 'resources' || currentPage.startsWith('resources'))) return true;
   if (page === 'about' && currentPage === 'about') return true;
   if (page === 'contact' && currentPage === 'contact') return true;
-  if (page === 'github' && (currentPage === 'github' || currentPage === 'resources/github')) return true;
+  if (page === 'github' && (currentPage === 'github' || currentPage === 'resource/github')) return true;
   return false;
 };
 
@@ -46,7 +48,7 @@ const getMobileLinkClasses = (page: string) => {
       <div class="flex items-center">
         <a href="/" class="flex items-center" style="margin-right:2.5rem;">
           <img 
-            src="/logos/kelifax.png" 
+            src={getApprovedLogoUrl('kelifax.png')} 
             alt="Kelifax" 
             class="w-16 h-16 object-contain hover:opacity-80 transition-opacity"
           />
@@ -82,7 +84,7 @@ const getMobileLinkClasses = (page: string) => {
             x-transition:leave-end="transform opacity-0 scale-95"
             class="absolute left-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50"
           >
-            <a href="/resources/github" class={`block px-4 py-3 text-sm transition-colors border-b border-gray-100 ${isActive('github') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'}`}>
+            <a href="/resource/github" class={`block px-4 py-3 text-sm transition-colors border-b border-gray-100 ${isActive('github') ? 'text-blue-600 bg-blue-50' : 'text-gray-700 hover:bg-gray-50 hover:text-blue-600'}`}>
               <div class="flex items-center">
                 <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                 GitHub - Enhanced
@@ -119,7 +121,7 @@ const getMobileLinkClasses = (page: string) => {
 
       <!-- CTA Button -->
       <div class="hidden md:flex items-center">
-        <a href="/submit-resource" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+        <a href="/submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
           Submit Resource
         </a>
       </div>
@@ -156,7 +158,7 @@ const getMobileLinkClasses = (page: string) => {
       </a>
       <a href="/resources?featured=true" class="block px-3 py-2 text-gray-700 font-medium hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors">
         Featured
-      </a>            <a href="/resources/github" class={`block px-3 py-2 ml-4 text-sm text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors ${isActive('github') ? 'text-blue-600 bg-blue-50 border-l-2 border-blue-600' : ''}`}>
+      </a>            <a href="/resource/github" class={`block px-3 py-2 ml-4 text-sm text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md transition-colors ${isActive('github') ? 'text-blue-600 bg-blue-50 border-l-2 border-blue-600' : ''}`}>
               <div class="flex items-center">
                 <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
                 GitHub - Enhanced
@@ -169,7 +171,7 @@ const getMobileLinkClasses = (page: string) => {
         Contact
       </a>
       <div class="px-3 py-2">
-        <a href="/submit-resource" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-center">
+        <a href="/submit" class="block w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors text-center">
           Submit Resource
         </a>
       </div>

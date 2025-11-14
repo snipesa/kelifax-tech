@@ -1,0 +1,454 @@
+---
+import MainLayout from '../../layouts/MainLayout.astro';
+import { getApprovedLogoUrl } from '../../utils/s3-utils.js';
+
+// Static generation with basic resource info from local data
+export async function getStaticPaths() {
+  try {
+    // Fetch resources directly from API for static generation
+    const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev';
+    const API_KEY = import.meta.env.PUBLIC_API_KEY;
+    
+    const response = await fetch(`${API_BASE_URL}/resources`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Api-Key': API_KEY,
+      },
+      body: JSON.stringify({ 
+        batchSize: 100, // Get all resources
+        category: 'all' 
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status}`);
+    }
+    
+    const data = await response.json();
+    const resources = data.success && data.data ? data.data.resources : [];
+    
+    return resources.map((resource) => ({
+      params: { slug: resource.slug },
+      props: { 
+        basicResource: {
+          slug: resource.slug,
+          title: resource.title || resource.name,
+          name: resource.name || resource.title,
+          description: resource.description,
+          category: resource.category,
+          url: resource.url,
+          image: resource.image,
+          featured: resource.featured || false,
+          tags: resource.tags || []
+        }
+      }
+    }));
+  } catch (error) {
+    console.error('Failed to fetch resources from API for static generation:', error);
+    return [];
+  }
+}
+
+const { basicResource } = Astro.props;
+
+if (!basicResource) {
+  return Astro.redirect('/404');
+}
+---
+
+<MainLayout title={`${basicResource.title} - Kelifax`} description={basicResource.description} currentPage="resources">
+  <!-- Breadcrumb -->
+  <section class="bg-gray-50 py-4">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav class="flex items-center space-x-2 text-sm text-gray-600">
+        <a href="/" class="hover:text-blue-600 transition-colors">Home</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <a href="/resources" class="hover:text-blue-600 transition-colors">Resources</a>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span class="text-gray-900 capitalize">{basicResource.category}</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+        <span class="text-gray-500">{basicResource.title}</span>
+      </nav>
+    </div>
+  </section>
+
+  <!-- Resource Content -->
+  <section class="py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        
+        <!-- Main Content -->
+        <div class="lg:col-span-2">
+          <!-- Resource Header -->
+          <div class="mb-8">
+            <div class="flex items-start gap-6">
+              <!-- Logo -->
+              {basicResource.image && (
+                <div class="flex-shrink-0">
+                  <img 
+                    src={getApprovedLogoUrl(basicResource.image)}
+                    alt={basicResource.title}
+                    class="w-16 h-16 rounded-lg object-contain bg-gray-100 p-2"
+                  />
+                </div>
+              )}
+              
+              <!-- Header Info -->
+              <div class="flex-1">
+                <h1 class="text-3xl font-bold text-gray-900 mb-2">{basicResource.title}</h1>
+                <p class="text-lg text-gray-600 mb-4">{basicResource.description}</p>
+                
+                <!-- Category & Tags -->
+                <div class="flex flex-wrap items-center gap-4 mb-6">
+                  <span class="bg-blue-100 text-blue-800 text-sm font-medium px-3 py-1 rounded-full capitalize">
+                    {basicResource.category}
+                  </span>
+                  {basicResource.featured && (
+                    <span class="bg-yellow-100 text-yellow-800 text-sm font-medium px-3 py-1 rounded-full">
+                      Featured
+                    </span>
+                  )}
+                </div>
+                
+                <!-- Tags -->
+                {basicResource.tags && basicResource.tags.length > 0 && (
+                  <div class="flex flex-wrap gap-2 mb-6">
+                    {basicResource.tags.slice(0, 8).map(tag => (
+                      <span class="bg-gray-100 text-gray-700 text-sm px-3 py-1 rounded-full">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                
+                <!-- Action Button -->
+                <a 
+                  href={basicResource.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 inline-flex items-center gap-2 font-medium transition-colors"
+                >
+                  Visit {basicResource.title}
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dynamic content loading indicator -->
+          <div id="dynamic-loading" class="mb-8">
+            <div class="flex items-center gap-2 text-blue-600">
+              <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+              <span class="text-sm">Loading detailed resource information...</span>
+            </div>
+          </div>
+
+
+
+          <!-- Key Features Section (loaded dynamically) -->
+          <div id="key-features-section" class="mb-8 hidden">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Key Features</h2>
+            <ul id="key-features-list" class="space-y-3"></ul>
+          </div>
+
+          <!-- Use Cases Section (loaded dynamically) -->
+          <div id="use-cases-section" class="mb-8 hidden">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Use Cases</h2>
+            <ul id="use-cases-list" class="space-y-3"></ul>
+          </div>
+
+          <!-- Learning Resources Section (loaded dynamically) -->
+          <div id="learning-resources-section" class="mb-8 hidden">
+            <h2 class="text-2xl font-bold text-gray-900 mb-4">Learning Resources</h2>
+            <div id="learning-resources-list" class="grid gap-4"></div>
+          </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="lg:col-span-1">
+          <!-- Related Resources (loaded dynamically) -->
+          <div id="related-resources" class="bg-gray-50 p-6 rounded-lg hidden">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Related Resources</h3>
+            <div id="related-resources-list" class="space-y-4"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dynamic loading script -->
+  <script type="module" define:vars={{ 
+    resourceSlug: basicResource.slug,
+    apiUrl: import.meta.env.PUBLIC_API_URL || 'https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev',
+    apiKey: import.meta.env.PUBLIC_API_KEY
+  }}>
+    // API Configuration - using environment variables passed from server
+    const API_CONFIG = {
+      USE_API: true, // Force enable API for this implementation
+      BASE_URL: apiUrl,
+      API_KEY: apiKey,
+    };
+
+    // S3 Configuration (inline for client-side use)
+    const S3_CONFIG = {
+      BUCKET_NAME: 'kelifax-resources',
+      REGION: 'us-east-1',
+      ENVIRONMENT_PREFIX: 'dev',
+      APPROVED_LOGOS_PREFIX: 'logos/approved',
+      BASE_URL: null, // Using standard S3 URL format
+    };
+
+    // S3 utility function (inline)
+    function getApprovedLogoUrl(logoFilename) {
+      if (!logoFilename) return '';
+      
+      const environmentPath = S3_CONFIG.ENVIRONMENT_PREFIX;
+      const fullPath = `${environmentPath}/${S3_CONFIG.APPROVED_LOGOS_PREFIX}/${logoFilename}`;
+      
+      if (S3_CONFIG.BASE_URL) {
+        return `${S3_CONFIG.BASE_URL}/${fullPath}`;
+      }
+      
+      return `https://${S3_CONFIG.BUCKET_NAME}.s3.${S3_CONFIG.REGION}.amazonaws.com/${fullPath}`;
+    }
+
+    // Get detailed resource data from API
+    async function getResourceDetails(slug) {
+      try {
+        console.log('Fetching resource details for slug:', slug);
+        console.log('API URL:', `${API_CONFIG.BASE_URL}/get-resource`);
+        
+        const response = await fetch(`${API_CONFIG.BASE_URL}/get-resource`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Api-Key': API_CONFIG.API_KEY,
+            'Origin': window.location.origin
+          },
+          body: JSON.stringify({ slug: slug })
+        });
+        
+        console.log('API Response status:', response.status);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('API Error Response:', errorText);
+          throw new Error(`API request failed: ${response.status} - ${errorText}`);
+        }
+
+        const data = await response.json();
+        console.log('API Response data:', data);
+        
+        if (data.success && data.data) {
+          return data.data;
+        } else {
+          throw new Error(data.message || 'Resource not found');
+        }
+      } catch (error) {
+        console.error('Failed to fetch resource details:', error);
+        throw error;
+      }
+    }
+
+    // Get existing resources
+    async function getExistingResources(options = {}) {
+      const { batchSize = 10, category = 'all' } = options;
+      
+      try {
+        const response = await fetch(`${API_CONFIG.BASE_URL}/resources`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Api-Key': API_CONFIG.API_KEY,
+          },
+          body: JSON.stringify({ batchSize, category })
+        });
+        
+        if (!response.ok) {
+          throw new Error(`API request failed: ${response.status}`);
+        }
+
+        const data = await response.json();
+        if (data.success && data.data) {
+          return {
+            resources: data.data.resources || [],
+            pagination: data.data.pagination || {}
+          };
+        } else {
+          throw new Error(data.message || 'Failed to fetch resources');
+        }
+      } catch (error) {
+        console.error('Failed to fetch resources:', error);
+        throw error;
+      }
+    }
+
+    // Dynamic resource loading
+    async function loadDetailedResource() {
+      console.log('Starting to load detailed resource for:', resourceSlug);
+      
+      try {
+        // Fetch detailed resource data from API
+        const detailedResource = await getResourceDetails(resourceSlug);
+        
+        if (!detailedResource) {
+          throw new Error('Resource not found');
+        }
+
+        console.log('Successfully loaded detailed resource:', detailedResource);
+
+        // Hide loading indicator
+        const loadingIndicator = document.getElementById('dynamic-loading');
+        if (loadingIndicator) {
+          loadingIndicator.style.display = 'none';
+        }
+
+        // Populate Key Features
+        if (detailedResource.keyFeatures && detailedResource.keyFeatures.length > 0) {
+          const featuresSection = document.getElementById('key-features-section');
+          const featuresList = document.getElementById('key-features-list');
+          
+          featuresList.innerHTML = '';
+          detailedResource.keyFeatures.forEach(feature => {
+            const li = document.createElement('li');
+            li.className = 'flex items-start gap-3';
+            li.innerHTML = `
+              <svg class="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span class="text-gray-700">${feature}</span>
+            `;
+            featuresList.appendChild(li);
+          });
+          featuresSection.classList.remove('hidden');
+        }
+
+        // Populate Use Cases
+        if (detailedResource.useCases && detailedResource.useCases.length > 0) {
+          const useCasesSection = document.getElementById('use-cases-section');
+          const useCasesList = document.getElementById('use-cases-list');
+          
+          useCasesList.innerHTML = '';
+          detailedResource.useCases.forEach(useCase => {
+            const li = document.createElement('li');
+            li.className = 'flex items-start gap-3';
+            li.innerHTML = `
+              <svg class="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+              </svg>
+              <span class="text-gray-700">${useCase}</span>
+            `;
+            useCasesList.appendChild(li);
+          });
+          useCasesSection.classList.remove('hidden');
+        }
+
+        // Populate Learning Resources
+        if (detailedResource.learningResources && detailedResource.learningResources.length > 0) {
+          const learningSection = document.getElementById('learning-resources-section');
+          const learningList = document.getElementById('learning-resources-list');
+          
+          learningList.innerHTML = '';
+          detailedResource.learningResources.forEach(resource_item => {
+            const div = document.createElement('a');
+            div.href = resource_item.url;
+            div.target = '_blank';
+            div.rel = 'noopener noreferrer';
+            div.className = 'flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all';
+            
+            let iconSvg = '';
+            if (resource_item.type === 'documentation') {
+              iconSvg = `<svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>`;
+            } else if (resource_item.type === 'tutorial') {
+              iconSvg = `<svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+              </svg>`;
+            } else if (resource_item.type === 'video') {
+              iconSvg = `<svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+              </svg>`;
+            }
+            
+            div.innerHTML = `
+              <div class="flex-shrink-0">${iconSvg}</div>
+              <div class="flex-1">
+                <h3 class="font-medium text-gray-900">${resource_item.title}</h3>
+                <p class="text-sm text-gray-600 capitalize">${resource_item.type}</p>
+              </div>
+              <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
+              </svg>
+            `;
+            learningList.appendChild(div);
+          });
+          learningSection.classList.remove('hidden');
+        }
+
+        // Load related resources
+        try {
+          const result = await getExistingResources({ batchSize: 10, category: detailedResource.category });
+          const allResources = result.resources;
+          const relatedResources = allResources
+            .filter(r => r.slug !== detailedResource.slug)
+            .slice(0, 3);
+          
+          if (relatedResources.length > 0) {
+            const relatedContainer = document.getElementById('related-resources');
+            const relatedList = document.getElementById('related-resources-list');
+            
+            relatedList.innerHTML = '';
+            relatedResources.forEach(related => {
+              const div = document.createElement('a');
+              div.href = `/resource/${related.slug}`;
+              div.className = 'block p-4 bg-white rounded-lg hover:shadow-md transition-shadow';
+              
+              const imageHtml = related.image ? 
+                `<img src="${getApprovedLogoUrl(related.image)}" alt="${related.title || related.name}" class="w-10 h-10 rounded object-contain bg-gray-100 p-1" />` : '';
+              
+              div.innerHTML = `
+                <div class="flex items-center gap-3">
+                  ${imageHtml}
+                  <div>
+                    <h4 class="font-medium text-gray-900">${related.title || related.name}</h4>
+                    <p class="text-sm text-gray-600 capitalize">${related.category}</p>
+                  </div>
+                </div>
+              `;
+              relatedList.appendChild(div);
+            });
+            
+            relatedContainer.classList.remove('hidden');
+          }
+        } catch (error) {
+          console.warn('Failed to load related resources:', error);
+        }
+
+      } catch (error) {
+        console.error('Failed to load detailed resource:', error);
+        // Hide loading indicator on error
+        const loadingIndicator = document.getElementById('dynamic-loading');
+        if (loadingIndicator) {
+          loadingIndicator.innerHTML = '<p class="text-red-600 text-sm">Failed to load additional details. Please refresh the page.</p>';
+        }
+      }
+    }
+
+    // Load detailed content when page loads
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', loadDetailedResource);
+    } else {
+      loadDetailedResource();
+    }
+  </script>
+</MainLayout>

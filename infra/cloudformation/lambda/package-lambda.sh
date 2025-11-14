@@ -5,12 +5,14 @@
 ENVIRONMENT=${1:-dev}  # Default to dev if not provided
 FUNCTION_PREFIX="kelifax"
 BUCKET_NAME="cf-kelifax-deployment-bucket"
+TIMESTAMP=$(date +%Y%m%d-%H%M%S)
 LAMBDA_PREFIX="lambda-zip-${ENVIRONMENT}"  # For Lambda code
 CF_PREFIX="cloudformation-${ENVIRONMENT}"   # For CloudFormation templates
-ZIP_NAME="lambda-function.zip"
+ZIP_NAME="lambda-function-${TIMESTAMP}.zip"
 SOURCE_DIR="../../src/lambda"
 STACK_NAME="kelifax-lambda-stack-${ENVIRONMENT}"
 echo "📦 Packaging Lambda function for $ENVIRONMENT environment..."
+echo "📝 Using timestamped zip file: $ZIP_NAME"
 
 # Create temporary directory
 TEMP_DIR=$(mktemp -d)
@@ -41,7 +43,13 @@ zip -r $ZIP_NAME ./*
 
 # Upload to S3
 echo "☁️ Uploading Lambda ZIP to S3..."
-aws s3 cp $ZIP_NAME s3://$BUCKET_NAME/$LAMBDA_PREFIX/$ZIP_NAME
+# Create a temporary directory for sync
+SYNC_DIR=$(mktemp -d)
+mv $ZIP_NAME $SYNC_DIR/
+# Sync with --delete to remove old zip files
+aws s3 sync $SYNC_DIR s3://$BUCKET_NAME/$LAMBDA_PREFIX/ --delete
+# Clean up sync directory
+rm -rf $SYNC_DIR
 
 # Return to original directory before cleanup
 cd $ORIGINAL_DIR
@@ -76,7 +84,7 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
       Environment=$ENVIRONMENT \
       FunctionPrefix=$FUNCTION_PREFIX \
       DeploymentBucket=$BUCKET_NAME \
-      S3KeyPrefix=$LAMBDA_PREFIX \
+      S3ZipFile=$ZIP_NAME \
     --capabilities CAPABILITY_IAM
   
   # Check the status of the deployment
@@ -86,8 +94,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "🔍 Stack outputs:"
     aws cloudformation describe-stacks \
       --stack-name $STACK_NAME \
-      --query "Stacks[0].Outputs" \
-      --output table
+      --query "Stacks[0].Outputs[].{Key:OutputKey,Value:OutputValue}" \
+      --output text
     echo "✨ Deployment process completed successfully."
     exit 0
   else
@@ -106,10 +114,9 @@ else
   echo "  --parameter-overrides \\"
   echo "    Environment=$ENVIRONMENT \\"
   echo "    FunctionPrefix=$FUNCTION_PREFIX \\"
+  echo "    S3ZipFile=$ZIP_NAME \\"
   echo "    DeploymentBucket=$BUCKET_NAME \\"
-  echo "    S3KeyPrefix=$LAMBDA_PREFIX \\"
   echo "  --capabilities CAPABILITY_IAM"
-  
   # Even if skipped deployment, packaging was successful
   echo "✨ Lambda packaging process completed successfully."
   exit 0

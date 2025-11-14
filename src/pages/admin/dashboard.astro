@@ -1,0 +1,36 @@
+---
+// filepath: /Users/ashimeetunyi/Desktop/code/kelifax/src/pages/admin/dashboard.astro
+import MainLayout from '../../layouts/MainLayout.astro';
+import PendingResourcesList from '../../components/PendingResourcesList.astro';
+import ResourceManager from '../../components/ResourceManager.astro';
+---
+
+<MainLayout title="Admin Dashboard - Kelifax">
+  <div class="min-h-screen bg-gray-50 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- Header -->
+      <div class="mb-8">
+        <div class="flex justify-between items-center">
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
+            <p class="mt-1 text-sm text-gray-600">Manage Kelifax resources and approvals</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Dashboard Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Pending Resources Section -->
+        <div>
+          <PendingResourcesList />
+        </div>
+
+        <!-- Resource Manager Section -->
+        <div>
+          <ResourceManager />
+        </div>
+      </div>
+    </div>
+  </div>
+        

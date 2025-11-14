@@ -15,7 +15,20 @@ pnpm-debug.log*
 
 # environment variables
 .env
+.env.local
+.env.development
 .env.production
+.env.backup
+env.dev.config
+env.prod.config
+
+# test files and debugging
+*test*.html
+test*.sh
+*debug*.html
+api-test.*
+cors-test.*
+*.backup
 
 # macOS-specific files
 .DS_Store

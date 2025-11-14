@@ -1,0 +1,439 @@
+---
+// Page 3: Extended Details Component
+// Collects detailed structured information about the resource
+---
+
+<div class="space-y-8">
+  <div class="text-center mb-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">Extended Details</h2>
+    <p class="text-gray-600">Provide detailed information about the resource</p>
+  </div>
+
+  <!-- Key Features -->
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-2">
+      Key Features <span class="text-red-500">*</span>
+    </label>
+    <p class="text-sm text-gray-500 mb-4">List the main features of this resource (3-10 features, 10-200 characters each)</p>
+    
+    <div id="key-features-container" class="space-y-3">
+      <!-- Initial 3 feature inputs -->
+      <div class="feature-input-group">
+        <div class="flex items-start space-x-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-xs flex items-center justify-center mt-2">1</span>
+          <div class="flex-1">
+            <textarea 
+              name="keyFeature" 
+              rows="2"
+              maxlength="200"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 resize-vertical"
+              placeholder="Describe a key feature..."
+            ></textarea>
+            <div class="flex justify-between text-sm text-gray-500 mt-1">
+              <span class="feature-error text-red-500 hidden"></span>
+              <span class="character-count">0/200</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="feature-input-group">
+        <div class="flex items-start space-x-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-xs flex items-center justify-center mt-2">2</span>
+          <div class="flex-1">
+            <textarea 
+              name="keyFeature" 
+              rows="2"
+              maxlength="200"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 resize-vertical"
+              placeholder="Describe another key feature..."
+            ></textarea>
+            <div class="flex justify-between text-sm text-gray-500 mt-1">
+              <span class="feature-error text-red-500 hidden"></span>
+              <span class="character-count">0/200</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="feature-input-group">
+        <div class="flex items-start space-x-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-xs flex items-center justify-center mt-2">3</span>
+          <div class="flex-1">
+            <textarea 
+              name="keyFeature" 
+              rows="2"
+              maxlength="200"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 resize-vertical"
+              placeholder="Describe another key feature..."
+            ></textarea>
+            <div class="flex justify-between text-sm text-gray-500 mt-1">
+              <span class="feature-error text-red-500 hidden"></span>
+              <span class="character-count">0/200</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-4 flex justify-between">
+      <button 
+        type="button" 
+        id="add-feature" 
+        class="text-blue-600 hover:text-blue-700 text-sm font-medium flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        <span>Add Feature (max 10)</span>
+      </button>
+      <div class="error-message text-red-500 text-sm hidden" data-field="keyFeatures"></div>
+    </div>
+  </div>
+
+  <!-- Use Cases -->
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-2">
+      Use Cases <span class="text-red-500">*</span>
+    </label>
+    <p class="text-sm text-gray-500 mb-4">Describe how and when this resource is used (2-8 use cases, 15-300 characters each)</p>
+    
+    <div id="use-cases-container" class="space-y-3">
+      <!-- Initial 2 use case inputs -->
+      <div class="use-case-input-group">
+        <div class="flex items-start space-x-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-green-100 text-green-600 rounded-full text-xs flex items-center justify-center mt-2">1</span>
+          <div class="flex-1">
+            <textarea 
+              name="useCase" 
+              rows="3"
+              maxlength="300"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 resize-vertical"
+              placeholder="Describe a use case for this resource..."
+            ></textarea>
+            <div class="flex justify-between text-sm text-gray-500 mt-1">
+              <span class="use-case-error text-red-500 hidden"></span>
+              <span class="character-count">0/300</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="use-case-input-group">
+        <div class="flex items-start space-x-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-green-100 text-green-600 rounded-full text-xs flex items-center justify-center mt-2">2</span>
+          <div class="flex-1">
+            <textarea 
+              name="useCase" 
+              rows="3"
+              maxlength="300"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 resize-vertical"
+              placeholder="Describe another use case..."
+            ></textarea>
+            <div class="flex justify-between text-sm text-gray-500 mt-1">
+              <span class="use-case-error text-red-500 hidden"></span>
+              <span class="character-count">0/300</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="mt-4 flex justify-between">
+      <button 
+        type="button" 
+        id="add-use-case" 
+        class="text-green-600 hover:text-green-700 text-sm font-medium flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        <span>Add Use Case (max 8)</span>
+      </button>
+      <div class="error-message text-red-500 text-sm hidden" data-field="useCases"></div>
+    </div>
+  </div>
+
+  <!-- Learning Resources -->
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-2">
+      Learning Resources <span class="text-gray-400">(Optional)</span>
+    </label>
+    <p class="text-sm text-gray-500 mb-4">Add helpful resources for learning about this tool (max 5 resources)</p>
+    
+    <div id="learning-resources-container" class="space-y-4">
+      <!-- Initially empty, resources added dynamically -->
+    </div>
+    
+    <div class="mt-4">
+      <button 
+        type="button" 
+        id="add-learning-resource" 
+        class="text-purple-600 hover:text-purple-700 text-sm font-medium flex items-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+        </svg>
+        <span>Add Learning Resource (max 5)</span>
+      </button>
+      <div class="error-message text-red-500 text-sm mt-2 hidden" data-field="learningResources"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    let featureCount = 3;
+    let useCaseCount = 2;
+    let learningResourceCount = 0;
+
+    // Character counters
+    function setupCharacterCounter(element) {
+      const counter = element.parentElement.querySelector('.character-count');
+      const maxLength = element.getAttribute('maxlength');
+      
+      element.addEventListener('input', function() {
+        const count = this.value.length;
+        counter.textContent = `${count}/${maxLength}`;
+        
+        if (count > maxLength * 0.9) {
+          counter.classList.add('text-orange-500');
+          counter.classList.remove('text-gray-500');
+        } else {
+          counter.classList.remove('text-orange-500');
+          counter.classList.add('text-gray-500');
+        }
+      });
+    }
+
+    // Setup initial character counters
+    document.querySelectorAll('textarea[maxlength]').forEach(setupCharacterCounter);
+
+    // Key Features functionality
+    document.getElementById('add-feature').addEventListener('click', function() {
+      if (featureCount >= 10) return;
+      
+      featureCount++;
+      const container = document.getElementById('key-features-container');
+      const newFeature = document.createElement('div');
+      newFeature.className = 'feature-input-group';
+      newFeature.innerHTML = `
+        <div class="flex items-start space-x-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-blue-100 text-blue-600 rounded-full text-xs flex items-center justify-center mt-2">${featureCount}</span>
+          <div class="flex-1">
+            <textarea 
+              name="keyFeature" 
+              rows="2"
+              maxlength="200"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 resize-vertical"
+              placeholder="Describe another key feature..."
+            ></textarea>
+            <div class="flex justify-between text-sm text-gray-500 mt-1">
+              <span class="feature-error text-red-500 hidden"></span>
+              <span class="character-count">0/200</span>
+            </div>
+          </div>
+          <button type="button" class="remove-feature flex-shrink-0 text-red-500 hover:text-red-700 transition duration-200 mt-2" title="Remove feature">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      `;
+      
+      container.appendChild(newFeature);
+      setupCharacterCounter(newFeature.querySelector('textarea'));
+      
+      // Add remove functionality
+      newFeature.querySelector('.remove-feature').addEventListener('click', function() {
+        newFeature.remove();
+        featureCount--;
+        updateFeatureNumbers();
+        updateAddFeatureButton();
+      });
+      
+      updateAddFeatureButton();
+    });
+
+    // Use Cases functionality
+    document.getElementById('add-use-case').addEventListener('click', function() {
+      if (useCaseCount >= 8) return;
+      
+      useCaseCount++;
+      const container = document.getElementById('use-cases-container');
+      const newUseCase = document.createElement('div');
+      newUseCase.className = 'use-case-input-group';
+      newUseCase.innerHTML = `
+        <div class="flex items-start space-x-3">
+          <span class="flex-shrink-0 w-6 h-6 bg-green-100 text-green-600 rounded-full text-xs flex items-center justify-center mt-2">${useCaseCount}</span>
+          <div class="flex-1">
+            <textarea 
+              name="useCase" 
+              rows="3"
+              maxlength="300"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 resize-vertical"
+              placeholder="Describe another use case..."
+            ></textarea>
+            <div class="flex justify-between text-sm text-gray-500 mt-1">
+              <span class="use-case-error text-red-500 hidden"></span>
+              <span class="character-count">0/300</span>
+            </div>
+          </div>
+          <button type="button" class="remove-use-case flex-shrink-0 text-red-500 hover:text-red-700 transition duration-200 mt-2" title="Remove use case">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      `;
+      
+      container.appendChild(newUseCase);
+      setupCharacterCounter(newUseCase.querySelector('textarea'));
+      
+      // Add remove functionality
+      newUseCase.querySelector('.remove-use-case').addEventListener('click', function() {
+        newUseCase.remove();
+        useCaseCount--;
+        updateUseCaseNumbers();
+        updateAddUseCaseButton();
+      });
+      
+      updateAddUseCaseButton();
+    });
+
+    // Learning Resources functionality
+    document.getElementById('add-learning-resource').addEventListener('click', function() {
+      if (learningResourceCount >= 5) return;
+      
+      learningResourceCount++;
+      const container = document.getElementById('learning-resources-container');
+      const newResource = document.createElement('div');
+      newResource.className = 'learning-resource-group bg-gray-50 p-4 rounded-lg border border-gray-200';
+      newResource.innerHTML = `
+        <div class="flex justify-between items-start mb-3">
+          <h4 class="text-sm font-medium text-gray-700">Learning Resource ${learningResourceCount}</h4>
+          <button type="button" class="remove-learning-resource text-red-500 hover:text-red-700 transition duration-200" title="Remove resource">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">Title <span class="text-red-500">*</span></label>
+            <input 
+              type="text" 
+              name="learningResourceTitle" 
+              maxlength="100"
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+              placeholder="e.g., Getting Started Guide, Official Documentation"
+            />
+            <div class="learning-resource-title-error text-red-500 text-sm mt-1 hidden"></div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">URL <span class="text-red-500">*</span></label>
+            <input 
+              type="url" 
+              name="learningResourceUrl" 
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+              placeholder="https://example.com/docs"
+            />
+            <div class="learning-resource-url-error text-red-500 text-sm mt-1 hidden"></div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-600 mb-1">Type <span class="text-red-500">*</span></label>
+            <select 
+              name="learningResourceType" 
+              required
+              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
+            >
+              <option value="">Select type</option>
+              <option value="documentation">Documentation</option>
+              <option value="tutorial">Tutorial</option>
+              <option value="video">Video</option>
+              <option value="course">Course</option>
+            </select>
+            <div class="learning-resource-type-error text-red-500 text-sm mt-1 hidden"></div>
+          </div>
+        </div>
+      `;
+      
+      container.appendChild(newResource);
+      
+      // Add remove functionality
+      newResource.querySelector('.remove-learning-resource').addEventListener('click', function() {
+        newResource.remove();
+        learningResourceCount--;
+        updateLearningResourceNumbers();
+        updateAddLearningResourceButton();
+      });
+      
+      updateAddLearningResourceButton();
+    });
+
+    // Update button states
+    function updateAddFeatureButton() {
+      const button = document.getElementById('add-feature');
+      if (featureCount >= 10) {
+        button.disabled = true;
+        button.querySelector('span').textContent = 'Maximum features reached';
+      } else {
+        button.disabled = false;
+        button.querySelector('span').textContent = `Add Feature (max 10)`;
+      }
+    }
+
+    function updateAddUseCaseButton() {
+      const button = document.getElementById('add-use-case');
+      if (useCaseCount >= 8) {
+        button.disabled = true;
+        button.querySelector('span').textContent = 'Maximum use cases reached';
+      } else {
+        button.disabled = false;
+        button.querySelector('span').textContent = `Add Use Case (max 8)`;
+      }
+    }
+
+    function updateAddLearningResourceButton() {
+      const button = document.getElementById('add-learning-resource');
+      if (learningResourceCount >= 5) {
+        button.disabled = true;
+        button.querySelector('span').textContent = 'Maximum resources reached';
+      } else {
+        button.disabled = false;
+        button.querySelector('span').textContent = `Add Learning Resource (max 5)`;
+      }
+    }
+
+    // Update numbering
+    function updateFeatureNumbers() {
+      document.querySelectorAll('.feature-input-group').forEach((group, index) => {
+        const numberSpan = group.querySelector('span');
+        numberSpan.textContent = index + 1;
+      });
+    }
+
+    function updateUseCaseNumbers() {
+      document.querySelectorAll('.use-case-input-group').forEach((group, index) => {
+        const numberSpan = group.querySelector('span');
+        numberSpan.textContent = index + 1;
+      });
+    }
+
+    function updateLearningResourceNumbers() {
+      document.querySelectorAll('.learning-resource-group').forEach((group, index) => {
+        const heading = group.querySelector('h4');
+        heading.textContent = `Learning Resource ${index + 1}`;
+      });
+    }
+  });
+</script>

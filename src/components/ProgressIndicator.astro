@@ -1,0 +1,84 @@
+---
+// Progress Indicator Component for Multi-step Form
+interface Props {
+  currentStep: number;
+  totalSteps: number;
+}
+
+const { currentStep, totalSteps } = Astro.props;
+
+const steps = [
+  { number: 1, title: "Submitter Info", description: "Personal details" },
+  { number: 2, title: "Resource Info", description: "Basic information" },
+  { number: 3, title: "Extended Details", description: "Detailed features" }
+];
+---
+
+<div class="w-full max-w-3xl mx-auto mb-8" id="progress-indicator">
+  <!-- Progress Bar -->
+  <div class="relative">
+    <div class="flex items-center justify-between">
+      {steps.map((step, index) => (
+        <div class={`progress-step flex flex-col items-center relative z-10`} data-step={step.number}>
+          <!-- Step Circle -->
+          <div class={`
+            step-circle w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-300
+            ${step.number < currentStep 
+              ? 'bg-green-500 text-white' 
+              : step.number === currentStep 
+                ? 'bg-blue-500 text-white' 
+                : 'bg-gray-300 text-gray-600'
+            }
+          `}>
+            {step.number < currentStep ? (
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            ) : (
+              step.number
+            )}
+          </div>
+          
+          <!-- Step Labels -->
+          <div class="mt-3 text-center">
+            <div class={`
+              step-label text-sm font-medium
+              ${step.number <= currentStep ? 'text-gray-900' : 'text-gray-500'}
+            `}>
+              {step.title}
+            </div>
+            <div class={`
+              text-xs mt-1
+              ${step.number <= currentStep ? 'text-gray-600' : 'text-gray-400'}
+            `}>
+              {step.description}
+            </div>
+          </div>
+        </div>
+      ))}
+    </div>
+    
+    <!-- Progress Line -->
+    <div class="absolute top-5 left-0 w-full h-0.5 bg-gray-300 -z-0">
+      <div 
+        id="progress-line"
+        class="h-full bg-blue-500 transition-all duration-500 ease-out"
+        style={`width: ${((currentStep - 1) / (totalSteps - 1)) * 100}%`}
+      ></div>
+    </div>
+  </div>
+
+  <!-- Step Counter -->
+  <div class="text-center mt-6">
+    <span class="text-sm text-gray-600" id="step-counter">
+      Step {currentStep} of {totalSteps}
+    </span>
+    <div class="w-full bg-gray-200 rounded-full h-2 mt-2">
+      <div 
+        id="progress-bar"
+        class="bg-blue-500 h-2 rounded-full transition-all duration-300"
+        style={`width: ${(currentStep / totalSteps) * 100}%`}
+      ></div>
+    </div>
+  </div>
+</div>

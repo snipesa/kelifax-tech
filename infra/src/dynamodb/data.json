@@ -1,14 +1,314 @@
 {
   "Table_name": [
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "visual-studio-code" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "figma" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "github" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "notion" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "tailwind-css" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "coursera" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "postman" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "canva" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "stack-overflow" }, "status": { "S": "existing" } } } },
-    { "PutRequest": { "Item": { "resourceSlug": { "S": "slack" }, "status": { "S": "existing" } } } }
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "visual-studio-code" },
+          "submissionId": { "S": "existing-vscode-2025" },
+          "resourceStatus": { "S": "approved" },
+          "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+          "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+          "createdAt": { "S": "2024-12-15T09:23:45Z" },
+          "updatedAt": { "S": "2025-01-12T14:30:22Z" },
+          "submitterFirstName": { "S": "System" },
+          "submitterLastName": { "S": "Admin" },
+          "submitterEmail": { "S": "admin@kelifax.com" },
+          "submitterCompany": { "S": "Kelifax" },
+          "submitterDomain": { "S": "kelifax.com" },
+          "resourceName": { "S": "Visual Studio Code" },
+          "resourceUrl": { "S": "https://code.visualstudio.com" },
+          "usagePurpose": { "S": "Free, open-source code editor with intelligent code completion, built-in Git integration, extensive extension marketplace, and powerful debugging capabilities for modern development workflows." },
+          "category": { "S": "development" },
+          "logoImage": { "S": "vscode.png" },
+          "tags": { "S": "code editor,microsoft,extensions,debugging,git,intellisense,syntax highlighting,integrated terminal,live share,remote development,multi-language support,code completion,refactoring,linting,version control" },
+          "keyFeatures": { "S": "IntelliSense Code Completion - Smart code completion with syntax highlighting, auto-completion, and intelligent suggestions|Extensive Extension Marketplace - Thousands of extensions for languages, themes, debuggers, and tools|Built-in Git Integration - Native Git support with visual diff editor, staging, branching, and seamless version control|Powerful Debugging Tools - Advanced debugging capabilities with breakpoints, call stacks, variable inspection|Integrated Terminal - Built-in terminal that supports multiple shells and allows you to run commands|Live Share Collaboration - Real-time collaborative editing and debugging sessions with other developers|Remote Development - Develop on remote machines, containers, or WSL with the same local VS Code experience" },
+          "useCases": { "S": "Full-stack web development|Mobile app development|Data science and machine learning projects|DevOps and infrastructure as code|API development and testing|Database management and queries|Documentation writing with Markdown|Multi-language programming projects" },
+          "learningResources": { "S": "{\"title\":\"VS Code Official Documentation\",\"url\":\"https://code.visualstudio.com/docs\",\"type\":\"documentation\"}|{\"title\":\"VS Code Tips and Tricks\",\"url\":\"https://code.visualstudio.com/docs/getstarted/tips-and-tricks\",\"type\":\"tutorial\"}|{\"title\":\"Extension Development Guide\",\"url\":\"https://code.visualstudio.com/api\",\"type\":\"documentation\"}|{\"title\":\"VS Code YouTube Channel\",\"url\":\"https://www.youtube.com/channel/UCs5Y5_7XK8HLDX0SLNwkd3w\",\"type\":\"video\"}" },
+          "searchText": { "S": "visual studio code development code editor microsoft extensions debugging git intellisense syntax highlighting integrated terminal live share remote development" },
+          "featured": { "BOOL": true },
+          "viewCount": { "N": "0" },
+          "lastViewed": { "S": "2025-01-20T16:45:12Z" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "figma" },
+          "submissionId": { "S": "existing-figma-2025" },
+          "resourceStatus": { "S": "approved" },
+          "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+          "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+          "createdAt": { "S": "2024-11-28T11:15:33Z" },
+          "updatedAt": { "S": "2025-01-08T08:22:17Z" },
+          "submitterFirstName": { "S": "System" },
+          "submitterLastName": { "S": "Admin" },
+          "submitterEmail": { "S": "admin@kelifax.com" },
+          "submitterCompany": { "S": "Kelifax" },
+          "submitterDomain": { "S": "kelifax.com" },
+          "resourceName": { "S": "Figma" },
+          "resourceUrl": { "S": "https://figma.com" },
+          "usagePurpose": { "S": "Collaborative interface design tool with real-time collaboration, prototyping, and design system capabilities." },
+          "category": { "S": "design" },
+          "logoImage": { "S": "figma.png" },
+          "tags": { "S": "ui design,prototyping,collaboration,vector graphics" },
+          "keyFeatures": { "S": "Real-time Collaboration - Multiple designers can work on the same file simultaneously|Vector Graphics Tools - Professional vector editing tools for creating scalable designs|Prototyping - Interactive prototypes with animations and transitions|Design Systems - Reusable components and styles for consistent design" },
+          "useCases": { "S": "UI/UX design for web and mobile applications|Design system creation and maintenance|Interactive prototyping and user testing|Collaborative design workflow with teams" },
+          "learningResources": { "S": "{\"title\":\"Figma Academy\",\"url\":\"https://help.figma.com\",\"type\":\"tutorial\"}|{\"title\":\"Figma Community\",\"url\":\"https://www.figma.com/community\",\"type\":\"documentation\"}" },
+          "searchText": { "S": "figma design ui design prototyping collaboration vector graphics interface design" },
+          "featured": { "BOOL": true },
+          "viewCount": { "N": "0" },
+          "lastViewed": { "S": "2025-01-18T13:27:45Z" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "github" },
+          "submissionId": { "S": "existing-github-2025" },
+          "resourceStatus": { "S": "approved" },
+          "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+          "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+          "createdAt": { "S": "2024-12-03T07:42:18Z" },
+          "updatedAt": { "S": "2025-01-15T19:33:51Z" },
+          "submitterFirstName": { "S": "System" },
+          "submitterLastName": { "S": "Admin" },
+          "submitterEmail": { "S": "admin@kelifax.com" },
+          "submitterCompany": { "S": "Kelifax" },
+          "submitterDomain": { "S": "kelifax.com" },
+          "resourceName": { "S": "GitHub" },
+          "resourceUrl": { "S": "https://github.com" },
+          "usagePurpose": { "S": "Comprehensive platform for Git-based version control, collaborative development, automated CI/CD with GitHub Actions, and AI-powered coding assistance with GitHub Copilot." },
+          "category": { "S": "development" },
+          "logoImage": { "S": "github.png" },
+          "tags": { "S": "git,version control,collaboration,open source,ci/cd,github actions,github copilot,code review,automation,ai assistant,repository management,pull requests,branching,merging,continuous integration,continuous deployment" },
+          "keyFeatures": { "S": "Git Version Control - Complete Git-based version control system for tracking changes, managing branches, and collaborative development|GitHub Actions CI/CD - Powerful automation platform for building, testing, and deploying code with custom workflows|GitHub Copilot - AI-powered coding assistant that provides intelligent code suggestions, auto-completion, and code generation|Code Review & Collaboration - Built-in tools for code reviews, pull requests, issue tracking, and team collaboration|Repository Management - Organize code with repositories, manage access permissions, and integrate with third-party tools|Open Source Community - World's largest platform for open source projects with millions of repositories and developers" },
+          "useCases": { "S": "Version control and source code management|Collaborative software development|Automated testing and deployment pipelines|Code review and quality assurance|Open source project hosting|Documentation and project wikis|Issue and bug tracking|Team project management" },
+          "learningResources": { "S": "{\"title\":\"Git Handbook\",\"url\":\"https://guides.github.com/introduction/git-handbook/\",\"type\":\"tutorial\"}|{\"title\":\"GitHub Actions Documentation\",\"url\":\"https://docs.github.com/en/actions\",\"type\":\"documentation\"}|{\"title\":\"GitHub Copilot Guide\",\"url\":\"https://docs.github.com/en/copilot\",\"type\":\"documentation\"}|{\"title\":\"Git Branching Tutorial\",\"url\":\"https://learngitbranching.js.org/\",\"type\":\"tutorial\"}" },
+          "searchText": { "S": "github development git version control collaboration open source ci cd github actions github copilot code review automation ai assistant repository management" },
+          "featured": { "BOOL": true },
+          "viewCount": { "N": "0" },
+          "lastViewed": { "S": "2025-01-22T10:14:29Z" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "notion" },
+          "submissionId": { "S": "existing-notion-2025" },
+          "resourceStatus": { "S": "approved" },
+          "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+          "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+          "createdAt": { "S": "2024-12-20T15:18:07Z" },
+          "updatedAt": { "S": "2025-01-05T12:45:33Z" },
+          "submitterFirstName": { "S": "System" },
+          "submitterLastName": { "S": "Admin" },
+          "submitterEmail": { "S": "admin@kelifax.com" },
+          "submitterCompany": { "S": "Kelifax" },
+          "submitterDomain": { "S": "kelifax.com" },
+          "resourceName": { "S": "Notion" },
+          "resourceUrl": { "S": "https://notion.so" },
+          "usagePurpose": { "S": "All-in-one workspace combining notes, tasks, wikis, and databases for personal and team productivity." },
+          "category": { "S": "productivity" },
+          "logoImage": { "S": "notion.png" },
+          "tags": { "S": "notes,project management,collaboration,database,wiki" },
+          "keyFeatures": { "S": "All-in-one Workspace - Combine notes, tasks, wikis, and databases in a single platform|Flexible Database System - Create custom databases with various view types and filtering options|Rich Text Editor - Advanced text editing with multimedia support and formatting|Team Collaboration - Share pages, assign tasks, and collaborate in real-time" },
+          "useCases": { "S": "Personal note-taking and organization|Team project management and documentation|Knowledge base and wiki creation|Task and goal tracking" },
+          "learningResources": { "S": "{\"title\":\"Notion Help Center\",\"url\":\"https://www.notion.so/help\",\"type\":\"documentation\"}|{\"title\":\"Notion Templates Gallery\",\"url\":\"https://www.notion.so/templates\",\"type\":\"tutorial\"}" },
+          "searchText": { "S": "notion productivity notes project management collaboration database wiki workspace" },
+          "featured": { "BOOL": false },
+          "viewCount": { "N": "0" },
+          "lastViewed": { "S": "2025-01-17T09:52:18Z" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "tailwind-css" },
+          "submissionId": { "S": "existing-tailwind-2025" },
+          "resourceStatus": { "S": "approved" },
+          "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+          "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+          "createdAt": { "S": "2024-11-10T13:55:41Z" },
+          "updatedAt": { "S": "2025-01-11T17:28:09Z" },
+          "submitterFirstName": { "S": "System" },
+          "submitterLastName": { "S": "Admin" },
+          "submitterEmail": { "S": "admin@kelifax.com" },
+          "submitterCompany": { "S": "Kelifax" },
+          "submitterDomain": { "S": "kelifax.com" },
+          "resourceName": { "S": "Tailwind CSS" },
+          "resourceUrl": { "S": "https://tailwindcss.com" },
+          "usagePurpose": { "S": "Utility-first CSS framework with low-level utility classes for building custom designs without writing CSS." },
+          "category": { "S": "development" },
+          "logoImage": { "S": "" },
+          "tags": { "S": "css framework,utility-first,responsive design,customizable" },
+          "keyFeatures": { "S": "Utility-First Approach - Build designs using low-level utility classes instead of writing custom CSS|Responsive Design - Built-in responsive design utilities for all screen sizes|Customizable - Fully customizable design system with configuration file|Component-Friendly - Works well with component-based frameworks like React, Vue, and Angular" },
+          "useCases": { "S": "Rapid web application development|Custom design system creation|Responsive website building|Component-based UI development" },
+          "learningResources": { "S": "{\"title\":\"Tailwind CSS Documentation\",\"url\":\"https://tailwindcss.com/docs\",\"type\":\"documentation\"}|{\"title\":\"Tailwind UI Components\",\"url\":\"https://tailwindui.com\",\"type\":\"tutorial\"}" },
+          "searchText": { "S": "tailwind css development css framework utility-first responsive design customizable" },
+          "featured": { "BOOL": false },
+          "viewCount": { "N": "0" },
+          "lastViewed": { "S": "2025-01-14T11:39:57Z" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "coursera" },
+          "submissionId": { "S": "existing-coursera-2025" },
+          "resourceStatus": { "S": "approved" },
+          "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+          "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+          "createdAt": { "S": "2024-12-08T16:33:22Z" },
+          "updatedAt": { "S": "2025-01-09T14:17:46Z" },
+          "submitterFirstName": { "S": "System" },
+          "submitterLastName": { "S": "Admin" },
+          "submitterEmail": { "S": "admin@kelifax.com" },
+          "submitterCompany": { "S": "Kelifax" },
+          "submitterDomain": { "S": "kelifax.com" },
+          "resourceName": { "S": "Coursera" },
+          "resourceUrl": { "S": "https://coursera.org" },
+          "usagePurpose": { "S": "Online learning platform offering courses, specializations, and degrees from top universities and companies." },
+          "category": { "S": "learning" },
+          "logoImage": { "S": "coursera.png" },
+          "tags": { "S": "online courses,universities,certificates,degrees,skills" },
+          "keyFeatures": { "S": "University Partnerships - Courses from top universities like Stanford, Yale, and University of Michigan|Professional Certificates - Industry-recognized certificates from companies like Google, IBM, and Meta|Flexible Learning - Self-paced courses with mobile app support|Verified Certificates - Shareable certificates upon course completion" },
+          "useCases": { "S": "Professional skill development|Career advancement and certification|Academic learning and degree programs|Personal enrichment and lifelong learning" },
+          "learningResources": { "S": "{\"title\":\"Coursera Help Center\",\"url\":\"https://learner.coursera.help\",\"type\":\"documentation\"}|{\"title\":\"Course Catalog\",\"url\":\"https://www.coursera.org/browse\",\"type\":\"tutorial\"}" },
+          "searchText": { "S": "coursera learning online courses universities certificates degrees skills education" },
+          "featured": { "BOOL": false },
+          "viewCount": { "N": "0" },
+          "lastViewed": { "S": "2025-01-19T15:21:34Z" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "postman" },
+          "submissionId": { "S": "existing-postman-2025" },
+          "resourceStatus": { "S": "approved" },
+          "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+          "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+          "createdAt": { "S": "2024-11-22T10:47:15Z" },
+          "updatedAt": { "S": "2025-01-06T18:52:28Z" },
+          "submitterFirstName": { "S": "System" },
+          "submitterLastName": { "S": "Admin" },
+          "submitterEmail": { "S": "admin@kelifax.com" },
+          "submitterCompany": { "S": "Kelifax" },
+          "submitterDomain": { "S": "kelifax.com" },
+          "resourceName": { "S": "Postman" },
+          "resourceUrl": { "S": "https://postman.com" },
+          "usagePurpose": { "S": "API development platform for building, testing, and documenting APIs with collaborative features." },
+          "category": { "S": "development" },
+          "logoImage": { "S": "" },
+          "tags": { "S": "api testing,api development,documentation,collaboration" },
+          "keyFeatures": { "S": "API Testing - Send requests and validate responses with automated testing capabilities|Collection Organization - Group related API requests into organized collections|Environment Management - Manage different environments with variables and configurations|Automated Documentation - Generate API documentation automatically from collections" },
+          "useCases": { "S": "API development and testing|API documentation creation|Team collaboration on API projects|Automated API testing and monitoring" },
+          "learningResources": { "S": "{\"title\":\"Postman Learning Center\",\"url\":\"https://learning.postman.com\",\"type\":\"tutorial\"}|{\"title\":\"Postman Documentation\",\"url\":\"https://learning.postman.com/docs\",\"type\":\"documentation\"}" },
+          "searchText": { "S": "postman development api testing api development documentation collaboration" },
+          "featured": { "BOOL": false },
+          "viewCount": { "N": "0" },
+          "lastViewed": { "S": "2025-01-16T12:08:42Z" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "canva" },
+          "submissionId": { "S": "existing-canva-2025" },
+          "resourceStatus": { "S": "approved" },
+          "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+          "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+          "createdAt": { "S": "2024-12-12T08:29:53Z" },
+          "updatedAt": { "S": "2025-01-07T20:41:16Z" },
+          "submitterFirstName": { "S": "System" },
+          "submitterLastName": { "S": "Admin" },
+          "submitterEmail": { "S": "admin@kelifax.com" },
+          "submitterCompany": { "S": "Kelifax" },
+          "submitterDomain": { "S": "kelifax.com" },
+          "resourceName": { "S": "Canva" },
+          "resourceUrl": { "S": "https://canva.com" },
+          "usagePurpose": { "S": "User-friendly graphic design platform with templates, stock photos, and design tools for non-designers." },
+          "category": { "S": "design" },
+          "logoImage": { "S": "canva.png" },
+          "tags": { "S": "graphic design,templates,social media,presentations,easy-to-use" },
+          "keyFeatures": { "S": "Template Library - Thousands of professionally designed templates for various purposes|Drag-and-Drop Interface - Simple, intuitive design interface accessible to non-designers|Stock Media Library - Access to millions of stock photos, illustrations, and graphics|Brand Kit - Maintain consistent branding with custom colors, fonts, and logos" },
+          "useCases": { "S": "Social media graphics and posts|Presentation design and creation|Marketing materials and flyers|Business card and logo design" },
+          "learningResources": { "S": "{\"title\":\"Canva Design School\",\"url\":\"https://www.canva.com/designschool\",\"type\":\"tutorial\"}|{\"title\":\"Canva Help Center\",\"url\":\"https://www.canva.com/help\",\"type\":\"documentation\"}" },
+          "searchText": { "S": "canva design graphic design templates social media presentations easy-to-use" },
+          "featured": { "BOOL": false },
+          "viewCount": { "N": "0" },
+          "lastViewed": { "S": "2025-01-21T14:35:27Z" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "stack-overflow" },
+          "submissionId": { "S": "existing-stackoverflow-2025" },
+          "resourceStatus": { "S": "approved" },
+          "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+          "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+          "createdAt": { "S": "2024-11-05T14:12:38Z" },
+          "updatedAt": { "S": "2025-01-13T11:25:49Z" },
+          "submitterFirstName": { "S": "System" },
+          "submitterLastName": { "S": "Admin" },
+          "submitterEmail": { "S": "admin@kelifax.com" },
+          "submitterCompany": { "S": "Kelifax" },
+          "submitterDomain": { "S": "kelifax.com" },
+          "resourceName": { "S": "Stack Overflow" },
+          "resourceUrl": { "S": "https://stackoverflow.com" },
+          "usagePurpose": { "S": "Question and answer community for programmers to share knowledge and solve coding problems." },
+          "category": { "S": "learning" },
+          "logoImage": { "S": "stackoverflow.png" },
+          "tags": { "S": "programming,qa community,problem solving,knowledge sharing" },
+          "keyFeatures": { "S": "Q&A Format - Structured question and answer format with voting system|Community Moderation - Self-moderated community with reputation system|Code Snippets - Support for formatted code blocks and syntax highlighting|Search Functionality - Powerful search to find existing solutions to common problems" },
+          "useCases": { "S": "Programming problem solving and debugging|Learning new programming concepts and techniques|Code review and best practices discussion|Career development and professional networking" },
+          "learningResources": { "S": "{\"title\":\"How to Ask Good Questions\",\"url\":\"https://stackoverflow.com/help/how-to-ask\",\"type\":\"tutorial\"}|{\"title\":\"Stack Overflow Tour\",\"url\":\"https://stackoverflow.com/tour\",\"type\":\"tutorial\"}" },
+          "searchText": { "S": "stack overflow learning programming qa community problem solving knowledge sharing" },
+          "featured": { "BOOL": true },
+          "viewCount": { "N": "0" },
+          "lastViewed": { "S": "2025-01-23T17:48:13Z" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "slack" },
+          "submissionId": { "S": "existing-slack-2025" },
+          "resourceStatus": { "S": "approved" },
+          "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+          "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+          "createdAt": { "S": "2024-11-18T12:07:24Z" },
+          "updatedAt": { "S": "2025-01-10T16:19:55Z" },
+          "submitterFirstName": { "S": "System" },
+          "submitterLastName": { "S": "Admin" },
+          "submitterEmail": { "S": "admin@kelifax.com" },
+          "submitterCompany": { "S": "Kelifax" },
+          "submitterDomain": { "S": "kelifax.com" },
+          "resourceName": { "S": "Slack" },
+          "resourceUrl": { "S": "https://slack.com" },
+          "usagePurpose": { "S": "Business communication platform with channels, direct messaging, file sharing, and app integrations for team collaboration." },
+          "category": { "S": "productivity" },
+          "logoImage": { "S": "slack.png" },
+          "tags": { "S": "team communication,messaging,collaboration,integrations,business,remote work,channels,file sharing,workflow automation" },
+          "keyFeatures": { "S": "Channel-based Organization - Organize conversations by topics, projects, or teams with public and private channels|Direct Messaging - Send direct messages to individuals or create group conversations|File Sharing and Storage - Share files, documents, and media with automatic previews and search|App Integrations - Connect with thousands of third-party apps and services for seamless workflows|Search Functionality - Powerful search across messages, files, and shared content|Voice and Video Calls - Built-in audio and video calling capabilities for real-time communication|Custom Workflows - Automate routine tasks with Workflow Builder and custom slash commands" },
+          "useCases": { "S": "Remote team communication and collaboration|Project coordination and status updates|Internal company announcements and notifications|Customer support team coordination|Sales team communication and deal tracking|Software development team collaboration|Cross-departmental information sharing|Integration hub for business tools and services" },
+          "learningResources": { "S": "{\"title\":\"Slack Help Center\",\"url\":\"https://slack.com/help\",\"type\":\"documentation\"}|{\"title\":\"Getting Started with Slack\",\"url\":\"https://slack.com/resources/using-slack/getting-started\",\"type\":\"tutorial\"}|{\"title\":\"Slack API Documentation\",\"url\":\"https://api.slack.com\",\"type\":\"documentation\"}" },
+          "searchText": { "S": "slack productivity team communication messaging collaboration integrations business remote work channels file sharing" },
+          "featured": { "BOOL": false },
+          "viewCount": { "N": "0" },
+          "lastViewed": { "S": "2025-01-24T09:33:08Z" }
+        }
+      }
+    }
   ]
 }

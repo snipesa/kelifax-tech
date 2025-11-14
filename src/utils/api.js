@@ -1,41 +1,9 @@
 // API utility functions for Kelifax frontend
 // This will be used to interact with AWS Lambda functions via API Gateway
 
-const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'https://af3e78t7db.execute-api.us-east-1.amazonaws.com/dev';
+import { API_CONFIG, FEATURES, ENV } from './config.js';
 
-// Mock data for development testing
-const MOCK_RESOURCES = [
-  {
-    resourceSlug: 'github-submitted',
-    title: 'GitHub',
-    description: 'Version control and code collaboration',
-    url: 'https://github.com',
-    companyEmail: 'contact@github.com',
-    status: 'submitted',
-    submissionTimestamp: '2024-10-15T10:30:00Z',
-    tags: ['development', 'version-control']
-  },
-  {
-    resourceSlug: 'figma-approved',
-    title: 'Figma',
-    description: 'Design and prototyping tool',
-    url: 'https://figma.com',
-    companyEmail: 'hello@figma.com',
-    status: 'approved',
-    submissionTimestamp: '2024-10-14T14:20:00Z',
-    tags: ['design', 'prototyping']
-  },
-  {
-    resourceSlug: 'notion-rejected',
-    title: 'Notion',
-    description: 'All-in-one workspace',
-    url: 'https://notion.so',
-    companyEmail: 'team@notion.so',
-    status: 'rejected',
-    submissionTimestamp: '2024-10-13T09:15:00Z',
-    tags: ['productivity', 'notes']
-  }
-];
+const API_BASE_URL = API_CONFIG.BASE_URL;
 
 /**
  * Generic API request function
@@ -51,9 +19,11 @@ async function apiRequest(endpoint, options = {}) {
   };
   
   // Add API key if available
-  const apiKey = import.meta.env.PUBLIC_API_KEY;
+  const apiKey = API_CONFIG.API_KEY;
   if (apiKey) {
-    defaultHeaders['x-api-key'] = apiKey;
+    defaultHeaders['X-Api-Key'] = apiKey;
+  } else if (API_CONFIG.USE_API) {
+    console.warn('API is enabled but no API key is configured. Requests may fail.');
   }
 
   const defaultOptions = {
@@ -73,20 +43,78 @@ async function apiRequest(endpoint, options = {}) {
     const response = await fetch(url, config);
     
     if (!response.ok) {
+      const errorText = await response.text();
+      if (FEATURES.ENABLE_DEBUG_LOGGING) {
+        console.error('API Error Details:', {
+          url,
+          status: response.status,
+          statusText: response.statusText,
+          errorText
+        });
+      }
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
 
     const data = await response.json();
     return data;
   } catch (error) {
-    console.error('API Request Error:', error);
+    if (FEATURES.ENABLE_DEBUG_LOGGING) {
+      console.error('API Request Error:', error);
+    }
     throw error;
   }
 }
 
 /**
- * Fetch resources with optional admin privileges
- * @param {object} filters - Optional filters (status, category, etc.)
+ * Get existing approved resources in batches for public listing
+ * @param {object} options - Request options
+ * @param {number} options.batchSize - Number of resources per batch (default: 10, max: 50)
+ * @param {string} options.pageToken - Token for pagination (optional)
+ * @param {string} options.category - Category filter ('all' or specific category)
+ * @returns {Promise<object>} - Response with resources and pagination info
+ */
+export async function getExistingResources(options = {}) {
+  const { batchSize = 10, pageToken = null, category = 'all' } = options;
+  
+  // Check if API is enabled
+  if (API_CONFIG.USE_API) {
+    try {
+      const requestBody = {
+        batchSize: Math.min(batchSize, 50), // Enforce max batch size
+        category: category
+      };
+      
+      // Add page token if provided
+      if (pageToken) {
+        requestBody.pageToken = pageToken;
+      }
+      
+      const response = await apiRequest('/resources', {
+        method: 'POST',
+        body: JSON.stringify(requestBody)
+      });
+      
+      if (response.success && response.data) {
+        return {
+          resources: response.data.resources || [],
+          pagination: response.data.pagination || {}
+        };
+      } else {
+        throw new Error(response.message || 'Failed to fetch resources');
+      }
+    } catch (error) {
+      console.error('Failed to fetch resources from API:', error);
+      throw error;
+    }
+  }
+  
+  // Throw error if API is disabled
+  throw new Error('API is disabled. Please enable API access to load resources.');
+}
+
+/**
+ * Fetch resources with optional admin privileges (legacy function for admin use)
+ * @param {object} filters - Optional filters (resourceStatus, category, etc.)
  * @param {string} authToken - Optional admin authentication token
  * @returns {Promise<Array>} - Array of resources
  */
@@ -118,15 +146,19 @@ export async function getResources(filters = {}, authToken = null) {
     }
   }
   
-  // For main site (no admin token), use local resources.json
-  try {
-    const response = await fetch('/src/data/resources.json');
-    const data = await response.json();
-    return data.resources || [];
-  } catch (error) {
-    console.error('Failed to load local resources:', error);
-    return [];
+  // For non-admin usage, always use API
+  if (API_CONFIG.USE_API) {
+    try {
+      const result = await getExistingResources({ batchSize: 100 });
+      return result.resources;
+    } catch (error) {
+      console.error('Failed to fetch resources from API:', error);
+      throw error;
+    }
   }
+  
+  // Throw error if API is disabled
+  throw new Error('API is disabled. Please enable API access to load resources.');
 }
 
 /**
@@ -145,33 +177,34 @@ export async function getResource(id) {
 }
 
 /**
- * Get a specific resource by slug
+ * Get detailed resource data from DynamoDB via API or local fallback
+ * This is used when user visits a resource detail page (/resources/{slug})
  * @param {string} slug - Resource slug
- * @returns {Promise<object>} - Resource object
+ * @returns {Promise<object>} - Full resource details
  */
-export async function getResourceBySlug(slug) {
-  try {
-    const response = await apiRequest(`/resources/slug/${slug}`);
-    return response.resource;
-  } catch (error) {
-    console.error('Failed to fetch resource by slug:', error);
-    throw error;
+export async function getResourceDetails(slug) {
+  // Check if API is enabled
+  if (API_CONFIG.USE_API) {
+    try {
+      const response = await apiRequest(`/get-resource`, {
+        method: 'POST',
+        body: JSON.stringify({ slug: slug })
+      });
+      
+      // Handle the response format from your Lambda function
+      if (response.success && response.data) {
+        return response.data;
+      } else {
+        throw new Error(response.message || 'Resource details not found');
+      }
+    } catch (error) {
+      console.error('Failed to fetch resource details from API:', error);
+      throw error;
+    }
   }
-}
-
-/**
- * Search resources
- * @param {string} query - Search query
- * @param {object} filters - Additional filters
- * @returns {Promise<Array>} - Array of matching resources
- */
-export async function searchResources(query, filters = {}) {
-  const searchParams = {
-    q: query,
-    ...filters,
-  };
   
-  return getResources(searchParams);
+  // Throw error if API is disabled
+  throw new Error('API is disabled. Please enable API access to load resource details.');
 }
 
 /**
@@ -180,7 +213,6 @@ export async function searchResources(query, filters = {}) {
  * @returns {Promise<object>} - Submission response
  */
 export async function submitResource(resourceData) {
-  // Always use real API for resource submission (DynamoDB)
   try {
     const response = await apiRequest('/resources', {
       method: 'POST',
@@ -194,61 +226,62 @@ export async function submitResource(resourceData) {
 }
 
 /**
- * Authenticate admin user
- * @param {string} password - Admin password
- * @returns {Promise<object>} - Authentication response with token
+ * Submit a new resource for review
+ * @param {object} resourceSubmission - Complete resource submission data
+ * @returns {Promise<object>} - Submission response
  */
-export async function authenticateAdmin(password) {
+export async function submitResourceSubmission(resourceSubmission) {
   try {
-    const response = await apiRequest('/admin-auth', {
+    console.log('Resource submission data:', resourceSubmission);
+    
+    const response = await apiRequest('/submit-resource', {
       method: 'POST',
-      body: JSON.stringify({ password }),
+      body: JSON.stringify(resourceSubmission),
     });
     
-    // Handle the response format from your Lambda function
-    if (response.success && response.data) {
+    if (response.success) {
       return {
         success: true,
-        token: response.data.sessionToken,
-        expiresAt: response.data.expiresAt
+        message: response.message || 'Resource submitted successfully',
+        data: response.data
       };
     } else {
       return {
         success: false,
-        message: response.message || 'Authentication failed'
+        message: response.message || 'Failed to submit resource',
+        errors: response.errors
       };
     }
   } catch (error) {
-    console.error('Failed to authenticate admin:', error);
-    return { 
-      success: false, 
-      message: 'Authentication failed. Please try again.' 
-    };
+    console.error('Failed to submit resource:', error);
+    throw error;
   }
 }
+
+// Admin authentication now handled by CloudFront Lambda@Edge
 
 /**
  * Update resource status (admin only)
  * @param {string} resourceSlug - Resource slug
- * @param {string} status - New status (approved, rejected, submitted)
+ * @param {string} resourceStatus - New status (approved, rejected, pending)
  * @param {string} authToken - Admin authentication token
  * @returns {Promise<object>} - Update response
  */
-export async function updateResourceStatus(resourceSlug, status, authToken) {
+export async function updateResourceStatus(resourceSlug, resourceStatus, authToken) {
   try {
     const response = await apiRequest(`/resources/${resourceSlug}`, {
       method: 'PATCH',
       headers: {
         'Authorization': `Bearer ${authToken}`,
       },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ resourceStatus }),
     });
     
     // Handle the response format from your Lambda function
     if (response.success) {
       return {
         success: true,
-        message: response.message || `Status updated to ${status}`
+        message: response.message || `Resource status updated to ${resourceStatus}`
       };
     } else {
       return {
@@ -310,67 +343,6 @@ export async function submitContact(contactData) {
   } catch (error) {
     console.error('Failed to submit contact form:', error);
     throw error;
-  }
-}
-
-/**
- * Get resource categories
- * @returns {Promise<Array>} - Array of categories
- */
-export async function getCategories() {
-  try {
-    const response = await apiRequest('/categories');
-    return response.categories || [];
-  } catch (error) {
-    console.warn('Failed to fetch categories from API');
-    // Fallback categories
-    return ['development', 'design', 'learning', 'productivity', 'marketing', 'business'];
-  }
-}
-
-/**
- * Get featured resources
- * @returns {Promise<Array>} - Array of featured resources
- */
-export async function getFeaturedResources() {
-  try {
-    const response = await apiRequest('/resources/featured');
-    return response.resources || [];
-  } catch (error) {
-    console.warn('Failed to fetch featured resources from API');
-    return [];
-  }
-}
-
-/**
- * Subscribe to newsletter
- * @param {string} email - Email address
- * @returns {Promise<object>} - Subscription response
- */
-export async function subscribeNewsletter(email) {
-  try {
-    const response = await apiRequest('/newsletter/subscribe', {
-      method: 'POST',
-      body: JSON.stringify({ email }),
-    });
-    return response;
-  } catch (error) {
-    console.error('Failed to subscribe to newsletter:', error);
-    throw error;
-  }
-}
-
-/**
- * Get popular tags
- * @returns {Promise<Array>} - Array of popular tags
- */
-export async function getPopularTags() {
-  try {
-    const response = await apiRequest('/tags/popular');
-    return response.tags || [];
-  } catch (error) {
-    console.warn('Failed to fetch popular tags from API');
-    return [];
   }
 }
 

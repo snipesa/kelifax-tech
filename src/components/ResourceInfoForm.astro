@@ -1,0 +1,351 @@
+---
+// Page 2: Basic Resource Information Component
+// Collects core information about the resource being submitted
+import { CATEGORIES, CATEGORY_LABELS } from '../utils/config.js';
+---
+
+<div class="space-y-6">
+  <div class="text-center mb-8">
+    <h2 class="text-2xl font-bold text-gray-800 mb-2">Resource Information</h2>
+    <p class="text-gray-600">Tell us about the resource you want to share</p>
+
+  </div>
+
+  <!-- Resource Name -->
+  <div>
+    <label for="resourceName" class="block text-sm font-medium text-gray-700 mb-2">
+      Resource Name <span class="text-red-500">*</span>
+    </label>
+    <input 
+      type="text" 
+      id="resourceName" 
+      name="resourceName" 
+      maxlength="100"
+      required
+      class="form-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+      placeholder="e.g., Visual Studio Code, Figma, Notion"
+    />
+    <div class="error-message text-red-500 text-sm mt-1 hidden" data-field="resourceName"></div>
+    <p class="text-sm text-gray-500 mt-1">3-100 characters, must be unique</p>
+  </div>
+
+  <!-- Usage Purpose -->
+  <div>
+    <label for="usagePurpose" class="block text-sm font-medium text-gray-700 mb-2">
+      Usage Purpose <span class="text-red-500">*</span>
+    </label>
+    <textarea 
+      id="usagePurpose" 
+      name="usagePurpose" 
+      rows="4"
+      maxlength="500"
+      required
+      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 resize-vertical"
+      placeholder="Describe what this resource is used for and how it helps users..."
+    ></textarea>
+    <div class="error-message text-red-500 text-sm mt-1 hidden" data-field="usagePurpose"></div>
+    <div class="flex justify-between text-sm text-gray-500 mt-1">
+      <span>20-500 characters required</span>
+      <span class="character-count" data-field="usagePurpose">0/500</span>
+    </div>
+  </div>
+
+  <!-- Resource URL -->
+  <div>
+    <label for="resourceUrl" class="block text-sm font-medium text-gray-700 mb-2">
+      Resource URL <span class="text-red-500">*</span>
+    </label>
+    <input 
+      type="url" 
+      id="resourceUrl" 
+      name="resourceUrl" 
+      required
+      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+      placeholder="https://example.com"
+    />
+    <div class="error-message text-red-500 text-sm mt-1 hidden" data-field="resourceUrl"></div>
+    <p class="text-sm text-gray-500 mt-1">Must be a valid, publicly accessible URL</p>
+  </div>
+
+  <!-- Category -->
+  <div>
+    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+      Category <span class="text-red-500">*</span>
+    </label>
+    <select 
+      id="category" 
+      name="category" 
+      required
+      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 bg-white"
+    >
+      <option value="">Select a category</option>
+      {CATEGORIES.map(category => (
+        <option value={category}>{CATEGORY_LABELS[category]}</option>
+      ))}
+    </select>
+    <div class="error-message text-red-500 text-sm mt-1 hidden" data-field="category"></div>
+    <p class="text-sm text-gray-500 mt-1">Choose the most relevant category</p>
+  </div>
+
+  <!-- Logo Upload -->
+  <div>
+    <label for="logoImage" class="block text-sm font-medium text-gray-700 mb-2">
+      Logo Image <span class="text-gray-400">(Optional)</span>
+    </label>
+    <p class="text-sm text-blue-600 mb-2">💡 Please enter the resource name above before uploading a logo</p>
+    <div class="relative">
+      <input 
+        type="file" 
+        id="logoImage" 
+        name="logoImage" 
+        accept=".png"
+        class="hidden"
+      />
+      <label 
+        for="logoImage" 
+        class="logo-upload-area w-full px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 cursor-pointer flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100"
+      >
+        <div class="text-center">
+          <svg class="mx-auto h-12 w-12 text-gray-400 mb-2" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span class="text-gray-600">Click to upload logo</span>
+          <p class="text-sm text-gray-500">PNG only, max 600KB, square preferred</p>
+        </div>
+      </label>
+    </div>
+    <div class="error-message text-red-500 text-sm mt-1 hidden" data-field="logoImage"></div>
+    <div id="logo-preview" class="hidden mt-4">
+      <div class="flex items-center space-x-3 p-3 bg-green-50 border border-green-200 rounded-lg">
+        <div class="w-12 h-12 bg-white border border-gray-200 rounded-lg flex items-center justify-center overflow-hidden">
+          <img id="logo-preview-image" src="" alt="Logo preview" class="w-full h-full object-cover">
+        </div>
+        <div class="flex-1">
+          <p class="text-sm font-medium text-green-800" id="logo-filename"></p>
+          <p class="text-sm text-green-600" id="logo-filesize"></p>
+        </div>
+        <button 
+          type="button" 
+          id="remove-logo" 
+          class="text-red-500 hover:text-red-700 transition duration-200"
+          title="Remove logo"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tags -->
+  <div>
+    <label for="tags" class="block text-sm font-medium text-gray-700 mb-2">
+      Tags <span class="text-gray-400">(Optional)</span>
+    </label>
+    <input 
+      type="text" 
+      id="tags" 
+      name="tags" 
+      class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
+      placeholder="e.g., productivity, development, automation"
+    />
+    <div class="error-message text-red-500 text-sm mt-1 hidden" data-field="tags"></div>
+    <p class="text-sm text-gray-500 mt-1">Comma-separated tags, max 10 tags, each max 30 characters</p>
+  </div>
+</div>
+
+<script>
+  // Character counter for usage purpose - initialize when Page 2 becomes visible
+  window.initializeResourceInfoForm = function() {
+    console.log('Initializing ResourceInfoForm...');
+
+    // Character counter for usage purpose
+    const usagePurposeTextarea = document.getElementById('usagePurpose');
+    const characterCount = document.querySelector('[data-field="usagePurpose"]');
+
+    if (usagePurposeTextarea && characterCount) {
+      usagePurposeTextarea.addEventListener('input', function() {
+        const count = this.value.length;
+        characterCount.textContent = `${count}/500`;
+        
+        if (count > 500) {
+          characterCount.classList.add('text-red-500');
+          characterCount.classList.remove('text-gray-500');
+        } else {
+          characterCount.classList.remove('text-red-500');
+          characterCount.classList.add('text-gray-500');
+        }
+      });
+    }
+
+    // Update logo upload availability based on resource name
+    const resourceNameInput = document.getElementById('resourceName');
+    const logoUploadArea = document.querySelector('.logo-upload-area');
+    
+    function updateLogoUploadState() {
+      const hasResourceName = resourceNameInput.value.trim().length > 0;
+      if (logoUploadArea) {
+        if (hasResourceName) {
+          logoUploadArea.classList.remove('opacity-50', 'cursor-not-allowed');
+          logoUploadArea.classList.add('cursor-pointer');
+        } else {
+          logoUploadArea.classList.add('opacity-50', 'cursor-not-allowed');
+          logoUploadArea.classList.remove('cursor-pointer');
+        }
+      }
+    }
+    
+    if (resourceNameInput) {
+      resourceNameInput.addEventListener('input', updateLogoUploadState);
+      updateLogoUploadState(); // Initial state
+    }
+    
+    // Logo upload handling
+    const logoInput = document.getElementById('logoImage');
+    const logoPreview = document.getElementById('logo-preview');
+    const logoPreviewImage = document.getElementById('logo-preview-image');
+    const logoFilename = document.getElementById('logo-filename');
+    const logoFilesize = document.getElementById('logo-filesize');
+    const removeLogo = document.getElementById('remove-logo');
+
+    if (logoInput && logoPreview && logoPreviewImage && logoFilename && logoFilesize && removeLogo) {
+
+    logoInput.addEventListener('change', async function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        // Check if resource name is filled first
+        const resourceNameInput = document.getElementById('resourceName');
+        const resourceName = resourceNameInput.value.trim();
+        
+        if (!resourceName) {
+          showFieldError('logoImage', 'Please enter the resource name first before uploading a logo');
+          this.value = '';
+          // Focus on resource name field
+          resourceNameInput.focus();
+          return;
+        }
+        
+        // Validate file
+        if (file.type !== 'image/png') {
+          showFieldError('logoImage', 'Only PNG files are allowed');
+          this.value = '';
+          return;
+        }
+        
+        if (file.size > 600 * 1024) {
+          showFieldError('logoImage', 'File size must be less than 600KB');
+          this.value = '';
+          return;
+        }
+
+        // Show preview first
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          logoPreviewImage.src = e.target.result;
+          logoFilename.textContent = file.name;
+          logoFilesize.textContent = `${(file.size / 1024).toFixed(1)} KB`;
+          logoPreview.classList.remove('hidden');
+          hideFieldError('logoImage');
+        };
+        reader.readAsDataURL(file);
+
+        // Upload to S3 immediately
+        try {
+          // Show uploading state
+          logoFilesize.textContent = 'Uploading...';
+          logoFilesize.classList.add('text-blue-600');
+          
+          // Use the resource name we already validated
+          const resourceName = resourceNameInput.value.trim();
+          
+          // Import upload functions
+          const { uploadLogoToS3, isS3Configured, mockLogoUpload } = await import('../utils/s3-upload.js');
+          
+          let uploadResult;
+          if (isS3Configured()) {
+            try {
+              uploadResult = await uploadLogoToS3(file, resourceName);
+            } catch (s3Error) {
+              console.warn('S3 upload failed, falling back to mock:', s3Error.message);
+              // If S3 fails (likely due to CORS), use mock upload
+              uploadResult = await mockLogoUpload(file, resourceName);
+              uploadResult.fallbackUsed = true;
+            }
+          } else {
+            uploadResult = await mockLogoUpload(file, resourceName);
+            console.warn('Using mock S3 upload - configure AWS credentials for actual uploads');
+          }
+          
+          if (uploadResult.success) {
+            // Update UI to show successful upload
+            const uploadText = uploadResult.mock || uploadResult.fallbackUsed 
+              ? `${(file.size / 1024).toFixed(1)} KB - Mock Upload ✓` 
+              : `${(file.size / 1024).toFixed(1)} KB - Uploaded ✓`;
+            logoFilesize.textContent = uploadText;
+            logoFilesize.classList.remove('text-blue-600');
+            logoFilesize.classList.add('text-green-600');
+            
+            // Store the uploaded filename for form submission
+            logoInput.dataset.uploadedFilename = uploadResult.filename;
+            logoInput.dataset.uploadedKey = uploadResult.key;
+            
+            console.log('Logo uploaded successfully:', uploadResult);
+            console.log('File uploaded to S3 with key:', uploadResult.key);
+          } else {
+            throw new Error(uploadResult.error || 'Upload failed');
+          }
+          
+        } catch (error) {
+          console.error('Logo upload failed:', error);
+          logoFilesize.textContent = `Upload failed: ${error.message}`;
+          logoFilesize.classList.remove('text-blue-600');
+          logoFilesize.classList.add('text-red-600');
+          showFieldError('logoImage', `Upload failed: ${error.message}`);
+        }
+      }
+    });
+
+    // Handle remove logo
+    removeLogo.addEventListener('click', function() {
+      logoInput.value = '';
+      logoPreview.classList.add('hidden');
+      
+      // Clear the uploaded file data
+      delete logoInput.dataset.uploadedFilename;
+      delete logoInput.dataset.uploadedKey;
+      
+      hideFieldError('logoImage');
+      
+      // TODO: Optionally delete the uploaded file from S3 temp folder
+      // This could be implemented as a cleanup API call
+      console.log('Logo removed from form');
+    });
+    } else {
+      console.warn('Logo upload elements not found:', {
+        logoInput: !!logoInput,
+        logoPreview: !!logoPreview,
+        logoPreviewImage: !!logoPreviewImage,
+        logoFilename: !!logoFilename,
+        logoFilesize: !!logoFilesize,
+        removeLogo: !!removeLogo
+      });
+    }
+  };
+
+  // Utility functions for error handling
+  function showFieldError(fieldName, message) {
+    const errorElement = document.querySelector(`[data-field="${fieldName}"]`);
+    if (errorElement) {
+      errorElement.textContent = message;
+      errorElement.classList.remove('hidden');
+    }
+  }
+
+  function hideFieldError(fieldName) {
+    const errorElement = document.querySelector(`[data-field="${fieldName}"]`);
+    if (errorElement) {
+      errorElement.classList.add('hidden');
+    }
+  }
+</script>

@@ -1,6 +1,4 @@
 ---
-import resourcesData from '../data/resources.json';
-
 const baseUrl = 'https://kelifax.com';
 const currentDate = new Date().toISOString();
 
@@ -12,8 +10,33 @@ const staticPages = [
   '/contact'
 ];
 
-// Dynamic resource pages
-const resourcePages = resourcesData.map(resource => `/resources/${resource.slug}`);
+// Fetch resource pages from API
+let resourcePages = [];
+try {
+  const API_BASE_URL = import.meta.env.PUBLIC_API_URL || 'https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev';
+  const API_KEY = import.meta.env.PUBLIC_API_KEY;
+  
+  const response = await fetch(`${API_BASE_URL}/resources`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Api-Key': API_KEY,
+    },
+    body: JSON.stringify({ 
+      batchSize: 100, 
+      category: 'all' 
+    })
+  });
+  
+  if (response.ok) {
+    const data = await response.json();
+    const resources = data.success && data.data ? data.data.resources : [];
+    resourcePages = resources.map(resource => `/resource/${resource.slug}`);
+  }
+} catch (error) {
+  console.error('Failed to fetch resources for sitemap:', error);
+  // Continue with empty array if API fails
+}
 
 // All pages
 const allPages = [...staticPages, ...resourcePages];
@@ -25,8 +48,8 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 ${allPages.map(page => `  <url>
     <loc>${baseUrl}${page}</loc>
     <lastmod>${currentDate}</lastmod>
-    <changefreq>${page === '' ? 'daily' : page.includes('/resources/') ? 'weekly' : 'monthly'}</changefreq>
-    <priority>${page === '' ? '1.0' : page.includes('/resources/') ? '0.8' : '0.7'}</priority>
+    <changefreq>${page === '' ? 'daily' : page.includes('/resource/') ? 'weekly' : 'monthly'}</changefreq>
+    <priority>${page === '' ? '1.0' : page.includes('/resource/') ? '0.8' : '0.7'}</priority>
   </url>`).join('\n')}
 </urlset>`;
 

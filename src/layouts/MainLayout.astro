@@ -1,4 +1,6 @@
 ---
+import { getApprovedLogoUrl } from '../utils/s3-utils.js';
+
 export interface Props {
   title: string;
   description?: string;
@@ -6,6 +8,8 @@ export interface Props {
 }
 
 const { title, description = "Kelifax - Curated tech resources platform for developers, students, and tech enthusiasts", currentPage } = Astro.props;
+const kelifaxLogoUrl = getApprovedLogoUrl('kelifax.png');
+
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
@@ -17,8 +21,8 @@ import Footer from '../components/Footer.astro';
     <meta charset="UTF-8" />
     <meta name="description" content={description} />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="/logos/kelifax.png" />
-    <link rel="apple-touch-icon" href="/logos/kelifax.png" />
+    <link rel="icon" type="image/png" href={kelifaxLogoUrl} />
+    <link rel="apple-touch-icon" href={kelifaxLogoUrl} />
     <link rel="manifest" href="/manifest.json" />
     <meta name="generator" content={Astro.generator} />
     
@@ -33,7 +37,7 @@ import Footer from '../components/Footer.astro';
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={Astro.url} />
-    <meta property="og:image" content={new URL('/logos/kelifax.png', Astro.url)} />
+    <meta property="og:image" content={kelifaxLogoUrl} />
     <meta property="og:site_name" content="Kelifax" />
     <meta property="og:locale" content="en_US" />
     
@@ -41,7 +45,7 @@ import Footer from '../components/Footer.astro';
     <meta name="twitter:card" content="summary" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content={new URL('/logos/kelifax.png', Astro.url)} />
+    <meta name="twitter:image" content={kelifaxLogoUrl} />
     
     <!-- Additional Favicon Sizes -->
     <meta name="twitter:card" content="summary_large_image" />
