@@ -42,9 +42,12 @@ def handle_admin_get_resource(event, headers, table_name):
 
     try:
         # Query DynamoDB for the resource
-        print(f"Looking for resource with slug: {resource_slug}")
+        print(f"Looking for resource with slug: '{resource_slug}'")
         response = table.get_item(Key={'resourceSlug': resource_slug})
         item = response.get('Item')
+        
+        print(f"DynamoDB response: {response}")
+        print(f"Item found: {item is not None}")
 
         if not item:
             return {
@@ -52,7 +55,7 @@ def handle_admin_get_resource(event, headers, table_name):
                 'headers': headers,
                 'body': json.dumps({
                     'success': False,
-                    'message': 'Resource not found.'
+                    'message': f'Resource not found with slug: {resource_slug}'
                 })
             }
 

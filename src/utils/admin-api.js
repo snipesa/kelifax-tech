@@ -57,8 +57,11 @@ export async function getSubmittedResources() {
  */
 export async function approveResource(resourceName) {
   try {
+    // Simple slug formatting: lowercase and replace spaces/underscores with hyphens
+    const slug = resourceName.toLowerCase().replace(/[\s_]+/g, '-');
+    
     return await adminApiRequest('/admin/approve-resource', {
-      resourceName
+      slug
     });
   } catch (error) {
     console.error('Error approving resource:', error);
@@ -73,8 +76,11 @@ export async function approveResource(resourceName) {
  */
 export async function declineResource(resourceName) {
   try {
+    // Simple slug formatting: lowercase and replace spaces/underscores with hyphens
+    const slug = resourceName.toLowerCase().replace(/[\s_]+/g, '-');
+    
     return await adminApiRequest('/admin/decline-resource', {
-      resourceName
+      slug
     });
   } catch (error) {
     console.error('Error declining resource:', error);
@@ -89,27 +95,15 @@ export async function declineResource(resourceName) {
  */
 export async function getResourceByName(resourceName) {
   try {
-    // Convert resource name to slug (lowercase, spaces to hyphens)
-    const resourceSlug = resourceName.toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
+    // Simple slug formatting: lowercase and replace spaces/underscores with hyphens
+    const slug = resourceName.toLowerCase().replace(/[\s_]+/g, '-');
     
-    // Use public endpoint for resource lookup (no auth required)
-    const response = await fetch(`${API_CONFIG.BASE_URL}/get-resource`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        name: resourceName // Use original name, backend will process it
-      })
+    // Use admin endpoint for resource lookup (requires authentication)
+    const response = await adminApiRequest('/admin/get-resource', {
+      slug
     });
-
-    if (!response.ok) {
-      throw new Error('Resource not found');
-    }
-
-    const data = await response.json();
     
-    // Extract resource data from API response
+    // Extract the data from the API response
     if (response && response.success && response.data) {
       return response.data;
     }
@@ -128,8 +122,11 @@ export async function getResourceByName(resourceName) {
  */
 export async function deleteResource(resourceName) {
   try {
+    // Simple slug formatting: lowercase and replace spaces/underscores with hyphens
+    const slug = resourceName.toLowerCase().replace(/[\s_]+/g, '-');
+    
     return await adminApiRequest('/admin/delete-resource', {
-      resourceName
+      slug
     });
   } catch (error) {
     console.error('Error deleting resource:', error);
