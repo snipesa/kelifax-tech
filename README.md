@@ -49,25 +49,29 @@ http://localhost:4321/
 
 ## 📖 Documentation
 
-**📚 [Complete Project Guide](./kelifax-guide.md)** - Comprehensive documentation covering:
-- Project structure and file organization
-- Component architecture and customization
-- SEO implementation and best practices
-- API integration points for Phase 2
-- Development workflows and deployment
+**📚 Architecture & Development:**
+- **[Development Guide](./reference-materials/DEVELOPMENT.md)** - Project architecture, API integration, and development workflow
+- **[Admin Section](./reference-materials/ADMIN-SECTION.md)** - Authentication flow and admin operations
+- **[Resource Submission](./reference-materials/RESOURCE-SUBMISSION-SPECIFICATION.md)** - Form structure and validation rules
+- **[Database Schema](./reference-materials/DYNAMODB-SCHEMA-RECOMMENDATION.md)** - DynamoDB table design and optimization
 
 ## 🏗️ Project Structure
 
 ```
 kelifax/
-├── src/
-│   ├── components/     # UI components
-│   ├── layouts/        # Page layouts
-│   ├── pages/          # Site pages (auto-routed)
-│   ├── utils/          # API utilities and configuration
-│   └── styles/         # Global styles
-├── public/             # Static assets
-└── kelifax-guide.md    # 📚 Complete documentation
+├── src/                    # Frontend source code
+│   ├── components/         # UI components
+│   ├── layouts/            # Page layouts
+│   ├── pages/              # Site pages (auto-routed)
+│   ├── utils/              # API utilities and configuration
+│   └── styles/             # Global styles
+├── infra/                  # AWS infrastructure
+│   ├── src/lambda/         # Lambda functions
+│   ├── cloudformation/     # Infrastructure as Code
+│   └── src/dynamodb/       # Database scripts
+├── public/                 # Static assets
+├── reference-materials/    # 📚 Documentation
+└── README.md              # Main project guide
 ```
 
 ## 🎯 Current Pages
@@ -88,83 +92,45 @@ npm run build    # Build for production
 npm run preview  # Preview production build locally
 ```
 
-### **Environment Configuration**
-```bash
-# Development environment (uses .env.development)
-# - API: https://ds7z6al08j.execute-api.us-east-1.amazonaws.com/dev
-# - S3: kelifax-dev-project
 
-# Production environment (uses .env.production)  
-# - API: https://ru8vee8krh.execute-api.us-east-1.amazonaws.com/prod
-# - S3: kelifax.com-website
-```
-
-### **🚀 Automated Deployment**
+### **🚀 Frontend Deployment**
 ```bash
 # Deploy to development environment
 ./deploy.sh -dev
 
 # Deploy to production environment (with confirmation)
 ./deploy.sh -prod
-
-# Show deployment help
-./deploy.sh -h
 ```
 
-**What the deployment script does:**
-- ✅ Switches to correct environment configuration
-- ✅ Builds project with proper API URLs
-- ✅ Deploys to appropriate S3 bucket
-- ✅ Auto-detects and invalidates CloudFront CDN
-- ✅ Restores original .env after deployment
-- ✅ Comprehensive error handling and rollback
-
-### **Manual Deployment (if needed)**
+### **🔧 Backend Infrastructure Deployment**
 ```bash
-# Development
-cp .env.development .env
-npm run build
-aws s3 sync ./dist s3://kelifax-dev-project --delete
+# Lambda Edge Authentication (Cognito)
+cd infra/src/cognito-lambda-edge
+./package-lambda-edge.sh dev    # Package for development
+./package-lambda-edge.sh prod   # Package for production
 
-# Production
-cp .env.production .env
-npm run build
-aws s3 sync ./dist s3://kelifax.com-website --delete
-```
+# Lambda Authorizer
+cd infra/src/lambda-authorizer
+./package-authorizer.sh dev     # Package for development
+./package-authorizer.sh prod    # Package for production
 
-### **DynamoDB Resources Management**
-```bash
-# Upload enhanced resource data to DynamoDB
-
-# For Dev environment
+# DynamoDB Resources Management
 cd infra/src/dynamodb
-./upload-resources.sh dev data.json
-
-# For Prod environment  
-cd infra/src/dynamodb
-./upload-resources.sh prod data.json
+./upload-resources.sh dev data.json   # Upload to development
+./upload-resources.sh prod data.json  # Upload to production
 ```
 
 ### **Environment Files**
 - `.env` - Local development (not committed to git)
-- `.env.development` - Development deployment config
-- `.env.production` - Production deployment config
+- `.env.dev.config` - Development deployment config
+- `.env.prod.config` - Production deployment config
 
 ## 🌟 Recent Updates - SEO & Navigation Enhancements
 
 ### ✅ **Phase 2b Complete - SEO-Optimized URLs**
 - **SEO-Friendly URLs**: Changed from `/resources/1` to `/resources/visual-studio-code`
-- **Enhanced Navigation**: Active tab highlighting with Alpine.js interactive dropdowns
-- **Slug-Based Routing**: All resource pages now use descriptive slugs for better SEO
-- **Updated Sitemap**: Dynamic sitemap generation with slug-based URLs
-- **Resource Data Enhancement**: Added slug fields to all resources in JSON data
-
-### ✅ **Advanced SEO Implementation**
 - **Meta Tags**: Comprehensive keywords, Open Graph, Twitter Cards, canonical URLs
-- **Structured Data**: JSON-LD markup for rich snippets and better search engine understanding
-- **Performance**: Homepage loads in ~11ms, resource pages in ~4ms
-- **Navigation**: Interactive dropdowns with proper accessibility and mobile support
-- **URL Structure**: SEO-optimized slugs using kebab-case format (e.g., `visual-studio-code`)
+
 
 ### ✅ **Homepage & Core Functionality**
 - **All Components Working**: ResourceCard components properly configured with slug props
@@ -172,102 +138,19 @@ cd infra/src/dynamodb
 - **Cross-Page Consistency**: Slug-based links working across all pages and components
 - **Mobile Responsive**: Full functionality across all device sizes
 
-## 🌟 Phase 2a Complete - Enhanced GitHub Resource
 
-- ✅ **Dynamic API Integration** - GitHub resource now uses dynamic data from API
-- ✅ **Enhanced Resource Data** - Added keyFeatures, useCases, and learningResources
-- ✅ **Dedicated GitHub Page** - Comprehensive page showcasing Git, GitHub Actions, and GitHub Copilot
-- ✅ **Improved ResourceCard** - Enhanced to display key features and additional metadata
-- ✅ **Scalable Architecture** - Code structure ready for easy addition of more enhanced resources
-
-## 🚀 Future-Compatible API Architecture
-
-### ✅ **API-Ready Implementation Complete**
-
-The codebase has been restructured to seamlessly support both **static JSON** (current) and **API Gateway + Lambda** (future) without any code changes:
-
-- **Environment-Based Switching**: Uses `PUBLIC_USE_API` environment variable
-- **Graceful Fallback**: API failures automatically fall back to local JSON
-- **Zero Breaking Changes**: All existing functionality preserved
-- **Promise-Based Architecture**: All data functions now async-ready
-
-### 🔧 **How It Works**
-
-**Current Production Mode:**
-```env
-PUBLIC_USE_API=true
-PUBLIC_API_BASE_URL=https://your-api-gateway-url
-```
-- All resources fetched from API Gateway
-- Static generation uses API data during build
-- Dynamic enhancement loads detailed data at runtime
-
-### 📋 **API-First Architecture**
-
-1. **Static Generation**: Uses API data to generate pages at build time ✅
-2. **Runtime Enhancement**: Loads detailed resource data dynamically ✅  
-3. **Full Integration**: All data comes from DynamoDB via Lambda functions ✅
-
-**API Contract**: Lambda functions return structured JSON data for all resource information
-
-## 🚀 Deployment
-
-The project includes a comprehensive deployment script that handles environment-specific builds and deployments.
-
-### Deploy Script Usage
+## 🚀 Additional Deployment Options
 
 ```bash
-# Development deployment
-./deploy.sh -dev                    # Build and deploy to development
+# Frontend deployment with options
 ./deploy.sh -dev --dry-run         # Build for dev but don't deploy
-
-# Production deployment  
-./deploy.sh -prod                   # Build and deploy to production
 ./deploy.sh -prod --dry-run        # Build for prod but don't deploy
-
-# Help
 ./deploy.sh --help                 # Show usage information
 ```
 
-### Key Deployment Features
-
-✅ **Environment-Specific Builds**: Automatically uses correct environment variables  
-✅ **API-First Architecture**: All data comes from DynamoDB via API Gateway  
-✅ **Pre-deployment Confirmation**: Asks for approval before S3 sync  
-✅ **Dry Run Support**: Test builds without deploying  
-✅ **Comprehensive Validation**: Checks AWS CLI, environment files, and variables  
-✅ **Build Information**: Shows file count and size after build  
-✅ **Graceful Cleanup**: Restores original environment files on exit  
-
-### Environment Files
-
-The script automatically creates template environment files if they don't exist:
-- `.env.development` - Development environment configuration
-- `.env.production` - Production environment configuration
-
-### Deployment Targets
-
-- **Development**: `kelifax-dev-project` S3 bucket
-- **Production**: `kelifax.com-website` S3 bucket
-
-## 🌟 What's Next (Phase 3)
-
-- User accounts and authentication system  
-- Resource bookmarking and favorites functionality
-- Admin dashboard for resource management
-- Analytics and performance tracking
-- Enhanced resource pages for other tools (VS Code, Figma, etc.)
-- Search functionality with filtering and sorting
-- User-generated content and reviews
-
-### 🎨 Asset Management
-- **Resource Logo Images**: Store in `public/logos/` (128x128px, PNG/SVG, <50KB)
-- **Missing Logos**: Tailwind CSS and Postman logos can be added for visual completeness
-- **Image Optimization**: Consider implementing lazy loading for better performance
-
 ## 📞 Support
 
-For detailed guidance, see the [Complete Project Guide](./kelifax-guide.md) which covers everything from basic customization to advanced API integration.
+For detailed guidance, see the [Complete Project Guide](reference-materials/DEVELOPMENT.md) which covers everything from basic customization to advanced API integration.
 
 ---
 
