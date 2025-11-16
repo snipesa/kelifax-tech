@@ -1,0 +1,128 @@
+{
+  "Table_name": [
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "claude-by-anthropic" },
+          "submissionId": { "S": "existing-claude-2025" },
+          "resourceStatus": { "S": "approved" },
+          "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+          "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+          "createdAt": { "S": "2024-12-15T09:30:00Z" },
+          "updatedAt": { "S": "2025-01-20T14:45:30Z" },
+          "submitterFirstName": { "S": "System" },
+          "submitterLastName": { "S": "Admin" },
+          "submitterEmail": { "S": "admin@kelifax.com" },
+          "submitterCompany": { "S": "Kelifax" },
+          "submitterDomain": { "S": "kelifax.com" },
+          "resourceName": { "S": "Claude by Anthropic" },
+          "resourceUrl": { "S": "https://claude.ai" },
+          "usagePurpose": { "S": "Advanced AI assistant with exceptional reasoning capabilities, coding expertise, and comprehensive document analysis for professional and creative tasks." },
+          "category": { "S": "ai" },
+          "logoImage": { "S": "claude.png" },
+          "tags": { "S": "artificial intelligence,ai assistant,coding,document analysis,reasoning,creative writing,research,problem solving,anthropic,claude code,conversational ai" },
+          "keyFeatures": { "S": "Advanced Reasoning - Superior logical thinking and complex problem-solving capabilities across multiple domains|Claude Code Integration - Seamless coding assistance with syntax highlighting, debugging, and code generation|Document Analysis - Upload and analyze PDFs, images, and text documents with comprehensive understanding|Web Interface - Intuitive chat-based interface accessible through web browsers and mobile devices|Multi-Modal Processing - Handle text, images, and documents in a single conversation thread|Context Awareness - Maintain long conversations with excellent memory and contextual understanding|Transparent Pricing - Clear usage-based pricing model with free tier and flexible paid plans" },
+          "useCases": { "S": "Software development and code review|Research and data analysis|Creative writing and content creation|Document summarization and analysis|Educational tutoring and explanation|Business strategy and planning|Technical documentation writing|Complex problem solving and reasoning" },
+          "learningResources": { "S": "{\"title\":\"Claude Documentation\",\"url\":\"https://docs.anthropic.com/claude\",\"type\":\"documentation\"}|{\"title\":\"Claude API Guide\",\"url\":\"https://docs.anthropic.com/claude/reference\",\"type\":\"documentation\"}|{\"title\":\"Anthropic Safety Research\",\"url\":\"https://www.anthropic.com/research\",\"type\":\"tutorial\"}|{\"title\":\"Claude Prompt Engineering\",\"url\":\"https://docs.anthropic.com/claude/docs/prompt-engineering\",\"type\":\"tutorial\"}" },
+          "searchText": { "S": "claude anthropic ai artificial intelligence assistant coding document analysis reasoning creative writing research problem solving claude code" },
+          "featured": { "BOOL": true },
+          "viewCount": { "N": "0" },
+          "lastViewed": { "S": "2025-01-25T16:22:45Z" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "openai-codex" },
+          "submissionId": { "S": "existing-codex-2025" },
+          "resourceStatus": { "S": "approved" },
+          "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+          "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+          "createdAt": { "S": "2024-11-28T14:15:22Z" },
+          "updatedAt": { "S": "2025-01-18T11:33:17Z" },
+          "submitterFirstName": { "S": "System" },
+          "submitterLastName": { "S": "Admin" },
+          "submitterEmail": { "S": "admin@kelifax.com" },
+          "submitterCompany": { "S": "Kelifax" },
+          "submitterDomain": { "S": "kelifax.com" },
+          "resourceName": { "S": "OpenAI Codex" },
+          "resourceUrl": { "S": "https://openai.com/blog/openai-codex" },
+          "usagePurpose": { "S": "AI-powered code generation model that translates natural language to code, supports dozens of programming languages, and powers GitHub Copilot with advanced autocomplete capabilities." },
+          "category": { "S": "ai" },
+          "logoImage": { "S": "codex.png" },
+          "tags": { "S": "artificial intelligence,code generation,programming assistant,natural language to code,github copilot,openai,machine learning,developer tools,autocomplete,coding ai" },
+          "keyFeatures": { "S": "Natural Language to Code - Convert plain English descriptions into functional code across multiple programming languages|Multi-Language Support - Supports Python, JavaScript, TypeScript, Ruby, Go, PHP, C++, C#, Java, and many more languages|GitHub Copilot Integration - Powers the popular GitHub Copilot extension for real-time code suggestions in IDEs|Code Completion - Advanced autocomplete that understands context and generates entire functions or code blocks|Code Translation - Convert code between different programming languages with high accuracy|API Access - RESTful API for integrating Codex capabilities into custom applications and workflows|Usage-Based Pricing - Flexible pricing model based on token consumption with free tier available for experimentation" },
+          "useCases": { "S": "Rapid prototyping and development|Code review and optimization|Learning new programming languages|Converting pseudocode to actual code|Automated code documentation|Bug fixing and debugging assistance|Code refactoring and modernization|Educational programming tutorials" },
+          "learningResources": { "S": "{\"title\":\"OpenAI Codex Documentation\",\"url\":\"https://platform.openai.com/docs/guides/code\",\"type\":\"documentation\"}|{\"title\":\"Codex API Reference\",\"url\":\"https://platform.openai.com/docs/api-reference\",\"type\":\"documentation\"}|{\"title\":\"GitHub Copilot Guide\",\"url\":\"https://docs.github.com/en/copilot\",\"type\":\"tutorial\"}|{\"title\":\"OpenAI Cookbook - Code Examples\",\"url\":\"https://github.com/openai/openai-cookbook\",\"type\":\"tutorial\"}" },
+          "searchText": { "S": "openai codex ai artificial intelligence code generation programming assistant natural language github copilot autocomplete developer tools" },
+          "featured": { "BOOL": true },
+          "viewCount": { "N": "0" },
+          "lastViewed": { "S": "2025-01-26T12:18:55Z" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "cursor" },
+          "submissionId": { "S": "existing-cursor-2025" },
+          "resourceStatus": { "S": "approved" },
+          "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+          "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+          "createdAt": { "S": "2024-10-15T16:20:18Z" },
+          "updatedAt": { "S": "2025-01-22T09:15:42Z" },
+          "submitterFirstName": { "S": "System" },
+          "submitterLastName": { "S": "Admin" },
+          "submitterEmail": { "S": "admin@kelifax.com" },
+          "submitterCompany": { "S": "Kelifax" },
+          "submitterDomain": { "S": "kelifax.com" },
+          "resourceName": { "S": "Cursor" },
+          "resourceUrl": { "S": "https://cursor.sh" },
+          "usagePurpose": { "S": "AI-first code editor built on VS Code with advanced AI pair programming, natural language editing, and intelligent code completion for modern development workflows." },
+          "category": { "S": "ai" },
+          "logoImage": { "S": "cursor.png" },
+          "tags": { "S": "ai code editor,artificial intelligence,pair programming,vs code,intelligent completion,natural language editing,code generation,developer tools,ai assistant,programming,coding ai" },
+          "keyFeatures": { "S": "AI Pair Programming - Intelligent coding companion that understands your codebase and provides contextual suggestions|Natural Language Editing - Edit code using plain English commands and descriptions|VS Code Foundation - Built on Visual Studio Code with full extension compatibility and familiar interface|Codebase Understanding - AI that comprehends your entire project structure and coding patterns|Intelligent Autocomplete - Advanced code completion that goes beyond syntax to understand intent and context|Chat with Code - Interactive AI chat interface for discussing code, debugging, and getting explanations|Flexible Pricing - Subscription-based model with free tier and professional plans for teams" },
+          "useCases": { "S": "AI-assisted software development|Code refactoring and optimization|Learning new programming languages and frameworks|Debugging and troubleshooting complex issues|Rapid prototyping with AI assistance|Code review and quality improvement|Legacy code modernization|Educational programming with AI guidance" },
+          "learningResources": { "S": "{\"title\":\"Cursor Documentation\",\"url\":\"https://cursor.sh/docs\",\"type\":\"documentation\"}|{\"title\":\"Getting Started Guide\",\"url\":\"https://cursor.sh/blog/getting-started\",\"type\":\"tutorial\"}|{\"title\":\"Cursor vs Other Editors\",\"url\":\"https://cursor.sh/blog/cursor-vs-copilot\",\"type\":\"tutorial\"}|{\"title\":\"AI Pair Programming Tips\",\"url\":\"https://cursor.sh/blog/ai-pair-programming\",\"type\":\"tutorial\"}" },
+          "searchText": { "S": "cursor ai code editor artificial intelligence pair programming vs code intelligent completion natural language editing developer tools coding assistant" },
+          "featured": { "BOOL": true },
+          "viewCount": { "N": "0" },
+          "lastViewed": { "S": "2025-01-27T14:33:22Z" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "resourceSlug": { "S": "github-copilot" },
+          "submissionId": { "S": "existing-github-copilot-2025" },
+          "resourceStatus": { "S": "approved" },
+          "submittedAt": { "S": "2025-01-01T00:00:00Z" },
+          "approvedAt": { "S": "2025-01-01T00:00:00Z" },
+          "createdAt": { "S": "2024-09-22T13:45:30Z" },
+          "updatedAt": { "S": "2025-01-28T10:20:15Z" },
+          "submitterFirstName": { "S": "System" },
+          "submitterLastName": { "S": "Admin" },
+          "submitterEmail": { "S": "admin@kelifax.com" },
+          "submitterCompany": { "S": "Kelifax" },
+          "submitterDomain": { "S": "kelifax.com" },
+          "resourceName": { "S": "GitHub Copilot" },
+          "resourceUrl": { "S": "https://github.com/features/copilot" },
+          "usagePurpose": { "S": "AI-powered coding assistant that provides intelligent code suggestions, autocompletion, and multi-agent support across popular IDEs with flexible and affordable pricing plans." },
+          "category": { "S": "ai" },
+          "logoImage": { "S": "github-copilot.png" },
+          "tags": { "S": "artificial intelligence,code assistant,github,ai agents,autocompletion,ide integration,coding productivity,openai codex,programming assistant,affordable ai,multi-agent,development tools" },
+          "keyFeatures": { "S": "AI Code Suggestions - Real-time intelligent code completions and suggestions powered by OpenAI Codex|Multi-Agent Integration - Support for different AI agents and models to enhance coding assistance capabilities|IDE Compatibility - Seamless integration with VS Code, Visual Studio, JetBrains IDEs, Neovim, and other popular editors|Context-Aware Completions - Understands your codebase context to provide relevant suggestions and entire function implementations|Chat Interface - Interactive AI chat for code explanations, debugging help, and programming guidance|Affordable Pricing - Cost-effective subscription plans starting at $10/month for individuals with flexible team pricing|Enterprise Support - Advanced security features, policy management, and audit logs for organizations" },
+          "useCases": { "S": "Accelerated software development and coding productivity|Learning new programming languages and frameworks|Code review assistance and best practices guidance|Debugging and troubleshooting complex code issues|API integration and boilerplate code generation|Documentation and comment generation|Legacy code understanding and modernization|Team collaboration with consistent coding patterns" },
+          "learningResources": { "S": "{\"title\":\"GitHub Copilot Documentation\",\"url\":\"https://docs.github.com/en/copilot\",\"type\":\"documentation\"}|{\"title\":\"Getting Started with Copilot\",\"url\":\"https://docs.github.com/en/copilot/quickstart\",\"type\":\"tutorial\"}|{\"title\":\"Copilot Chat Guide\",\"url\":\"https://docs.github.com/en/copilot/github-copilot-chat\",\"type\":\"tutorial\"}|{\"title\":\"Best Practices for Copilot\",\"url\":\"https://github.blog/2023-06-20-how-to-write-better-prompts-for-github-copilot\",\"type\":\"tutorial\"}" },
+          "searchText": { "S": "github copilot ai artificial intelligence code assistant autocompletion ide integration coding productivity openai codex programming assistant affordable multi-agent" },
+          "featured": { "BOOL": true },
+          "viewCount": { "N": "0" },
+          "lastViewed": { "S": "2025-01-28T16:45:30Z" }
+        }
+      }
+    }
+  ]
+}
