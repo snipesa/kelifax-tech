@@ -1,4 +1,6 @@
 ---
+import { getCollection } from 'astro:content';
+
 const baseUrl = 'https://kelifax.com';
 const currentDate = new Date().toISOString();
 
@@ -6,9 +8,14 @@ const currentDate = new Date().toISOString();
 const staticPages = [
   '',
   '/resources',
+  '/insights',
   '/about',
   '/contact'
 ];
+
+// Get insights pages
+const insights = await getCollection('insights');
+const insightPages = insights.map(insight => `/insights/${insight.slug}`);
 
 // Fetch resource pages from API
 let resourcePages = [];
@@ -39,7 +46,7 @@ try {
 }
 
 // All pages
-const allPages = [...staticPages, ...resourcePages];
+const allPages = [...staticPages, ...insightPages, ...resourcePages];
 
 export const prerender = true;
 
@@ -48,8 +55,8 @@ const sitemap = `<?xml version="1.0" encoding="UTF-8"?>
 ${allPages.map(page => `  <url>
     <loc>${baseUrl}${page}</loc>
     <lastmod>${currentDate}</lastmod>
-    <changefreq>${page === '' ? 'daily' : page.includes('/resource/') ? 'weekly' : 'monthly'}</changefreq>
-    <priority>${page === '' ? '1.0' : page.includes('/resource/') ? '0.8' : '0.7'}</priority>
+    <changefreq>${page === '' ? 'daily' : page.includes('/resource/') ? 'weekly' : page.includes('/insights/') ? 'weekly' : 'monthly'}</changefreq>
+    <priority>${page === '' ? '1.0' : page.includes('/resource/') || page.includes('/insights/') ? '0.8' : '0.7'}</priority>
   </url>`).join('\n')}
 </urlset>`;
 

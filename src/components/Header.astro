@@ -12,6 +12,7 @@ const { currentPage = '' } = Astro.props;
 const isActive = (page: string) => {
   if (page === 'home' && (currentPage === '' || currentPage === 'home')) return true;
   if (page === 'resources' && (currentPage === 'resources' || currentPage.startsWith('resources'))) return true;
+  if (page === 'insights' && (currentPage === 'insights' || currentPage.startsWith('insights'))) return true;
   if (page === 'about' && currentPage === 'about') return true;
   if (page === 'contact' && currentPage === 'contact') return true;
   if (page === 'github' && (currentPage === 'github' || currentPage === 'resource/github')) return true;
@@ -95,6 +96,9 @@ const getMobileLinkClasses = (page: string) => {
             </a>
           </div>
         </div>
+        <a href="/insights" class={getLinkClasses('insights')}>
+          Insights
+        </a>
         <a href="/about" class={getLinkClasses('about')}>
           About
         </a>
@@ -164,6 +168,9 @@ const getMobileLinkClasses = (page: string) => {
                 GitHub - Enhanced
               </div>
             </a>
+      <a href="/insights" class={getMobileLinkClasses('insights')}>
+        Insights
+      </a>
       <a href="/about" class={getMobileLinkClasses('about')}>
         About
       </a>

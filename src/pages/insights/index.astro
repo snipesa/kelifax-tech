@@ -1,0 +1,153 @@
+---
+// Insights listing page
+import MainLayout from '../../layouts/MainLayout.astro';
+import InsightCard from '../../components/insights/InsightCard.astro';
+import { getCollection } from 'astro:content';
+
+// Get all insights, sorted by publish date (newest first)
+const insights = await getCollection('insights');
+const sortedInsights = insights.sort((a, b) => 
+  new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+);
+
+// Separate featured and regular insights
+const featuredInsights = sortedInsights.filter(insight => insight.data.featured);
+const regularInsights = sortedInsights.filter(insight => !insight.data.featured);
+
+// Get all unique tags for filtering (future enhancement)
+const allTags = [...new Set(insights.flatMap(insight => insight.data.tags))];
+---
+
+<MainLayout 
+  title="Tech Insights - Kelifax" 
+  description="In-depth reviews, guides, and comparisons of developer tools and technologies. Stay updated with the latest trends and make informed decisions about your tech stack."
+  currentPage="insights"
+>
+  <!-- Hero Section -->
+  <section class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center">
+        <h1 class="text-5xl md:text-6xl font-bold mb-6">
+          Tech Insights
+        </h1>
+        <p class="text-xl md:text-2xl text-blue-100 mb-8 max-w-3xl mx-auto">
+          In-depth reviews, guides, and comparisons to help you choose the right tools for your projects.
+        </p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a 
+            href="#insights" 
+            class="bg-white text-blue-600 hover:bg-gray-50 font-semibold py-4 px-8 rounded-lg transition-colors inline-flex items-center justify-center"
+          >
+            Explore Insights
+          </a>
+          <a 
+            href="/resources" 
+            class="border-2 border-white text-white hover:bg-white hover:text-blue-600 font-semibold py-4 px-8 rounded-lg transition-colors inline-flex items-center justify-center"
+          >
+            Browse Resources
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Insights Content -->
+  <section id="insights" class="py-16 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      {insights.length > 0 ? (
+        <>
+          <!-- Featured Insights -->
+          {featuredInsights.length > 0 && (
+            <div class="mb-16">
+              <h2 class="text-3xl font-bold text-gray-900 mb-8">Featured Insights</h2>
+              <div class="grid grid-cols-1 lg:grid-cols-1 gap-8 mb-8">
+                {featuredInsights.slice(0, 1).map(insight => (
+                  <InsightCard insight={insight} size="large" />
+                ))}
+              </div>
+              {featuredInsights.length > 1 && (
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  {featuredInsights.slice(1).map(insight => (
+                    <InsightCard insight={insight} size="medium" />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          <!-- All Insights -->
+          <div>
+            <div class="flex items-center justify-between mb-8">
+              <h2 class="text-3xl font-bold text-gray-900">
+                {featuredInsights.length > 0 ? 'More Insights' : 'All Insights'}
+              </h2>
+              <div class="flex items-center space-x-2 text-sm text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15" />
+                </svg>
+                <span>{insights.length} insight{insights.length !== 1 ? 's' : ''} published</span>
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {(featuredInsights.length > 0 ? regularInsights : sortedInsights).map(insight => (
+                <InsightCard insight={insight} size="medium" />
+              ))}
+            </div>
+          </div>
+        </>
+      ) : (
+        <!-- Empty State -->
+        <div class="text-center py-16">
+          <div class="max-w-md mx-auto">
+            <svg class="w-16 h-16 text-gray-400 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            <h3 class="text-xl font-semibold text-gray-900 mb-2">No insights yet</h3>
+            <p class="text-gray-600 mb-6">
+              We're working on creating valuable content for you. Check back soon for in-depth guides and reviews!
+            </p>
+            <a 
+              href="/resources" 
+              class="bg-blue-600 text-white hover:bg-blue-700 font-semibold py-3 px-6 rounded-lg transition-colors inline-flex items-center gap-2"
+            >
+              Explore Resources
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </a>
+          </div>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- Newsletter CTA -->
+  <section class="py-16 bg-blue-600">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold text-white mb-4">
+        Stay Updated with New Insights
+      </h2>
+      <p class="text-xl text-blue-100 mb-8">
+        Get notified when we publish new reviews, guides, and comparisons
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center max-w-md mx-auto">
+        <input 
+          type="email" 
+          placeholder="Enter your email"
+          class="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        />
+        <button 
+          type="submit"
+          class="bg-white text-blue-600 hover:bg-gray-50 font-semibold py-3 px-6 rounded-lg transition-colors"
+        >
+          Subscribe
+        </button>
+      </div>
+      <p class="text-blue-200 text-sm mt-4">
+        No spam, unsubscribe anytime
+      </p>
+    </div>
+  </section>
+</MainLayout>

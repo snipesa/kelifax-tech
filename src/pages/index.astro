@@ -1,13 +1,21 @@
 ---
 import MainLayout from '../layouts/MainLayout.astro';
 import ResourceCard from '../components/ResourceCard.astro';
+import InsightsList from '../components/insights/InsightsList.astro';
 import { CATEGORIES, CATEGORY_LABELS } from '../utils/config.js';
 import { getApprovedLogoUrl } from '../utils/s3-utils.js';
+import { getCollection } from 'astro:content';
 
 // Since we're using API-only approach, we'll load resources client-side
 // Set default values for server-side rendering
 const featuredResources = [];
 const totalResources = '50'; // Will be updated client-side
+
+// Get insights for homepage display
+const insights = await getCollection('insights');
+const sortedInsights = insights.sort((a, b) => 
+  new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime()
+);
 ---
 
 <MainLayout title="Kelifax - Curated Tech Resources" description="Discover verified and categorized digital tools, platforms, and learning materials for developers, students, and technology enthusiasts." currentPage="home">
@@ -45,6 +53,14 @@ const totalResources = '50'; // Will be updated client-side
       </div>
     </div>
   </section>
+
+  <!-- Insights Section -->
+  <InsightsList 
+    insights={sortedInsights}
+    limit={4}
+    title="Latest Tech Insights"
+    description="In-depth reviews, guides, and comparisons to help you choose the right tools"
+  />
 
   <!-- Stats Section -->
   <section class="py-16 bg-white">
