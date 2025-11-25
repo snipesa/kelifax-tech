@@ -1,0 +1,100 @@
+---
+// RelatedResources component for displaying linked resources
+export interface Props {
+  resourceSlugs: string[];
+  title?: string;
+}
+
+const { resourceSlugs, title = "Related Resources from Kelifax" } = Astro.props;
+
+// Define resource data (you can expand this or fetch from API later)
+const resourcesData = {
+  'github-copilot': {
+    name: 'GitHub Copilot',
+    description: 'AI pair programmer with IDE integration',
+    url: '/resource/github-copilot'
+  },
+  'cursor': {
+    name: 'Cursor IDE',
+    description: 'AI-powered code editor',
+    url: '/resource/cursor'
+  },
+  'vscode': {
+    name: 'VS Code',
+    description: 'Popular code editor with extensive extension support',
+    url: '/resource/vscode'
+  },
+  'github': {
+    name: 'GitHub',
+    description: 'Essential for version control and collaboration',
+    url: '/resource/github'
+  },
+  'notion': {
+    name: 'Notion',
+    description: 'All-in-one workspace for notes and project management',
+    url: '/resource/notion'
+  },
+  'figma': {
+    name: 'Figma',
+    description: 'Design collaboration and prototyping tool',
+    url: '/resource/figma'
+  }
+};
+
+// Filter resources based on provided slugs
+const relatedResources = resourceSlugs
+  .map(slug => ({ slug, ...resourcesData[slug] }))
+  .filter(resource => resource.name); // Only include valid resources
+---
+
+{relatedResources.length > 0 && (
+  <section class="bg-blue-50 rounded-xl p-8 mt-12">
+    <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+      {title}
+    </h3>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {relatedResources.map(resource => (
+        <a 
+          href={resource.url}
+          class="bg-white rounded-lg p-6 hover:shadow-lg transition-all duration-200 border border-gray-200 hover:border-blue-300 group"
+        >
+          <div class="flex items-start space-x-4">
+            <div class="flex-shrink-0">
+              <div class="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+            </div>
+            <div class="flex-1">
+              <h4 class="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                {resource.name}
+              </h4>
+              <p class="text-gray-600 text-sm mt-1">
+                {resource.description}
+              </p>
+            </div>
+            <div class="flex-shrink-0">
+              <svg class="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+    
+    <div class="text-center mt-8">
+      <a 
+        href="/resources" 
+        class="text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-2 transition-colors"
+      >
+        Browse All Resources
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+        </svg>
+      </a>
+    </div>
+  </section>
+)}

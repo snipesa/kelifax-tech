@@ -48,6 +48,7 @@ export const APP_CONFIG = {
   // Site metadata
   SITE_NAME: 'Kelifax',
   SITE_DESCRIPTION: 'Curated tech resources platform for developers, students, and technology enthusiasts',
+  SITE_URL: import.meta.env.PUBLIC_SITE_URL || 'https://kelifax.com',
   CONTACT_EMAIL: import.meta.env.PUBLIC_CONTACT_EMAIL || 'contact@kelifax.com',
   
   // Pagination

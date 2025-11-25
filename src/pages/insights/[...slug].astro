@@ -1,0 +1,31 @@
+---
+// Dynamic page for individual insights
+import { getCollection } from 'astro:content';
+import InsightLayout from '../../layouts/InsightLayout.astro';
+
+export async function getStaticPaths() {
+  const insights = await getCollection('insights');
+  return insights.map((insight) => ({
+    params: { slug: insight.slug },
+    props: { insight },
+  }));
+}
+
+const { insight } = Astro.props;
+const { Content } = await insight.render();
+---
+
+<InsightLayout
+  title={insight.data.title}
+  description={insight.data.description}
+  publishDate={insight.data.publishDate}
+  updateDate={insight.data.updateDate}
+  author={insight.data.author}
+  readingTime={insight.data.readingTime}
+  coverImage={insight.data.coverImage}
+  tags={insight.data.tags}
+  relatedResources={insight.data.relatedResources}
+  seoKeywords={insight.data.seoKeywords}
+>
+  <Content />
+</InsightLayout>
